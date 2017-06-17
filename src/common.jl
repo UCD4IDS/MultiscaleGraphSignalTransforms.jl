@@ -26,7 +26,7 @@ function dvec2dmatrix(dvec::Matrix{Float64}, GP::GraphPart, BS::BasisSpec)
 
     levlist = BS.levlist
     levlengths = BS.levlengths
-    
+
     # constants
     (N, jmax) = Base.size(GP.rs)
     N = N - 1
@@ -44,7 +44,7 @@ function dvec2dmatrix(dvec::Matrix{Float64}, GP::GraphPart, BS::BasisSpec)
             dvec[n:(n + levlengths[row] - 1), :]
         n += levlengths[row]
     end
-    
+
     #
     # 2. Return the `dmatrix` array
     #
@@ -102,7 +102,7 @@ end # of function dmatrix2dvec (with no BS input)
 
 Given a matrix of expansion coefficients, convert it to a vector.
 This function assumes that the input coefficient array `dmatrix` is in the coarse-to-fine format. If `BS.c2f == false`, then this function internally converts `dmatrix` into the fine-to-coarse format. Hence, if one supplies the f2c `dmatrix`, the results become wrong, and the subsequent procedure may result in error.
-    
+
 ### Input Arguments
 * `dmatrix::Array{Float64,3}`: matrices of expansion coefficients
 * `GP::GraphPart`: an input GraphPart object
@@ -162,7 +162,7 @@ function levlist2levlengths!(GP::GraphPart, BS::BasisSpec)
     levlist = BS.levlist
     rs = GP.rs
     # allocate space
-    levlengths = zeros(UInt8, length(levlist))
+    levlengths = zeros(typeof(rs[1]), length(levlist))
 
     # 1. Determine the length of each basis block specified by levlist
     if BS.c2f                   # coarse-to-fine case
@@ -195,13 +195,13 @@ function levlist2levlengths!(GP::GraphPart, BS::BasisSpec)
     levlist = levlist[levlengths .!= 0] # . before != is important here!!
     levlengths = levlengths[levlengths .!= 0]
     BS.levlengths = levlengths
-    
+
 end # of function levlist2levlengths!
 
 """
     (levlistfull, levlengthsfull, transfull) = bsfull(GP::GraphPart, BS::BasisSpec, trans::Vector{Bool})
 
-Given a BasisSpec object, return the full-length, redundant levlist, levlengths, and trans descriptions.  
+Given a BasisSpec object, return the full-length, redundant levlist, levlengths, and trans descriptions.
 
 ###  Input Arguments
 * `GP::GraphPart`: an input GraphPart object
@@ -209,7 +209,7 @@ Given a BasisSpec object, return the full-length, redundant levlist, levlengths,
 * `trans::Vector{Bool}`: a specification of the transforms used for the HGLET-GHWT hybrid transform (default: null)
 * `levlengthsp::Bool`: a flag to return levlengthsfull (default: false)
 * `transp::Bool`: a flag to return transfull (default: false)
-    
+
 ###  Output Arguments
 * `levlistfull::Vector{UInt8}`: the full-length, redundant levels list description
 * `levlengthsfull::Vector{UInt8}`: the full-length, redundant levels lengths description
@@ -234,7 +234,7 @@ function bsfull(GP::GraphPart, BS::BasisSpec;
     # Assuming that the maximum value of levlist <= jmax \approx log2(N)
     # can be representable by `UInt8`, i.e., N < \approx 5.79E76, which is
     # reasonable. We cannot handle such a large N at this point.
-    
+
     if levlengthsp
         levlengthsfull = zeros(UInt8, N)
     end
@@ -283,7 +283,7 @@ Specify the Haar basis for a given graph partitioning
 
 ### Input Argument
 * `GP::GraphPart`: an input GraphPart object
- 
+
 ### Output Argument
 * `BS::BasisSpec`: a BasisSpec object corresponding to the Haar basis
 """
@@ -335,11 +335,11 @@ function bs_level(GP::GraphPart, j::Int, c2f::Bool = true)
             #    ghwt_core!(GP)
             # end
             fine2coarse!(GP)
-        end        
+        end
         rspointer = GP.rsf2c[:, j + 1]
         bspec = "fine-to-coarse level $(j)"
     end
-    
+
     # specify the level j basis
     Nj = countnz(rspointer) - 1
     levlist = (j + 1) * ones(UInt8, Nj)
@@ -351,3 +351,69 @@ function bs_level(GP::GraphPart, j::Int, c2f::Bool = true)
     # return it
     return BS
 end # of bs_level
+
+
+"""
+function dvec_Threshold(dvec::Vector{Float64}, SORH::String, keep::Float64,
+                GP::GraphPart, BS::BasisSpec)
+
+ Threshold HGLET / GHWT coefficients
+
+### Input Arguments
+*   `dvec::Vector{Float64}`        the vector of expansion coefficients
+*   `SORH::String`        use soft ('s') or hard ('h') thresholding
+*   `keep::Float64`        a fraction between 0 and 1 which says how many coefficients should be kept
+*   `GP::GraphPart`          a GraphPart object, used to identify scaling coefficients
+*   `BS::BasisSpec`          a BasisSpec object, used to identify scaling coefficients
+
+### Output Argument
+*   `dvec_new::Vector{Float64}`        the thresholded expansion coefficients
+*   `kept::Float64`        the number of coefficients kept
+
+
+"""
+#Apply to 1-D only for now. Need to modify in the future
+function dvec_Threshold(dvec::Vector{Float64}, SORH::String, keep::Float64,
+                GP::GraphPart, BS::BasisSpec)
+
+    dvec_new = deepcopy(dvec)
+    # Obtain the number of coefficients kept
+    if keep > 1 || keep < 0
+      error("The input keep should between 0~1")
+    else
+      kept = Int64(round(keep*size(dvec,1)))
+    end
+
+    if SORH == "s" || SORH == "soft"
+      ind = sortperm(abs(dvec), rev = true)
+      T = abs(dvec[ind[kept+1]])
+
+      if BS != nothing
+        #convert the tag matrix to a vector corresponding to BS
+        tag = dmatrix2dvec(Array{Float64,3}(reshape(GP.tag,(size(GP.tag,1),size(GP.tag,2),1))),GP,BS)
+
+        #soft-threshold the non-scaling coefficients
+        ind = 1:size(dvec,1)
+        ind = ind[tag .> 0]
+        dvec_new[ind] = sign(dvec[ind]).*(abs(dvec[ind])-T).*(abs(dvec[ind])-T .>0)
+
+      # if BS is not given, soft-threshold all coefficients
+      else
+        dvec_new = sign[dvec].*(abs(dvec)-T).*(abs(dvec)-T.>0)
+      end
+
+      kept = countnz(dvec_new)
+
+    elseif SORH == "h" || SORH == "hard"
+      ind = sortperm(abs(dvec), rev = true)
+      dvec_new[ind[kept+1:end]] = 0
+
+      kept = countnz(dvec_new)
+
+    else
+
+      kept = countnz(dvec_new)
+
+    end
+    return dvec_new, kept
+end

@@ -68,7 +68,7 @@ end
 Flatten dmatrix using the method specified by the string "flatten"
 
 ### Input Arguments
-* `dmatrix::Array{Float64,3}`: the matrix of expansion coefficients; after this function is called, it becomes the size of (*, *, 1).
+* `dmatrix::Array{Float64,3}`: the matrix of expansion coefficients; after this function is called, it becomes the size of (~, ~, 1).
 * `flatten::Any`: the method for flattening dmatrix (see the code in details)
 """
 function dmatrix_flatten!(dmatrix::Array{Float64,3}, flatten::Any)
@@ -82,7 +82,7 @@ function dmatrix_flatten!(dmatrix::Array{Float64,3}, flatten::Any)
         else
             dmatrix = (sum(abs(dmatrix).^flatten, 3)).^(1 / flatten)
         end
-    
+
         # histogram
         # # # elseif strcmpi(flatten,'histogram') # not yet implemented
         # What I meant here was to implement ASH-like pdf estimation
@@ -101,7 +101,7 @@ function dmatrix_flatten!(dmatrix::Array{Float64,3}, flatten::Any)
             dmatrix = var(dmatrix, 3)
             # inverse variance
         elseif flatten == :invvar
-            dmatrix = var(dmatrix, 3) 
+            dmatrix = var(dmatrix, 3)
             dmatrix[ abs(dmatrix) < eps() ] = eps()
             dmatrix = dmatrix.^-1;
             # max coefficient - min coefficient
@@ -148,7 +148,7 @@ end # of function dmatrix_flatten!
 """
     costfun = cost_functional(cfspec::Any)
 
-Determine the cost functional to be used by the best-basis algorithm.  
+Determine the cost functional to be used by the best-basis algorithm.
 
 ### Input Argument
 * `cfspec::Any`: the specification for the cost functional
@@ -158,10 +158,10 @@ Determine the cost functional to be used by the best-basis algorithm.
 """
 function cost_functional(cfspec::Any)
     if isa(cfspec, Number)
-        return function (x) return norm(x, cfspec) end
+        return function (x) return vecnorm(x, cfspec) end
     elseif isa(cfspec, Function)
         return function (x) return cfspec(x) end
-    else return function (x) return norm(x, 1) end # by default 1-norm
+    else return function (x) return vecnorm(x, 1) end # by default 1-norm
         # else return function (x) return norm(x, 0.1) end # by default 0.1-quasinorm
     end
 end # of function cost_functional
@@ -184,4 +184,54 @@ function bbchange(dvec::Vector{Float64}, j::Int)
     levlist = zeros(UInt8, n)
     levlist[1] = j
     return dvec, levlist        # might need deepcopy here.
+end
+
+
+"""
+    function rs_to_region(rs::Matrix{ANY}, tag::Matrix{ANY})
+
+From the imformation of rs, tag from GP, compute the tag_r matrix, which have the same
+size of dmatrix (expansion coefficient matrix). Each element indicates the place of the
+coefficient in the expansion tree.
+
+### Input Arguments
+* `rs::Matrix{ANY}`: rs from GP, showing information of the partition tree
+* `tag::Matrix{ANY}`: tag from GP, indicating coefficients tag
+
+### Output Arguments
+* `tag_r::Matrix{UInt32}`: showing information of the partition tree, same size as dmatrix
+"""
+
+
+function rs_to_region(rs::Matrix{ANY}, tag::Matrix{ANY})
+  (m,n) = size(tag)
+  tag_r = zeros(m,n)
+  for j = 1:(n-1)
+    regioncount = countnz(rs[:,j]) - 1
+    for r = 1:regioncount
+      rs1 = rs[r,j]
+      rs3 = rs[r+1,j]
+      s = rs3-rs1
+      if s==1 #the region and subregion have only one element
+        tag_r[rs1,j+1] = 2*tag_r[rs1,j]
+      elseif s > 1
+        # rs2 marks the start of the second subregion
+        rs2 = rs1 + 1
+        while rs2 < rs3 && tag[rs2, j+1]!=0
+          rs2 = rs2 + 1;
+        end
+
+        # the parent region is a copy of the subregion
+        if rs2 == rs3
+          tag_r[rs1:rs3-1,j+1] = 2*tag_r[rs1:rs3-1,j]
+
+        # the parent region has 2 child regions
+        else
+        tag_r[rs1:rs2-1,j+1] = 2*tag_r[rs1:rs2-1,j]
+        tag_r[rs2:rs3-1,j+1] = 2*tag_r[rs2:rs3-1,j]+1
+        end
+      end
+    end
+  end
+return Matrix{UInt32}(tag_r)
 end
