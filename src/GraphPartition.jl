@@ -29,7 +29,7 @@ Implemented by Jeff Irion (Adviser: Dr. Naoki Saito) |
 Translated and modified by Naoki Saito, Feb. 7, 2017
 Revised for two parameters by Naoki Saito, Feb. 24, 2017
 """
-type GraphPart{Tl <: Unsigned, Ts <: Unsigned}
+struct GraphPart{Tl <: Unsigned, Ts <: Unsigned}
     ind::Vector{Tl}    # ordering of the indices on the finest level
     rs::Matrix{Tl}     # `rs[i,j]` = the index in `ind` of the first
                        # point in Region `i` at level j 
@@ -49,7 +49,8 @@ type GraphPart{Tl <: Unsigned, Ts <: Unsigned}
                        compinfof2c::Matrix{Tl} = Matrix{Tl}(0, 0),
                        method::Symbol = :unspecified)
         
-        where{Tl <: Unsigned, Ts <: Unsigned}
+        where Tl <: Unsigned
+        where Ts <: Unsigned
         # Sanity checks
         if Base.size(rs, 1) != Base.length(ind) + 1
             warn("size(rs,1) must be length(ind) + 1")
