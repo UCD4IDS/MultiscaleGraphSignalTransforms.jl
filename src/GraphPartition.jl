@@ -49,7 +49,7 @@ type GraphPart{Tl <: Unsigned, Ts <: Unsigned}
                        compinfof2c::Matrix{Tl} = Matrix{Tl}(0, 0),
                        method::Symbol = :unspecified)
         
-        where {Tl <: Unsigned, Ts <: Unsigned}
+        where{Tl <: Unsigned, Ts <: Unsigned}
         # Sanity checks
         if Base.size(rs, 1) != Base.length(ind) + 1
             warn("size(rs,1) must be length(ind) + 1")
