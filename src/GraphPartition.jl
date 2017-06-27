@@ -41,7 +41,7 @@ type GraphPart{Tl <: Unsigned, Ts <: Unsigned}
     method::Symbol           # specification of graph partition method
 
     # An inner constructor here.
-    function GraphPart(ind::Vector{Tl}, rs::Matrix{Tl};
+    function GraphPart{Tl,Ts}(ind::Vector{Tl}, rs::Matrix{Tl};
                        tag::Matrix{Ts} = Matrix{Ts}(0, 0),
                        compinfo::Matrix{Tl} = Matrix{Tl}(0, 0),
                        rsf2c::Matrix{Tl} = Matrix{Tl}(0, 0),
