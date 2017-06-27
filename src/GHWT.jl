@@ -14,7 +14,7 @@ export ghwt_core!, ghwt_analysis!, fine2coarse!, ghwt_synthesis, ghwt_c2f_bestba
 performs the forward GHWT transform, which computes tag and compinfo of GP, but not the expansion coefficients.
 
 ### Input Arguments
-* `GP::GraphPart`: a GraphPart object (with or without tag and compinfo data); note that tag and compinfo will be modified after this function is executed 
+* `GP::GraphPart`: a GraphPart object (with or without tag and compinfo data); note that tag and compinfo will be modified after this function is executed
 """
 function ghwt_core!(GP::GraphPart)
 
@@ -66,7 +66,7 @@ function ghwt_core!(GP::GraphPart)
                     n1 = rs2 - rs1 # # of pts in the 1st subregion
                     n2 = rs3 - rs2 # # of pts in the 2nd subregion
                     # SCALING COEFFICIENT (n > 1)
-                    compinfo[rs1, j] = n1; 
+                    compinfo[rs1, j] = n1;
                     # HAAR COEFFICIENT
                     compinfo[rs1 + 1, j] = n2; tag[rs1 + 1, j] = 1
                     # WALSH COEFFICIENTS
@@ -107,8 +107,8 @@ end # of function ghwt_core!
 performs the forward GHWT transform, which generates expansion coefficients, tag, and compinfo.
 
 ### Input Arguments
-* `GP::GraphPart`: a GraphPart object (with or without tag and compinfo data); note that tag and compinfo will be modified after this function is executed 
-* `dmatrix::Array{Float64,3}`: a matrix of expansion coefficients with only the last column filled in as the original input signal(s) `f`; after this function is executed, this matrix contains whole expansion coefficients of the input signal(s) relative to the GHWT dictionary 
+* `GP::GraphPart`: a GraphPart object (with or without tag and compinfo data); note that tag and compinfo will be modified after this function is executed
+* `dmatrix::Array{Float64,3}`: a matrix of expansion coefficients with only the last column filled in as the original input signal(s) `f`; after this function is executed, this matrix contains whole expansion coefficients of the input signal(s) relative to the GHWT dictionary
 """
 function ghwt_core!(GP::GraphPart, dmatrix::Array{Float64,3})
 
@@ -274,7 +274,7 @@ end # of ghwt_analysis!
     coefp::Bool = false, indp::Bool = false)
 
 Fill in the fine-to-coarse info (rs2f2c, tagf2c, and compinfof2c) in a
-GraphPart object.  Also, rearrange a matrix of expansion coefficients.  
+GraphPart object.  Also, rearrange a matrix of expansion coefficients.
 
 ### Input Arguments
 * `GP::GraphPart`: an input GraphPart object without fine-to-coarse info (rsf2c, tagf2c, compinfof2c); after this function, rsf2c, tagf2c, compinfof2c are filled. Note that rs, tag, compinfo are intact.
@@ -325,7 +325,7 @@ function fine2coarse!(GP::GraphPart;
     ind = GP.ind; rs = GP. rs
     tag = GP.tag; compinfo = GP.compinfo
     rsf2c = GP.rsf2c; tagf2c = GP.tagf2c; compinfof2c = GP.compinfof2c
-    
+
     #
     # 1. Generate the fine-to-coarse dictionary
     #
@@ -338,10 +338,10 @@ function fine2coarse!(GP::GraphPart;
         tagf2c[:, j] = tag[IX[:, j], jmax + 1 - j]
         compinfof2c[:, j] = compinfo[IX[:, j], jmax + 1 - j]
 
-        if coefp 
+        if coefp
             dmatrixf2c[:, j, :] = dmatrix[IX[:, j], jmax + 1 - j, :]
         end
-        
+
         # fill in the fine-to-coarse regionstarts
         if j > 1
             rsf2crow = 2
@@ -459,7 +459,7 @@ function ghwt_synthesis(dvec::Matrix{Float64}, GP::GraphPart, BS::BasisSpec)
                                     dmatrix[child1, j + 1, :] =
                                         dmatrix[parent, j, :]
                                     child1 += 1; parent += 1
-                                  
+
                                 # subregion 2 has the smaller tag
                                 elseif child1 == rs2 ||
                                     (tag[child2, j + 1] < tag[child1, j + 1] &&
@@ -477,7 +477,7 @@ function ghwt_synthesis(dvec::Matrix{Float64}, GP::GraphPart, BS::BasisSpec)
                                         ( dmatrix[parent, j, :] -
                                           dmatrix[parent + 1, j, :] ) / sqrt(2)
                                     child1 += 1; child2 += 1; parent += 2
-                                end # of if child2 == r3 ... 
+                                end # of if child2 == r3 ...
                             end # of while child1 < rs2 ...
                         end # of if rs2 == rs3 ... else
                     end # of if n == 1 ... elseif n > 1 ...
@@ -523,7 +523,7 @@ function ghwt_synthesis(dvec::Matrix{Float64}, GP::GraphPart, BS::BasisSpec)
                             parent = rs1 # the current coef in the parent
                             child1 = rs1 # the current coefs in the children
                             child2 = rs2
-                            
+
                             # SCALING & HAAR COEFFICIENTS
                             if tagf2c[rs1, j] == 0
                                 while parent < rs3
@@ -556,7 +556,7 @@ function ghwt_synthesis(dvec::Matrix{Float64}, GP::GraphPart, BS::BasisSpec)
                                         dmatrix[parent, j, :] =
                                             dmatrix[child1, j + 1, :]
                                         parent += 1; child1 += 1
-                                        
+
                                     # 2 coefs formed from 2 coefs
                                     else
                                         dmatrix[parent, j, :] =
@@ -580,12 +580,15 @@ function ghwt_synthesis(dvec::Matrix{Float64}, GP::GraphPart, BS::BasisSpec)
     #
     # 2. Final prepartion for returning variables
     #
-    f = dmatrix[:, 1, :] # for fine-to-coarse and make f available
+
+    ftemp = dmatrix[:, 1, :] # for fine-to-coarse and make f available
     if BS.c2f
-        f = dmatrix[:, end, :] # for coarse-to-fine
+        ftemp = dmatrix[:, end, :] # for coarse-to-fine
     end
     # put the reconstructed values in the correct order and return it.
-    f[GP.ind, :] = f
+    f = zeros(size(ftemp))
+    f[GP.ind, :] = ftemp
+
     return f
 end # of function ghwt_synthesis (without G input)
 
@@ -721,7 +724,7 @@ function ghwt_f2c_bestbasis(dmatrix::Array{Float64,3}, GP::GraphPart;
     ## Find the best-basis from the GHWT fine-to-coarse dictionary
 
     # generate the fine-to-coarse GraphPart fields and coefficient matrix
-    (GP, dmatrixf2c) = fine2coarse!(GP, dmatrix)
+    dmatrixf2c = fine2coarse!(GP, dmatrix = dmatrix, coefp = true)
 
     # allocate/initialize
     dvecf2c = dmatrixf2c[:, jmax, 1]
@@ -776,12 +779,14 @@ Select the overall best basis among the c2f and f2c best bases
 function ghwt_bestbasis(dmatrix::Array{Float64,3}, GP::GraphPart;
                         cfspec::Any = 1.0, flatten::Any = 1.0)
 
+    costfun = cost_functional(cfspec)
+
     # Select the c2f best basis
-    (dvecc2f, BSc2f) = ghwt_c2f_bestbasis(dmatrix, GP, cfspec, flatten)
+    (dvecc2f, BSc2f) = ghwt_c2f_bestbasis(dmatrix, GP, cfspec = cfspec, flatten = flatten)
     costc2f = costfun(dvecc2f)
-    
+
     # Select the f2c best basis
-    (dvecf2c, BSf2c) = ghwt_f2c_bestbasis(dmatrix, GP, cfspec, flatten)
+    (dvecf2c, BSf2c) = ghwt_f2c_bestbasis(dmatrix, GP, cfspec = cfspec, flatten = flatten)
     costf2c = costfun(dvecf2c)
 
     # Compare the coarse-to-fine and fine-to-coarse best-bases

@@ -32,7 +32,7 @@ Revised for two parameters by Naoki Saito, Feb. 24, 2017
 struct GraphPart{Tl <: Unsigned, Ts <: Unsigned}
     ind::Vector{Tl}    # ordering of the indices on the finest level
     rs::Matrix{Tl}     # `rs[i,j]` = the index in `ind` of the first
-                       # point in Region `i` at level j 
+                       # point in Region `i` at level j
     tag::Matrix{Ts}    # Ts <: Tl because max(tag) <= log2(max(T))
     compinfo::Matrix{Tl}      # coef was from 2 coefs or from 1 coef
     rsf2c::Matrix{Tl}         # f2c version of `rs`
@@ -48,9 +48,6 @@ struct GraphPart{Tl <: Unsigned, Ts <: Unsigned}
                        tagf2c::Matrix{Ts} = Matrix{Ts}(0, 0),
                        compinfof2c::Matrix{Tl} = Matrix{Tl}(0, 0),
                        method::Symbol = :unspecified)
-        
-        where Tl <: Unsigned
-        where Ts <: Unsigned
         # Sanity checks
         if Base.size(rs, 1) != Base.length(ind) + 1
             warn("size(rs,1) must be length(ind) + 1")
@@ -144,7 +141,7 @@ function partition_tree_fiedler(G::GraphSignal.GraphSig, method::Symbol = :Lrw)
     while regioncount < N
         regioncount = countnz(rs[:, j]) - 1 # the number of regions on level j
         if j == jmax  # add a column to rs for level j+1, if necessary
-            rs = hcat(rs, vcat(1, zeros(N))) 
+            rs = hcat(rs, vcat(1, zeros(N)))
             jmax = jmax + 1
         end
         # for tracking the child regions
@@ -153,7 +150,7 @@ function partition_tree_fiedler(G::GraphSignal.GraphSig, method::Symbol = :Lrw)
             rs1 = rs[r, j]      # the start of the parent region
             rs2 = rs[r + 1, j] # 1 node after the end of the parent region
             n = rs2 - rs1   # the number of nodes in the parent region
-            
+
             if n > 1            # regions with 2 or more nodes
                 indrs = ind[rs1:(rs2 - 1)]
                 # partition the current region
