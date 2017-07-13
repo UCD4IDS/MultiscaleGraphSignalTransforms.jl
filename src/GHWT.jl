@@ -643,7 +643,7 @@ function ghwt_c2f_bestbasis(dmatrix::Array{Float64,3}, GP::GraphPart;
 
     # constants and dmatrix cleanup
     (N, jmax, fcols) = Base.size(dmatrix)
-    dmatrix[ abs(dmatrix) .< 10^2 * eps() ] = 0
+    dmatrix[ abs.(dmatrix) .< 10^2 * eps() ] = 0
 
     # "flatten" dmatrix
     if fcols > 1
@@ -674,7 +674,7 @@ function ghwt_c2f_bestbasis(dmatrix::Array{Float64,3}, GP::GraphPart;
             end
         end
     end
-    levlistc2f = levlistc2f[ levlistc2f .!= 0 ]
+    levlistc2f = Array{UInt8}(levlistc2f[ levlistc2f .!= 0 ])
     BSc2f = BasisSpec(levlistc2f, c2f = true, description = "GHWT c2f Best Basis")
     levlist2levlengths!(GP, BSc2f)
     # costc2f = costfun(dvecc2f)
@@ -711,7 +711,7 @@ function ghwt_f2c_bestbasis(dmatrix::Array{Float64,3}, GP::GraphPart;
 
     # constants and dmatrix cleanup
     (N, jmax, fcols) = Base.size(dmatrix)
-    dmatrix[ abs(dmatrix) .< 10^2 * eps() ] = 0
+    dmatrix[ abs.(dmatrix) .< 10^2 * eps() ] = 0
 
     # "flatten" dmatrix
     if fcols > 1
@@ -748,6 +748,7 @@ function ghwt_f2c_bestbasis(dmatrix::Array{Float64,3}, GP::GraphPart;
     end
 
     levlistf2c = levlistf2c[ levlistf2c .!=0 ]
+    levlistf2c = Array{UInt8}(levlistf2c[ levlistf2c .!= 0 ])
     BSf2c = BasisSpec(levlistf2c, c2f = false, description = "GHWT f2c Best Basis")
     levlist2levlengths!(GP, BSf2c)
     # costf2c = costfun(dvecf2c)

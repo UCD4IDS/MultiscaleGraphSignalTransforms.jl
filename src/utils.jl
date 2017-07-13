@@ -76,11 +76,11 @@ function dmatrix_flatten!(dmatrix::Array{Float64,3}, flatten::Any)
     # p-norms or p-quasinorms
     if isa(flatten, Number)
         if flatten == 1
-            dmatrix = sum(abs(dmatrix), 3)
+            dmatrix = sum(abs.(dmatrix), 3)
         elseif flatten == 0
             dmatrix = sum(dmatrix != 0, 3)
         else
-            dmatrix = (sum(abs(dmatrix).^flatten, 3)).^(1 / flatten)
+            dmatrix = (sum(abs.(dmatrix).^flatten, 3)).^(1 / flatten)
         end
 
         # histogram
@@ -91,7 +91,7 @@ function dmatrix_flatten!(dmatrix::Array{Float64,3}, flatten::Any)
         # sum of absolute values = 1-norm
     elseif isa(flatten, Symbol)
         if flatten == :abs
-            dmatrix = sum(abs(dmatrix), 3)
+            dmatrix = sum(abs.(dmatrix), 3)
             # standard deviation
         elseif flatten == :std
             # MATLAB: dmatrix = std(dmatrix, 0, 3)
@@ -102,7 +102,7 @@ function dmatrix_flatten!(dmatrix::Array{Float64,3}, flatten::Any)
             # inverse variance
         elseif flatten == :invvar
             dmatrix = var(dmatrix, 3)
-            dmatrix[ abs(dmatrix) < eps() ] = eps()
+            dmatrix[ abs.(dmatrix) < eps() ] = eps()
             dmatrix = dmatrix.^-1;
             # max coefficient - min coefficient
         elseif flatten == :minmax || flatten == :maxmin
@@ -116,7 +116,7 @@ function dmatrix_flatten!(dmatrix::Array{Float64,3}, flatten::Any)
             dmatrix = sum(dmatrix[:, :, 2:end] - dmatrix[:, :, 1:(end - 1)], 3)
             # the sum of the absolute values of the differences of consecutive coeffs
         elseif flatten == :sumabsdiff
-            dmatrix = sum(abs(dmatrix[:, :, 2:end] - dmatrix[:, :, 1:(end - 1)]), 3)
+            dmatrix = sum(abs.(dmatrix[:, :, 2:end] - dmatrix[:, :, 1:(end - 1)]), 3)
             # Shannon entropy
         elseif flatten === :entropy
             # MATLAB: p = abs(dmatrix)/norm(dmatrix[:], 'fro')
@@ -132,16 +132,16 @@ function dmatrix_flatten!(dmatrix::Array{Float64,3}, flatten::Any)
         elseif flatten == :sub
             # MATLAB: t = 0.5 * norm(dmatrix[:], 'fro') / numel(dmatrix)
             t = 0.5 * norm(dmatrix[:]) / length(dmatrix)
-            dmatrix[abs(dmatrix) .< t] = 0
+            dmatrix[abs.(dmatrix) .< t] = 0
             dmatrix = sum(dmatrix, 3)
             # default (1-norm)
         else
             warn("the specified flatten symbol $(flatten) is not recognized; hence we assume it as 1-norm.")
-            dmatrix = sum(abs(dmatrix), 3)
+            dmatrix = sum(abs.(dmatrix), 3)
         end
     else
         warn("the specified flatten argument $(flatten) is neither of number nor of symbol type; hence we assume it as 1-norm.")
-        dmatrix = sum(abs(dmatrix), 3)
+        dmatrix = sum(abs.(dmatrix), 3)
     end
 end # of function dmatrix_flatten!
 
@@ -188,22 +188,22 @@ end
 
 
 """
-    function rs_to_region(rs::Matrix{ANY}, tag::Matrix{ANY})
+    function rs_to_region(rs::Matrix{Any}, tag::Matrix{Any})
 
 From the imformation of rs, tag from GP, compute the tag_r matrix, which have the same
 size of dmatrix (expansion coefficient matrix). Each element indicates the place of the
 coefficient in the expansion tree.
 
 ### Input Arguments
-* `rs::Matrix{ANY}`: rs from GP, showing information of the partition tree
-* `tag::Matrix{ANY}`: tag from GP, indicating coefficients tag
+* `rs::Matrix{Any}`: rs from GP, showing information of the partition tree
+* `tag::Matrix{Any}`: tag from GP, indicating coefficients tag
 
 ### Output Arguments
 * `tag_r::Matrix{UInt32}`: showing information of the partition tree, same size as dmatrix
 """
 
 
-function rs_to_region(rs::Matrix{ANY}, tag::Matrix{ANY})
+function rs_to_region(rs::Matrix{<:Any}, tag::Matrix{<:Any})
   (m,n) = size(tag)
   tag_r = zeros(m,n)
   for j = 1:(n-1)

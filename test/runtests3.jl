@@ -5,7 +5,7 @@ using MTSG, MAT
 include("..\\src\\GHWT_tf_2d.jl")
 
 
-matrix = [ 1 2 3; 4 5 6]
+matrix = [ 1.0 2.0 3.0; 4.0 5.0 6.0]
 #matrix = matread("termdoc.mat")["matrix"]
 
 

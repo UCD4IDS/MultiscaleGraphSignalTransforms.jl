@@ -1,6 +1,7 @@
+include("..\\src\\MTSG.jl")
 # This is a very preliminary test function; just a copy of bbtest.jl of small scale P6 with 10 random signals. More coming!
 using MTSG, MAT
-tmp=matread("path6randn10.mat")
+tmp=matread("test\\path6randn10.mat")
 G=gpath(6, tmp["tmp"])
 GP=partition_tree_fiedler(G)
 dc2f = ghwt_analysis!(G, GP=GP)
@@ -18,8 +19,5 @@ println("The comp BB levlist: ", (bbc2f[2].levlist)')
 levlengths = Vector{UInt8}([1, 1, 1, 2, 1])
 println("The true BB levlengths: ", levlengths')
 println("The comp BB levlengths: ", (bbc2f[2].levlengths)')
-tmp2=matread("bbcoef.mat")
+tmp2=matread("test\\bbcoef.mat")
 println("The relative L2 error of the BB coefs: ", norm(tmp2["bbcoef"][:]-bbc2f[1][:])/norm(tmp2["bbcoef"]))
-
-        
-

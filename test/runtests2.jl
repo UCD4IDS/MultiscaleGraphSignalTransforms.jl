@@ -1,4 +1,4 @@
-include("src\\MTSG.jl")
+include("..\\src\\MTSG.jl")
 
 using MTSG, MAT
 

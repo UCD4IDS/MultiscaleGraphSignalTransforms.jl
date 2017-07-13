@@ -2,21 +2,21 @@ include("utils.jl")
 
 
 """
-    GProws, GPcols = PartitionTreeMatrixDhillon(matrix::Matrix{ANY})
+    GProws, GPcols = PartitionTreeMatrixDhillon(matrix::Matrix{Float64})
 
     Recursively partition the rows and columns of the matrix using the
     bipartite model proposed by Dhillon in "Co-clustering documents and words
     using Bipartite Spectral Graph Partitioning"
 
 ### Input Arguments
-* `matrix::Matrix{ANY}`: an input matrix
+* `matrix::Matrix{Float64}`: an input matrix
 
 ### Output Argument
 * `GProws::GraphPart`: partitioning using rows as samples
 * `GPcols::GraphPart`: partitioning using cols as samples
 """
 
-function PartitionTreeMatrixDhillon(matrix::Matrix{ANY})
+function PartitionTreeMatrixDhillon(matrix::Matrix{Float64})
   ## 0. Preliminary stuff
 
   # constants
@@ -242,7 +242,7 @@ function PartitionTreeMatrixDhillon(matrix::Matrix{ANY})
 end
 
 
-function second_largest_singular_vectors(A::Matrix{ANY})
+function second_largest_singular_vectors(A::Matrix{Float64})
   # Compute the second largest left and right singular vectors of
   # An = D1^(-0.5)*A*D2^(-0.5)
 
@@ -275,7 +275,7 @@ function second_largest_singular_vectors(A::Matrix{ANY})
 end
 
 
-function partition_vector(v:: Vector{ANY})
+function partition_vector(v:: Vector{Float64})
   # Partition vector into half, diveded by the mean of the values.
   l = size(v[:],1)
   m = mean(v)

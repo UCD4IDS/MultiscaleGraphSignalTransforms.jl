@@ -1,9 +1,9 @@
 include("PartitionTreeMatrixDhillon.jl")
 include("partition_fiedler.jl")
 
-function tf_core_2d(dmatrix::Matrix{ANY}, tag::Matrix{ANY}, tag_r::Matrix{ANY})
+function tf_core_2d(dmatrix::Matrix{Float64}, tag::Matrix{<:Any}, tag_r::Matrix{<:Any})
   # the core iteration of the time-frequency analysis algorithm
-  costfun = function(x) return sum(abs(x),1) end
+  costfun = function(x) return sum(abs.(x),1) end
   (m,n) = size(tag)
   (p,q) = size(dmatrix)
   dmatrix_new = zeros(p,q)
@@ -76,20 +76,20 @@ end
 
 
 """
-    dmatrix, GProws, GPcols = ghwt_tf_init_2d(matrix::Matrix{ANY})
+    dmatrix, GProws, GPcols = ghwt_tf_init_2d(matrix::Matrix{Float64})
 
     Partition matrix first to get GProws and GPcols. Then expand matrix
     in two directions to get dmatrix
 
 ### Input Arguments
-* `matrix::Matrix{ANY}`: an input matrix
+* `matrix::Matrix{Float64}`: an input matrix
 
 ### Output Argument
 * `GProws::GraphPart`: partitioning using rows as samples
 * `GPcols::GraphPart`: partitioning using cols as samples
-* `dmatrix::matrix{ANY}`: expansion coefficients of matrix
+* `dmatrix::matrix{Float64}`: expansion coefficients of matrix
 """
-function ghwt_tf_init_2d(matrix::Matrix{ANY})
+function ghwt_tf_init_2d(matrix::Matrix{Float64})
   #Partition matrix recuisively using Dhillon's method
   GProws, GPcols = PartitionTreeMatrixDhillon(matrix)
   ghwt_core!(GProws)
@@ -125,21 +125,21 @@ end
 
 
 """
-    Bbasis, infovec = ghwt_tf_bestbasis_2d(dmatrix::Matrix{ANY}, GProws::GraphPart, GPcols::GraphPart)
+    Bbasis, infovec = ghwt_tf_bestbasis_2d(dmatrix::Matrix{Float64}, GProws::GraphPart, GPcols::GraphPart)
 
     Find the best-basis with time-frequency analysis.
 
 ### Input Arguments
-* `dmatrix::Matrix{ANY}`: the expansion coefficients matrix
+* `dmatrix::Matrix{Float64}`: the expansion coefficients matrix
 * `GProws::GraphPart`: partitioning using rows as samples
 * `GPcols::GraphPart`: partitioning using cols as samples
 
 ### Output Argument
-* `Bbasis::matrix{ANY}`: the value of bestbasis
-* `infovec::matrix{ANY}`: the location of bestbasis in dmatrix
+* `Bbasis::matrix{Float64}`: the value of bestbasis
+* `infovec::matrix{Float64}`: the location of bestbasis in dmatrix
 
 """
-function ghwt_tf_bestbasis_2d(dmatrix::Matrix{ANY}, GProws::GraphPart, GPcols::GraphPart)
+function ghwt_tf_bestbasis_2d(dmatrix::Matrix{Float64}, GProws::GraphPart, GPcols::GraphPart)
 
   tag_r_row = rs_to_region(GProws.rs, GProws.tag)
   tag_r_col = rs_to_region(GPcols.rs, GPcols.tag)
@@ -170,14 +170,14 @@ function ghwt_tf_bestbasis_2d(dmatrix::Matrix{ANY}, GProws::GraphPart, GPcols::G
   # comparison in the row direction
   for i=1:(jmax_row - 1)
     DMATRIX[i+1,1], TAG_row[i+1], TAG_r_row[i+1], TAG_tf[i+1,1] = tf_core_2d(DMATRIX[i,1], TAG_row[i], TAG_r_row[i])
-    TAG_tf[i+1,1] = Matrix{UInt8}(TAG_tf[i+1,1] + 2)
+    TAG_tf[i+1,1] = Matrix{Int8}(TAG_tf[i+1,1] + 2)
   end
 
   # comparison in the column direction
   for i=1:(jmax_col - 1)
     DMATRIX[1,i+1], TAG_col[i+1], TAG_r_col[i+1], TAG_tf[1,i+1] = tf_core_2d(DMATRIX[1,i]',TAG_col[i], TAG_r_col[i])
     DMATRIX[1,i+1] = DMATRIX[1,i+1]'
-    TAG_tf[1,i+1] = Matrix{UInt8}(TAG_tf[1,i+1]')
+    TAG_tf[1,i+1] = Matrix{Int8}(TAG_tf[1,i+1]')
   end
 
   DMATRIX[1,1] = 0 # release the memory
@@ -195,11 +195,15 @@ function ghwt_tf_bestbasis_2d(dmatrix::Matrix{ANY}, GProws::GraphPart, GPcols::G
       temp_tf_row = temp_tf_row[:]
       DMATRIX[i,j], TAG_tf[i,j] = findmin(vcat(temp_col[:]', temp_row[:]'),1)
       DMATRIX[i,j] = reshape(DMATRIX[i,j], (p,q))
-      ind_r = ((TAG_tf[i,j].%2).==0)
-      ind_c = ((TAG_tf[i,j].%2).==1)
+      ind_r = ((TAG_tf[i,j].%2).==0)[:]
+      ind_c = ((TAG_tf[i,j].%2).==1)[:]
+
       TAG_tf[i,j][ind_r] = temp_tf_row[ind_r]+2
+
+
       TAG_tf[i,j][ind_c] = temp_tf_col[ind_c]
-      TAG_tf[i,j] = Matrix{UInt8}(reshape(TAG_tf[i,j], (p,q)))
+
+      TAG_tf[i,j] = Matrix{Int8}(reshape(TAG_tf[i,j], (p,q)))
 
       DMATRIX[i-1,j] = 0 # release the memory
 
@@ -245,12 +249,12 @@ function ghwt_tf_bestbasis_2d(dmatrix::Matrix{ANY}, GProws::GraphPart, GPcols::G
         region = TAG_r_col[j][k,l]
         tag = TAG_col[j][k,l]
         if TAG_tf[i,j][p,q] == 1 #frequency domain was chosen
-          k1 = find((TAG_col[j-1][:,l].==tag*2)&(TAG_r_col[j-1][:,l].==region))
-          k2 = find((TAG_col[j-1][:,l].==tag*2+1)&(TAG_r_col[j-1][:,l].==region))
+          k1 = find((TAG_col[j-1][:,l].==tag*2).&(TAG_r_col[j-1][:,l].==region))
+          k2 = find((TAG_col[j-1][:,l].==tag*2+1).&(TAG_r_col[j-1][:,l].==region))
         end
         if TAG_tf[i,j][p,q] == 0 #time domain was chosen
-          k1 = find((TAG_col[j-1][:,l+1].==tag)&(TAG_r_col[j-1][:,l+1].==region*2))
-          k2 = find((TAG_col[j-1][:,l+1].==tag)&(TAG_r_col[j-1][:,l+1].==region*2+1))
+          k1 = find((TAG_col[j-1][:,l+1].==tag).&(TAG_r_col[j-1][:,l+1].==region*2))
+          k2 = find((TAG_col[j-1][:,l+1].==tag).&(TAG_r_col[j-1][:,l+1].==region*2+1))
           l = l + 1
         end
         s1 = 0
@@ -290,12 +294,12 @@ function ghwt_tf_bestbasis_2d(dmatrix::Matrix{ANY}, GProws::GraphPart, GPcols::G
         region = TAG_r_row[i][k,l]
         tag = TAG_row[i][k,l]
         if TAG_tf[i,j][p,q] == 3 #frequency domain was chosen
-          k1 = find((TAG_row[i-1][:,l].==tag*2)&(TAG_r_row[i-1][:,l].==region))
-          k2 = find((TAG_row[i-1][:,l].==tag*2+1)&(TAG_r_row[i-1][:,l].==region))
+          k1 = find((TAG_row[i-1][:,l].==tag*2).&(TAG_r_row[i-1][:,l].==region))
+          k2 = find((TAG_row[i-1][:,l].==tag*2+1).&(TAG_r_row[i-1][:,l].==region))
         end
         if TAG_tf[i,j][p,q] == 2 #time domain was chosen
-          k1 = find((TAG_row[i-1][:,l+1].==tag)&(TAG_r_row[i-1][:,l+1].==region*2))
-          k2 = find((TAG_row[i-1][:,l+1].==tag)&(TAG_r_row[i-1][:,l+1].==region*2+1))
+          k1 = find((TAG_row[i-1][:,l+1].==tag).&(TAG_r_row[i-1][:,l+1].==region*2))
+          k2 = find((TAG_row[i-1][:,l+1].==tag).&(TAG_r_row[i-1][:,l+1].==region*2+1))
           l = l + 1
         end
         s1 = 0
