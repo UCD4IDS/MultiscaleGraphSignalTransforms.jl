@@ -1,7 +1,6 @@
-include("..\\src\\MTSG.jl")
 # This is a very preliminary test function; just a copy of bbtest.jl of small scale P6 with 10 random signals. More coming!
 using MTSG, MAT
-tmp=matread("test\\path6randn10.mat")
+tmp=matread("path6randn10.mat")
 G=gpath(6, tmp["tmp"])
 GP=partition_tree_fiedler(G)
 dc2f = ghwt_analysis!(G, GP=GP)
