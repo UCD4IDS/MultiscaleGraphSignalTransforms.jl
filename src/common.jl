@@ -385,7 +385,7 @@ function dvec_Threshold(dvec::Vector{Float64}, SORH::String, keep::Float64,
     end
 
     if SORH == "s" || SORH == "soft"
-      ind = sortperm(abs(dvec), rev = true)
+      ind = sortperm(abs.(dvec), rev = true)
       T = abs(dvec[ind[kept+1]])
 
       if BS != nothing
@@ -394,18 +394,18 @@ function dvec_Threshold(dvec::Vector{Float64}, SORH::String, keep::Float64,
 
         #soft-threshold the non-scaling coefficients
         ind = 1:size(dvec,1)
-        ind = ind[tag .> 0]
-        dvec_new[ind] = sign(dvec[ind]).*(abs(dvec[ind])-T).*(abs(dvec[ind])-T .>0)
+        ind = ind[(tag .> 0)[:]]
+        dvec_new[ind] = sign.(dvec[ind]).*(abs.(dvec[ind])-T).*(abs.(dvec[ind])-T .>0)
 
       # if BS is not given, soft-threshold all coefficients
       else
-        dvec_new = sign[dvec].*(abs(dvec)-T).*(abs(dvec)-T.>0)
+        dvec_new = sign.(dvec).*(abs.(dvec)-T).*(abs.(dvec)-T.>0)
       end
 
       kept = countnz(dvec_new)
 
     elseif SORH == "h" || SORH == "hard"
-      ind = sortperm(abs(dvec), rev = true)
+      ind = sortperm(abs.(dvec), rev = true)
       dvec_new[ind[kept+1:end]] = 0
 
       kept = countnz(dvec_new)

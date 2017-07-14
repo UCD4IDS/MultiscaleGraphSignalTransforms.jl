@@ -41,13 +41,14 @@ struct GraphPart{Tl <: Unsigned, Ts <: Unsigned}
     method::Symbol           # specification of graph partition method
 
     # An inner constructor here.
-    function GraphPart{Tl,Ts}(ind::Vector{Tl}, rs::Matrix{Tl};
+    function GraphPart{Tl, Ts}(ind::Vector{Tl}, rs::Matrix{Tl};
                        tag::Matrix{Ts} = Matrix{Ts}(0, 0),
                        compinfo::Matrix{Tl} = Matrix{Tl}(0, 0),
                        rsf2c::Matrix{Tl} = Matrix{Tl}(0, 0),
                        tagf2c::Matrix{Ts} = Matrix{Ts}(0, 0),
                        compinfof2c::Matrix{Tl} = Matrix{Tl}(0, 0),
-                       method::Symbol = :unspecified)
+                       method::Symbol = :unspecified) where{Tl, Ts}
+
         # Sanity checks
         if Base.size(rs, 1) != Base.length(ind) + 1
             warn("size(rs,1) must be length(ind) + 1")

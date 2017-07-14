@@ -10,23 +10,23 @@ export tf_core, ghwt_tf_bestbasis, tf_basisrecover, tf_threshold, tf_synthesis
 
 
 """
-    dmatrix_new, tag_new, tag_r_new,tag_tf = tf_core(dmatrix::Matrix{ANY},tag::Matrix{ANY},tag_r::Matrix{ANY})
+    dmatrix_new, tag_new, tag_r_new,tag_tf = tf_core(dmatrix::Matrix{Float64},tag::Matrix{<:Any},tag_r::Matrix{<:Any})
 
 Perform one iteration of the time-frequancy analysis
 
 ### Input Arguments
 * `dvec::Matrix{Float64}`: the expansion coefficients corresponding to the chosen basis or sums of cost of them
-* `tag::Matrix{ANY}`: indicating the tag of the coefficient of the element
-* `tag_r::Matrix{ANY}`: indicating the region of the elements
+* `tag::Matrix{<:Any}`: indicating the tag of the coefficient of the element
+* `tag_r::Matrix{<:Any}`: indicating the region of the elements
 
 ### Output Arguments
 * `dmatrix_new::Matrix{Float64}`: Sums of cost, each of which is computed from at most four elements in dmatrix. The
 smaller of the cost from the frequency direction or time direction is chosen.
-* `tag_new::Matrix{ANY}`: indicating the tag of the coefficient of the element
-* `tag_r_new::Matrix{ANY}`: indicating the region of the elements
-* `tag_tf::Matrix{ANY}`: indicating whether time cost (0) or frequency cost (1) is chosen
+* `tag_new::Matrix{<:Any}`: indicating the tag of the coefficient of the element
+* `tag_r_new::Matrix{<:Any}`: indicating the region of the elements
+* `tag_tf::Matrix{<:Any}`: indicating whether time cost (0) or frequency cost (1) is chosen
 """
-function  tf_core(dmatrix::Matrix{ANY},tag::Matrix{ANY},tag_r::Matrix{ANY})
+function  tf_core(dmatrix::Matrix{Float64},tag::Matrix{<:Any},tag_r::Matrix{<:Any})
   costfun = cost_functional(1)
   (m,n) = size(dmatrix)
   dmatrix_new = zeros(m,n-1)
@@ -137,14 +137,14 @@ end
 
 
 """
-tag_tf_b_new = tf_basisrecover(tag_tf_b::Matrix{ANY}, tag_tf_f::Matrix{ANY}, tag::Matrix{ANY}, tag_r::Matrix{ANY})
+tag_tf_b_new = tf_basisrecover(tag_tf_b::Matrix{<:Any}, tag_tf_f::Matrix{<:Any}, tag::Matrix{<:Any}, tag_r::Matrix{<:Any})
 One iteration in recovering the bestbasis in ghwt_tf_bestbasis method.
 
 ### Input Arguments
-* `tag_new::Matrix{ANY}`: indicating the tag of the coefficient of the element
-* `tag_r_new::Matrix{ANY}`: indicating the region of the elements
-* `tag_tf_f::Matrix{ANY}`:in the current iteration, indicating whether time cost (0) or frequency cost (1) is chosen
-* `tag_tf_b::Matrix{ANY}`:in the previous iteration, indicating whether time cost (0) or frequency cost (1) is chosen
+* `tag_new::Matrix{<:Any}`: indicating the tag of the coefficient of the element
+* `tag_r_new::Matrix{<:Any}`: indicating the region of the elements
+* `tag_tf_f::Matrix{<:Any}`:in the current iteration, indicating whether time cost (0) or frequency cost (1) is chosen
+* `tag_tf_b::Matrix{<:Any}`:in the previous iteration, indicating whether time cost (0) or frequency cost (1) is chosen
 
 
 ### Output Arguments
@@ -152,7 +152,7 @@ One iteration in recovering the bestbasis in ghwt_tf_bestbasis method.
 """
 
 
-function tf_basisrecover(tag_tf_b::Matrix{ANY}, tag_tf_f::Matrix{ANY}, tag::Matrix{ANY}, tag_r::Matrix{ANY})
+function tf_basisrecover(tag_tf_b::Matrix{<:Any}, tag_tf_f::Matrix{<:Any}, tag::Matrix{<:Any}, tag_r::Matrix{<:Any})
   m,n = size(tag_tf_b)
   tag_tf_b_new = -1*ones(m,n)
 
@@ -199,28 +199,28 @@ end
 
 
 """
- bestbasis_new = tf_threshold(bestbasis::Matrix{ANY}, GP::GraphPart, keep::Float64, SORH::String)
+ bestbasis_new = tf_threshold(bestbasis::Matrix{Float64}, GP::GraphPart, keep::Float64, SORH::String)
 
  Thresholding the coefficients of bestbasis.
 
 ### Input Arguments
- *   `bestbasis::Matrix{ANY}`        the matrix of expansion coefficients
+ *   `bestbasis::Matrix{Float64}`        the matrix of expansion coefficients
  *   `SORH::String`        use soft ('s') or hard ('h') thresholding
  *   `keep::Float64`        a fraction between 0 and 1 which says how many coefficients should be kept
  *   `GP::GraphPart`          a GraphPart object, used to identify scaling coefficients
 
 ### Output Argument
- *   `bestbasis_new::Matrix{ANY}`       the thresholded expansion coefficients
+ *   `bestbasis_new::Matrix{Float64}`       the thresholded expansion coefficients
 """
 
-function tf_threshold(bestbasis::Matrix{ANY}, GP::GraphPart, keep::Float64, SORH::String)
+function tf_threshold(bestbasis::Matrix{Float64}, GP::GraphPart, keep::Float64, SORH::String)
 
   tag = GP.tag
   if keep > 1 || keep < 0
     error("keep should be floating point between 0~1")
   end
   kept = UInt32(round(keep*size(bestbasis,1)))
-  dvec_S = sort(abs(bestbasis[:]), rev = true)
+  dvec_S = sort(abs.(bestbasis[:]), rev = true)
   T = dvec_S[kept + 1]
   bestbasis_new = deepcopy(bestbasis[:])
   indp = bestbasis_new.> T           #index for coefficients > T
@@ -228,13 +228,13 @@ function tf_threshold(bestbasis::Matrix{ANY}, GP::GraphPart, keep::Float64, SORH
 
   # hard thresholding
   if SORH == "h" || SORH == "hard"
-    bestbasis_new[~(indp | indn)] = 0
+    bestbasis_new[.~(indp .| indn)] = 0
 
   # soft thresholding
   elseif SORH == "s" || SORH == "soft"
-    bestbasis_new[(~indp) & (~indn) & (tag[:].!=0)] = 0
-    bestbasis_new[indp & (tag[:].!=0)] = bestbasis[indp & (tag[:].!=0)] - T
-    bestbasis_new[indn & (tag[:].!=0)] = bestbasis[indn & (tag[:].!=0)] + T
+    bestbasis_new[(.~indp) .& (.~indn) .& (tag[:].!=0)] = 0
+    bestbasis_new[indp .& (tag[:].!=0)] = bestbasis[indp .& (tag[:].!=0)] - T
+    bestbasis_new[indn .& (tag[:].!=0)] = bestbasis[indn .& (tag[:].!=0)] + T
   end
 
   bestbasis_new = reshape(bestbasis_new,size(bestbasis))
@@ -244,14 +244,14 @@ end
 
 
 """
-    (f, GS) = tf_synthesis(bestbasis::Matrix{ANY},bestbasis_tag::Matrix{ANY},GP::GraphPart,G::GraphSig)
+    (f, GS) = tf_synthesis(bestbasis::Matrix{Float64},bestbasis_tag::Matrix{<:Any},GP::GraphPart,G::GraphSig)
 
 Given a vector of GHWT expansion coefficients and info about the graph
 partitioning and the choice of basis, reconstruct the signal
 
 ### Input Arguments
-* `bestbasis::Matrix{ANY}`: the expansion coefficients corresponding to the chosen basis
-* 'bestbasis_tag::Matrix{ANY}': the location of the best basis coefficients in bestbasis matrix
+* `bestbasis::Matrix{Float64}`: the expansion coefficients corresponding to the chosen basis
+* 'bestbasis_tag::Matrix{<:Any}': the location of the best basis coefficients in bestbasis matrix
 * `GP::GraphPart`: an input GraphPart object
 * `G::GraphSig`: an input GraphSig object
 
@@ -259,7 +259,7 @@ partitioning and the choice of basis, reconstruct the signal
 * `f::Matrix{Float64}`: the reconstructed signal(s)
 * `GS::GraphSig`: the reconstructed GraphSig object
 """
-function tf_synthesis(bestbasis::Matrix{ANY},bestbasis_tag::Matrix{ANY},GP::GraphPart,G::GraphSig)
+function tf_synthesis(bestbasis::Matrix{Float64},bestbasis_tag::Matrix{<:Any},GP::GraphPart,G::GraphSig)
   tag = GP.tag
   rs = GP.rs
   bestbasis_new = deepcopy(bestbasis)
@@ -362,7 +362,7 @@ function tf_synthesis(bestbasis::Matrix{ANY},bestbasis_tag::Matrix{ANY},GP::Grap
   f[GP.ind] = ftemp
   f = reshape(f,(length(f),1)) # reorder f
   GS = deepcopy(G)
-  replace_data!(GS, f) # create the new graph signal 
+  replace_data!(GS, f) # create the new graph signal
   return f, GS
 end
 

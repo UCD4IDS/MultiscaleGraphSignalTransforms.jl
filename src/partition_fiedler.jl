@@ -43,7 +43,7 @@ function partition_fiedler(W::SparseMatrixCSC{Float64,Int};
         return pm, v
     end
 
-#    
+#
 # Now, we need to compute the Fiedler vector here. Preliminaries first.
 #
     N = size(W, 1)
@@ -92,7 +92,7 @@ function partition_fiedler(W::SparseMatrixCSC{Float64,Int};
             val = val[end - 1]       # val is set to a scalar.
             # In MATLAB, `full` was necessary to convert a sparse matrix format
             # to a usual matrix format as follows
-            # [v,val,~] = svd(full(diag(sum(W))-W)); 
+            # [v,val,~] = svd(full(diag(sum(W))-W));
         end
     elseif method == :Lrw # Otherwise, use L_rw, which is normally preferred.
         if N > cutoff           # for a relatively large W
@@ -111,14 +111,15 @@ function partition_fiedler(W::SparseMatrixCSC{Float64,Int};
             if eigs_flag == 0
                 val, ind = findmax(val) # val is set to be a scalar.
                 v = vtmp[:, ind]
-                # MATLAB: v = (full(sum(W,2)).^(-0.5)) .* v 
+                # MATLAB: v = (full(sum(W,2)).^(-0.5)) .* v
                 v = vec((sum(W, 2).^(-0.5)) .* v) # This is the Fiedler vector!
             end
         end
         if N <= cutoff || eigs_flag != 0 # if W is small or eigs had a problem,
                                          # then use full svd
-            D = sparse(diagm(vec(sum(W, 1))))
-            D2 = D.^(-0.5)
+            colsumW = vec(sum(W, 1))
+            D = sparse(diagm(colsumW))
+            D2 = sparse(diagm(colsumW.^(-0.5)))
             vtmp, val = svd(full(D2 * (D - W) * D2)) # SVD of Lsym
             # MATLAB: [v,val,~] = svd(full(...
             # bsxfun(@times,bsxfun(@times,full(sum(W,2)).^(-0.5),diag(sum(W))-W),
@@ -154,7 +155,7 @@ end # of partition_fiedler
 ### Output Arguments
 * `pm::Vector{Int}`: the partition info
 * `v::Vector{Float64}`: the output Fiedler vector if requested
-    
+
 Copyright 2015 The Regents of the University of California
 
 Implemented by Jeff Irion (Adviser: Dr. Naoki Saito)
@@ -162,7 +163,7 @@ Translated and revised by Naoki Saito, Feb. 10, 2017
 """
 function partition_fiedler_pm(v::Vector{Float64})
     # define a tolerance: if abs(x) < tol, then we view x = 0.
-    tol = 10^3 * eps()            
+    tol = 10^3 * eps()
 
     # set the first nonzero element to be positive
     row = 1
@@ -172,7 +173,7 @@ function partition_fiedler_pm(v::Vector{Float64})
     if v[row] < 0
         v = -v
     end
-    
+
     # assign each point to either region 1 or region -1, and assign any zero
     # entries to the smaller region
     if sum(v .>= tol) > sum(v .<= -tol) # more (+) than (-) entries
@@ -199,9 +200,9 @@ Troubleshoot potential issues with the partitioning
 * `v::Vector{Float64}`: the Fiedler vector of the graph
 * `W::SparseMatrixCSC{Float64,Int}`: an input edge weight matrix
 * `val::Float64`: the algebraic connectivity (i.e., `\lambda_2`)
-    
+
 ### Ouput Arguments
-* `pm::Vector{Int}`: a final partition info vector    
+* `pm::Vector{Int}`: a final partition info vector
 
 Copyright 2015 The Regents of the University of California
 
@@ -217,13 +218,13 @@ function partition_fiedler_troubleshooting(pm::Vector{Int},v::Vector{Float64},
 
     # If pm vector indicates no partition (single sign) or ambiguities via
     # 0 entries, then we'll trouble shoot.
-    if sum(pm .< 0) == 0 || sum(pm .> 0) == 0 || sum(abs(pm)) < N
+    if sum(pm .< 0) == 0 || sum(pm .> 0) == 0 || sum(abs.(pm)) < N
         # Case 1: an input graph is not connected (i.e., alg. conn < tol)
         if val < tol
-            pm = 2 * (abs(v) .> tol) - 1
+            pm = 2 * (abs.(v) .> tol) - 1
             while sum(pm .< 0) == 0 || sum(pm .> 0) == 0
                 tol = 10 * tol    # relax the tolerance
-                pm = 2 * (abs(v) .> tol) - 1
+                pm = 2 * (abs.(v) .> tol) - 1
                 if tol > 1
                     pm[1:ceil(N / 2)] = 1
                     pm[(ceil(N / 2) + 1):N] = -1
@@ -232,8 +233,8 @@ function partition_fiedler_troubleshooting(pm::Vector{Int},v::Vector{Float64},
         # Case 2: it is connected, but something funny happened
         else
             pm = 2 * (v .>= mean(v)) - 1
-            if sum(abs(pm)) < N
-                # assign the near-zero points based on the values of v 
+            if sum(abs.(pm)) < N
+                # assign the near-zero points based on the values of v
                 # at their neighbor nodes
                 pm0 = find(pm .== 0)
                 pm[pm0] = (W[pm0, :] * v .> tol) - (W[pm0, :] * v .< -tol)
@@ -245,7 +246,7 @@ function partition_fiedler_troubleshooting(pm::Vector{Int},v::Vector{Float64},
         if sum(pm .< 0) == 0 || sum(pm .> 0) == 0
             pm[1:ceil(N / 2)] = 1
             pm[(ceil(N / 2) + 1):N] = -1
-        end    
+        end
     end
 
 # make sure that the first point is assigned as a 1
