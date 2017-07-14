@@ -29,7 +29,7 @@ Implemented by Jeff Irion (Adviser: Dr. Naoki Saito) |
 Translated and modified by Naoki Saito, Feb. 7, 2017
 Revised for two parameters by Naoki Saito, Feb. 24, 2017
 """
-struct GraphPart{Tl <: Unsigned, Ts <: Unsigned}
+type GraphPart{Tl <: Unsigned, Ts <: Unsigned}
     ind::Vector{Tl}    # ordering of the indices on the finest level
     rs::Matrix{Tl}     # `rs[i,j]` = the index in `ind` of the first
                        # point in Region `i` at level j
