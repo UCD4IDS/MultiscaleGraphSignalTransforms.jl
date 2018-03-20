@@ -1,8 +1,6 @@
-include("..\\src\\MTSG.jl")
-
 using MTSG, MAT
 
-tmp = matread("test\\MN_MutGauss.mat")
+tmp = matread("MN_MutGauss.mat")
 tmp1 = tmp["G"]
 G=GraphSig(tmp1["W"],xy=tmp1["xy"],f=tmp1["f"],name =tmp1["name"])
 
