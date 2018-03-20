@@ -63,7 +63,7 @@ function tag_class(jmax::Int)
 end
 
 """
-    dmatrix_flatten!(dmatrix::Array{Float64,3}, flatten::Any)
+    dmatrix_flatten(dmatrix::Array{Float64,3}, flatten::Any)
 
 Flatten dmatrix using the method specified by the string "flatten"
 
@@ -71,7 +71,7 @@ Flatten dmatrix using the method specified by the string "flatten"
 * `dmatrix::Array{Float64,3}`: the matrix of expansion coefficients; after this function is called, it becomes the size of (~, ~, 1).
 * `flatten::Any`: the method for flattening dmatrix (see the code in details)
 """
-function dmatrix_flatten!(dmatrix::Array{Float64,3}, flatten::Any)
+function dmatrix_flatten(dmatrix::Array{Float64,3}, flatten::Any)
 
     # p-norms or p-quasinorms
     if isa(flatten, Number)
@@ -143,6 +143,7 @@ function dmatrix_flatten!(dmatrix::Array{Float64,3}, flatten::Any)
         warn("the specified flatten argument $(flatten) is neither of number nor of symbol type; hence we assume it as 1-norm.")
         dmatrix = sum(abs.(dmatrix), 3)
     end
+    return dmatrix
 end # of function dmatrix_flatten!
 
 """
@@ -235,3 +236,65 @@ function rs_to_region(rs::Matrix{<:Any}, tag::Matrix{<:Any})
   end
 return Matrix{UInt32}(tag_r)
 end
+
+
+"""
+function nonorth2relerror(nonorth::array{Float64,1},B::array{Float64,2})
+
+Given a vector 'nonorth' of non-orthonormal expansion coefficients and
+the matrix 'B' such that B*nonorth is the original signal, return a
+vector of relative approximation errors when retaining the 1,2,...,N
+largest coefficients in magnitude.
+
+### Input argument
+* `nonorth`:    a vector of non-orthonormal expansion coefficients
+* `B`:          the matrix whose such that B*nonorth is the original signal
+
+### Output argument
+* `relerror`:   a vector of relative approximation errors
+
+"""
+function nonorth2relerror(nonorth::Array{Float64,1},B::Array{Float64,2})
+
+    # sort the expansion coefficients
+    IX = sortperm(nonorth, by = abs, rev = true)
+
+    # generate a matrix where column j contains the j largest coefficients
+    matrix0 = full(UpperTriangular(repmat(nonorth[IX],1,length(IX))))
+    matrix = deepcopy(matrix0)
+    matrix[IX,:] = matrix0
+
+    # the original signal and a matrix of reconstructions
+    f = B*nonorth
+    recons = B*matrix
+
+    # the relative errors
+    relerror = sum((repmat(f,1,length(IX)) - recons).^2,1)'.^(1/2)./norm(f,2)
+    return relerror
+end
+
+
+"""
+function orth2relerror(orth)
+
+Given a vector 'orth' of orthonormal expansion coefficients, return a
+vector of relative approximation errors when retaining the 1,2,...,N
+largest coefficients in magnitude.
+
+### Input argument
+* `orth`:    a vector of orthonormal expansion coefficients
+
+### Output argument
+* `relerror`:   a vector of relative approximation errors
+
+"""
+
+function orth2relerror(orth::Array{Float64,1})
+    # sort the coefficients
+    orth = sort(orth.^2, rev = true)
+
+    #compute the relative errors
+    relerror = ((abs.(sum(orth) - cumsum(orth))).^(1/2))/sum(orth).^(1/2)
+
+    return relerror
+end 

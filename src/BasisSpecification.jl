@@ -21,21 +21,21 @@ Implemented by Jeff Irion (Adviser: Dr. Naoki Saito) |
 Translated to julia and revised by Naoki Saito, Feb. 22, 2017
 """
 type BasisSpec
-    levlist::Vector{UInt8}
-    levlengths::Vector{UInt16}
+    levlist :: Vector{Int}
+    levlengths :: Vector{Int}
     c2f::Bool
     description::String
 
     # An inner constructor here.
-    function BasisSpec(levlist::Vector{UInt8};
-                       levlengths::Vector{UInt16} = Vector{UInt16}(0),
+    function BasisSpec(levlist :: Vector{Int};
+                       levlengths :: Vector{Int} = Vector{Int}(0),
                        c2f::Bool = true,
                        description::String = "")
 
         # Sanity check here.
         if Base.length(levlengths) != Base.length(levlist) && Base.length(levlengths) != 0
             warn("length(levlengths) != length(levlist). Hence, use null levlengths")
-            new( levlist, Vector{UInt16}(0), c2f, description )
+            new( levlist, Vector{Integer}(0), c2f, description )
         else
             new( levlist, levlengths, c2f, description )
         end

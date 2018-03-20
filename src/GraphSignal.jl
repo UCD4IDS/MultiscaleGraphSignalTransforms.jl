@@ -301,7 +301,17 @@ function AddNoise(G::GraphSig; SNR::Float64=Float64(1.24), noisetype::String = "
 
   end
 
-  return return GraphSig(G.W, xy = G.xy, f = f, name = string("SNR = ",SNR," ", G.name), plotspecs = G.plotspecs)
+  return GraphSig(G.W, xy = G.xy, f = f, name = string("SNR = ",SNR," ", G.name), plotspecs = G.plotspecs)
 end
+
+
+
+
+
+
+
+
+
+
 
 end # of module GraphSignal

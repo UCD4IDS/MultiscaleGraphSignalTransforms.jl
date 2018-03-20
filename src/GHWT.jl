@@ -647,16 +647,16 @@ function ghwt_c2f_bestbasis(dmatrix::Array{Float64,3}, GP::GraphPart;
 
     # "flatten" dmatrix
     if fcols > 1
-        dmatrix0 = dmatrix      # keep the original dmatrix as dmatrix0
+        dmatrix0 = deepcopy(dmatrix)      # keep the original dmatrix as dmatrix0
         if flatten != nothing
-            dmatrix_flatten!(dmatrix, flatten)
+            dmatrix = dmatrix_flatten(dmatrix, flatten)
         end
     end
 
     ## Find the best-basis from the GHWT coarse-to-fine dictionary
     # allocate/initialize
     dvecc2f = dmatrix[:, jmax, 1]
-    levlistc2f = jmax * ones(UInt8, N)
+    levlistc2f = jmax * ones(Int, N)
 
     # set the tolerance
     tol = 10^4 * eps()
@@ -674,7 +674,7 @@ function ghwt_c2f_bestbasis(dmatrix::Array{Float64,3}, GP::GraphPart;
             end
         end
     end
-    levlistc2f = Array{UInt8}(levlistc2f[ levlistc2f .!= 0 ])
+    levlistc2f = Array{Int}(levlistc2f[ levlistc2f .!= 0 ])
     BSc2f = BasisSpec(levlistc2f, c2f = true, description = "GHWT c2f Best Basis")
     levlist2levlengths!(GP, BSc2f)
     # costc2f = costfun(dvecc2f)
@@ -715,9 +715,9 @@ function ghwt_f2c_bestbasis(dmatrix::Array{Float64,3}, GP::GraphPart;
 
     # "flatten" dmatrix
     if fcols > 1
-        dmatrix0 = dmatrix      # keep the original dmatrix as dmatrix0
+        dmatrix0 = deepcopy(dmatrix)      # keep the original dmatrix as dmatrix0
         if flatten != nothing
-            dmatrix_flatten!(dmatrix, flatten)
+            dmatrix = dmatrix_flatten(dmatrix, flatten)
         end
     end
 
@@ -728,7 +728,7 @@ function ghwt_f2c_bestbasis(dmatrix::Array{Float64,3}, GP::GraphPart;
 
     # allocate/initialize
     dvecf2c = dmatrixf2c[:, jmax, 1]
-    levlistf2c = jmax * ones(UInt8, N)
+    levlistf2c = jmax * ones(Int, N)
 
     # set the tolerance
     tol = 10^4 * eps()
@@ -748,7 +748,7 @@ function ghwt_f2c_bestbasis(dmatrix::Array{Float64,3}, GP::GraphPart;
     end
 
     levlistf2c = levlistf2c[ levlistf2c .!=0 ]
-    levlistf2c = Array{UInt8}(levlistf2c[ levlistf2c .!= 0 ])
+    levlistf2c = Array{Int}(levlistf2c[ levlistf2c .!= 0 ])
     BSf2c = BasisSpec(levlistf2c, c2f = false, description = "GHWT f2c Best Basis")
     levlist2levlengths!(GP, BSf2c)
     # costf2c = costfun(dvecf2c)
