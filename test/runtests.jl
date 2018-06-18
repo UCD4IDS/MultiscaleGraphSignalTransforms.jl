@@ -12,10 +12,10 @@ println("Relative L2 error of the Haar transform: ", norm(G.f[:]-frecon[:])/norm
 
 # Check the Best Basis
 bbc2f = ghwt_c2f_bestbasis(dc2f, GP)
-levlist = Vector{UInt8}([4, 4, 3, 3, 3])
+levlist = Vector{Int}([4, 4, 3, 3, 3])
 println("The true BB levlist: ", levlist')
 println("The comp BB levlist: ", (bbc2f[2].levlist)')
-levlengths = Vector{UInt16}([1, 1, 1, 2, 1])
+levlengths = Vector{Int}([1, 1, 1, 2, 1])
 println("The true BB levlengths: ", levlengths')
 println("The comp BB levlengths: ", (bbc2f[2].levlengths)')
 tmp2=matread("bbcoef.mat")

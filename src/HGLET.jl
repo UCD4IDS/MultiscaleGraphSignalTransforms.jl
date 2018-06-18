@@ -6,7 +6,7 @@ using ..GraphSignal, ..GraphPartition, ..BasisSpecification, ..GHWT
 
 include("common.jl")
 
-export HGLET_Synthesis, HGLET_jkl, HGLET_Analysis_All, HGLET_GHWT_BestBasis, BSfull, HGLET_GHWT_Synthesis, HGLET_GHWT_BestBasis_minrelerror
+export HGLET_Synthesis, HGLET_jkl, HGLET_Analysis_All, HGLET_GHWT_BestBasis, BSfull, HGLET_GHWT_Synthesis, HGLET_GHWT_BestBasis_minrelerror,LevelBasisSpec
 
 
 """
@@ -633,7 +633,7 @@ function BSfull(GP::GraphPart, BS::BasisSpec, trans::Array{Bool,2})
 
     ## 1. Fill out the redundant descriptions
     ind = 0
-    for row  = 1:length(BS_temp.levlist)
+    for row  = 1:length(levlist)
         levlistfull[ind+1:ind+levlengths[row]] = levlist[row]
 
         levlengthsfull[ind+1:ind+levlengths[row]] = levlengths[row]
@@ -730,7 +730,7 @@ function HGLET_GHWT_BestBasis_minrelerror(GP::GraphPart,G::GraphSig;dmatrixH::Ar
         # we are only considering the GHWT
         if isempty(dmatrixH) && isempty(dmatrixHrw) && isempty(dmatrixHsym) && !isempty(dmatrixG)
             dvec_temp, BS_temp = ghwt_bestbasis(dmatrixG, GP, cfspec = tau_temp)
-            trans_temp = trues(length(BS_temp.levlist,2))
+            trans_temp = trues(length(BS_temp.levlist),2)
             orthbasis = true
         else
             dvec_temp, BS_temp, trans_temp = HGLET_GHWT_BestBasis(GP, dmatrixH = dmatrixH, dmatrixG = dmatrixG,
@@ -778,6 +778,39 @@ function HGLET_GHWT_BestBasis_minrelerror(GP::GraphPart,G::GraphSig;dmatrixH::Ar
         end
     end
     return dvec, BS, trans, tau
+end
+
+"""
+function LevelBasisSpec(GP::GraphPart,j::Int;c2f::Bool = true)
+
+    Specify the basis corresponding to level j for a given graph partitioning.
+
+    ### Input argument:
+    * `GP`: A GraphPart object
+    * `j`:  the level to which the basis corresponds (j = 0 is the global level)
+    * `c2f`: specify whether the coarse-to-fine or fine-to-coarse dictionary
+    is used. Default setting is true, which correspond to coarse-to-fine. False correpsonds
+    to fine-to-coarse dictionary.
+
+    ### Output argument:
+    * `BS`: a BasisSpec object which correpsonds to the basis vectors on level j
+"""
+function LevelBasisSpec(GP::GraphPart,j::Int;c2f::Bool = true)
+# coarse-to-fine dictionary
+    if c2f == true
+        Nj = countnz(GP.rs[:,j+1]) - 1
+        levlist = (j+1)*ones(Int,Nj)
+        BS = BasisSpec(levlist, description = "coarse-to-fine level"*string(j))
+    else
+        if isempty(GP.rsf2c)
+            GP = GHWT_Info(GP)
+        end
+        Nj = countnz(GP.rsf2c[:,j+1]) - 1
+        levlist  = (j+1)*ones(Int,Nj)
+        BS = BasisSpec(levlist, c2f = false, description = "fine-to-coarse level"*string(j))
+    end
+    levlist2levlengths!(GP,BS)
+    return BS
 end
 
 end # end of module HGLET
