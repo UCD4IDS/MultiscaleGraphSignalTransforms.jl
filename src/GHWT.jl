@@ -6,7 +6,7 @@ using ..GraphSignal, ..GraphPartition, ..BasisSpecification
 
 include("common.jl")
 
-export ghwt_core!, ghwt_analysis!, fine2coarse!, ghwt_synthesis, ghwt_c2f_bestbasis, ghwt_f2c_bestbasis, ghwt_bestbasis, ghwt_Info!
+export ghwt_core!, ghwt_analysis!, fine2coarse!, ghwt_synthesis, ghwt_c2f_bestbasis, ghwt_f2c_bestbasis, ghwt_bestbasis
 
 """
     ghwt_core!(GP::GraphPart)
@@ -803,24 +803,4 @@ function ghwt_bestbasis(dmatrix::Array{Float64,3}, GP::GraphPart;
     return dvec, BS
 end # of function ghwt_bestbasis
 
-"""
-    ghwt_Info!(GP::GraphPart)
-For a GraphPart object GP, use rs and ind to compute tag, compinfo, rsf2c, tagf2c, and compinfof2c
-
-### Input Arguments
-* `GP::GraphPart`: the GraphPart object, with rs and ind
-
-###  Output Arguments
-* `GP::GraphPart`: the GraphPart object, with all fields filled in
-"""
-
-function ghwt_Info!(GP::GraphPart)
-    # fill in "tag" and "compinfo"
-    if isempty(GP.tag) || isempty(GP.compinfo)
-        ghwt_core!(GP)
-    end
-
-    # fill in the fine-to-coarse fields
-    fine2coarse!(GP)
-end
 end # of module GHWT
