@@ -75,7 +75,7 @@ function dmatrix2dvec(dmatrix::Array{Float64,3}, GP::GraphPart)
     ## 0. Preliminaries
     # allocate/initialize
     dvec = dmatrix[:, jmax, :]
-    levlist = jmax * ones(UInt8, N)
+    levlist = jmax * ones(Int, N)
 
     ## 1. Make a vector of the nonzero basis entries
     for j = (jmax - 1):-1:1
@@ -230,13 +230,13 @@ function bsfull(GP::GraphPart, BS::BasisSpec;
 
     # allocate space
     N = Base.length(GP.ind)
-    levlistfull = zeros(UInt8, N)
+    levlistfull = zeros(Int, N)
     # Assuming that the maximum value of levlist <= jmax \approx log2(N)
     # can be representable by `UInt8`, i.e., N < \approx 5.79E76, which is
     # reasonable. We cannot handle such a large N at this point.
 
     if levlengthsp
-        levlengthsfull = zeros(UInt8, N)
+        levlengthsfull = zeros(Int, N)
     end
 
     if transp && !isempty(trans)
@@ -293,7 +293,7 @@ function bs_haar(GP::GraphPart)
     jmax = Base.size(GP.rs, 2)
 
     # allocate space for levlist
-    levlist = zeros(UInt8, jmax)
+    levlist = zeros(Int, jmax)
 
     # fill in levlist for the Haar basis
     levlist[1] = jmax
@@ -342,7 +342,7 @@ function bs_level(GP::GraphPart, j::Int, c2f::Bool = true)
 
     # specify the level j basis
     Nj = countnz(rspointer) - 1
-    levlist = (j + 1) * ones(UInt8, Nj)
+    levlist = (j + 1) * ones(Int, Nj)
     BS = BasisSpec(levlist, c2f = c2f, description = bspec)
 
     # fill in the levlengths field of the BasisSpec object

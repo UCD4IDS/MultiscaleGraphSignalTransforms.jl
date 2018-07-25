@@ -178,11 +178,11 @@ Change to the new best basis
 
 ### Output Arguments
 * `dvec::Vector{Float64}`: an output coefficient matrix
-* `levlist::Vector{UInt8}`: an output levlist
+* `levlist::Vector{Int}`: an output levlist
 """
 function bbchange(dvec::Vector{Float64}, j::Int)
     n = Base.size(dvec, 1) # assume each column corresponding to one signal
-    levlist = zeros(UInt8, n)
+    levlist = zeros(Int, n)
     levlist[1] = j
     return dvec, levlist        # might need deepcopy here.
 end
@@ -297,4 +297,4 @@ function orth2relerror(orth::Array{Float64,1})
     relerror = ((abs.(sum(orth) - cumsum(orth))).^(1/2))/sum(orth).^(1/2)
 
     return relerror
-end 
+end

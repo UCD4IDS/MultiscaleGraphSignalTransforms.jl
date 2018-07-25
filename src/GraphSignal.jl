@@ -36,7 +36,7 @@ type GraphSig
     xy::Matrix{Float64}               # spatial coordinates (could be >= 3D)
     f::Matrix{Float64}                # the data sequences (signals) on the nodes
     name::String                      # name of the GraphSig object
-    plotspecs::Vector{Symbol}         # special instructions for plotting
+    plotspecs::String        # special instructions for plotting
     # The following three are deriable from W, xy, and f:
     length::Int                     # length of the data sequence
     dim::Int                        # the dimension of the node coordinates
@@ -47,7 +47,8 @@ type GraphSig
                       xy::Matrix{Float64} = Matrix{Float64}(0, 0),
                       f::Matrix{Float64} = zeros(Base.size(W, 1), 1),
                       name::String = "",
-                      plotspecs::Vector{Symbol} = Vector{Symbol}(0),
+                      plotspecs :: String = "",
+                      #plotspecs::Vector{Symbol} = Vector{Symbol}(0),
                       length::Int = Base.size(W, 1),
                       dim::Int = Base.size(xy, 2),
                       size::Tuple{Int,Int} = (Base.size(W, 1), Base.size(W, 2) + Base.size(xy, 2) + Base.size(f, 2)))
