@@ -7,6 +7,7 @@
 
 GPLOT Plot graph, as in graph theory. GPLOT(A,xyz,...) plots the graph
 specified by the adjacency matrix A and the node coordinates xyz.
+GPLOT!(A,xyz,...) adds a plot to `current` one.
 
 ### Input Arguments
 * `A::SparseMatrixCSC{Float64,Int}`: the adjacency matrix of a graph `G`
@@ -52,6 +53,7 @@ For 3D rotation, use `plotlyjs()` backend
 
 Revised by Naoki Saito, Feb. 17, 2017
 Revised by Naoki Saito, Oct. 13, 2017
+Revised by Haotian Li, Jul. 25, 2018
 """
 function gplot(A::SparseMatrixCSC{Float64,Int}, xyz::Matrix{Float64}; plotp::Bool = true,
                 style::Symbol = :auto, width::Int = 2, color::Symbol = :blue,
@@ -101,6 +103,69 @@ function gplot(A::SparseMatrixCSC{Float64,Int}, xyz::Matrix{Float64}; plotp::Boo
                     linestyle=style, linewidth=width, linecolor=color, grid=grid, label=label)
             else                # marker attributes are set.
                 plot(X, Y, Z,
+                    linestyle=style, linewidth=width, linecolor=color,
+                    markershape=shape, markersize=mwidth, markercolor=mcolor, markeralpha=malpha,
+                    markerstrokecolor=mscolor, markerstrokewidth=mswidth, markerstrokealpha=msalpha,
+                    grid=grid, label=label)
+            end
+        end
+    else                        # Return the X, Y, Z array if desired.
+        if nspacedim < 3
+            return X, Y
+        else
+            return X, Y, Z
+        end
+    end
+end
+
+function gplot!(A::SparseMatrixCSC{Float64,Int}, xyz::Matrix{Float64}; plotp::Bool = true,
+                style::Symbol = :auto, width::Int = 2, color::Symbol = :blue,
+                shape::Symbol = :none, mwidth::Int = 1, mcolor::Symbol = color, malpha::Float64 = 1.0,
+                mscolor::Symbol = color, mswidth::Int = 1, msalpha::Float64 = 1.0,
+                grid::Bool = false, label::String = "")
+
+    # Extract the node indices
+    (i,j)=ind2sub(size(A), find(A .!= 0.0));
+    p = sortperm(max.(i,j))
+    i = i[p]
+    j = j[p]
+
+    # Find out whether the graph is 2-D or 3-D
+    nspacedim = size(xyz, 2)
+    if nspacedim == 1
+        xyz = hcat(xyz, zeros(size(xyz, 1)))
+        nspacedim = 2
+    end
+
+    # Create a long, NaN-separated list of line segments
+    X = [ xyz[i,1] xyz[j,1] Base.fill(NaN,size(i)) ]'
+    Y = [ xyz[i,2] xyz[j,2] Base.fill(NaN,size(i)) ]'
+    X = X[:]
+    Y = Y[:]
+    if nspacedim == 3
+        Z = [ xyz[i,3] xyz[j,3] Base.fill(NaN,size(i)) ]'
+        Z = Z[:]
+    end
+
+    # Finally, do the work!
+    if plotp                    # plot the line-segments
+        if nspacedim < 3        # 2D
+            if shape == :none   # no markers
+                plot!(X, Y,
+                    linestyle=style, linewidth=width, linecolor=color, grid=grid, label=label)
+            else                # marker attributes are set.
+                plot!(X, Y,
+                    linestyle=style, linewidth=width, linecolor=color,
+                    markershape=shape, markersize=mwidth, markercolor=mcolor, markeralpha=malpha,
+                    markerstrokecolor=mscolor, markerstrokewidth=mswidth, markerstrokealpha=msalpha,
+                    grid=grid, label=label)
+            end
+        else                    #3D
+            if shape == :none   # no markers
+                plot!(X, Y, Z,
+                    linestyle=style, linewidth=width, linecolor=color, grid=grid, label=label)
+            else                # marker attributes are set.
+                plot!(X, Y, Z,
                     linestyle=style, linewidth=width, linecolor=color,
                     markershape=shape, markersize=mwidth, markercolor=mcolor, markeralpha=malpha,
                     markerstrokecolor=mscolor, markerstrokewidth=mswidth, markerstrokealpha=msalpha,
