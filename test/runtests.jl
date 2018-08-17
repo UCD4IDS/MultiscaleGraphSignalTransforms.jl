@@ -56,10 +56,12 @@ println("\n")
 
 
 #############################
-G = GraphSig(SparseMatrixCSC(diagm(ones(5),1)),f = [2. -2. 1. 3. -1. -2.]')
+f = [2. -2. 1. 3. -1. -2.]'
+G = GraphSig(SparseMatrixCSC(diagm(ones(5),1)),f = f)
 GP = partition_tree_fiedler(G,:Lrw)
 dmatrix = ghwt_analysis!(G, GP=GP)
 println("2. Testing time-frequency adapted GHWT functions on path signal: ", f)
+println("The original signal has L1 norm: ", vecnorm(f,1))
 
 # through the old way
 dvec,BS = ghwt_bestbasis(dmatrix, GP,cfspec=1)
@@ -98,7 +100,18 @@ dmatrix, GProws, GPcols = ghwt_tf_init_2d(matrix)
 # infovec indicate the location of each coefficient in dmatrix
 Bbasis, infovec = ghwt_tf_bestbasis_2d(dmatrix, GProws, GPcols)
 
-println("The bestbasis of toy matrix [1, 2, 3; 4, 5, 6] has Frobenius norm as ", vecnorm(Bbasis,1))
+BBmatrix = zeros(size(dmatrix))
+for i in 1:size(infovec,2)
+    BBmatrix[infovec[1,i],infovec[2,i]] = Bbasis[i]
+end
+
+matrix_r_temp = ghwt_synthesis_2d(BBmatrix, GProws, GPcols)
+matrix_r = zeros(size(matrix))
+matrix_r[GProws.ind,GPcols.ind] = matrix_r_temp
+
+println("The toy matrix [1, 2, 3; 4, 5, 6] has 1-vecnorm as ", vecnorm(matrix,1))
+println("The bestbasis of toy matrix [1, 2, 3; 4, 5, 6] has 1-vecnorm as ", vecnorm(Bbasis,1))
+println("Relative L2 error of the synthesized matrix: ", norm(matrix[:] - matrix_r[:], 2)/norm(matrix[:],2))
 
 println("\n")
 
@@ -119,6 +132,8 @@ dmatrixHrw = dmatrixHrw, dmatrixHsym = dmatrixHsym) # best-basis among all combi
 
 fS5, GS5 = HGLET_GHWT_Synthesis(reshape(dvec5,(size(dvec5)[1],1)),GP,BS5,trans5,G)
 
-println("Relative L2 error of the synthesized signal: ", norm(GS5.f[:]-fS5[:])/norm(GS5.f[:]))
+println("The original signal has L1 norm: ", vecnorm(G.f,1))
+println("The coefficients of best-basis selected from hybrid method has L1 norm: ", vecnorm(dvec5,1))
+println("Relative L2 error of the synthesized signal: ", norm(G.f[:]-fS5[:])/norm(G.f[:]))
 
 println("\n")

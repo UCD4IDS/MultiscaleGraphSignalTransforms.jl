@@ -1,3 +1,6 @@
+include("PartitionTreeMatrixDhillon.jl")
+include("partition_fiedler.jl")
+
 """
     tf2d_init(tag::Matrix{Int64},tag_r::Matrix{Int64})
 
@@ -186,7 +189,7 @@ Copyright 2018 The Regents of the University of California
 Implemented by Yiqun Shao (Adviser: Dr. Naoki Saito)
 """
 
-function ghwt_tf_bestbasis_2d_new(dmatrix::Matrix{Float64},GProws::GraphPart,GPcols::GraphPart)
+function ghwt_tf_bestbasis_2d(dmatrix::Matrix{Float64},GProws::GraphPart,GPcols::GraphPart)
     # Initialization
     tag_r_row = rs_to_region(GProws.rs, GProws.tag)
     tag_r_col = rs_to_region(GPcols.rs, GPcols.tag)
@@ -451,4 +454,53 @@ function ghwt_synthesis_2d(dmatrix::Matrix{Float64}, GProws::GraphPart, GPcols::
     matrix_r = matrix_r[:,end,:];
     #matrix_r = reshape(matrix_r,frows, fcols);
     return matrix_r
+end
+
+
+
+"""
+    dmatrix, GProws, GPcols = ghwt_tf_init_2d(matrix::Matrix{Float64})
+
+    Partition matrix first to get GProws and GPcols. Then expand matrix
+    in two directions to get dmatrix
+
+### Input Arguments
+* `matrix::Matrix{Float64}`: an input matrix
+
+### Output Argument
+* `GProws::GraphPart`: partitioning using rows as samples
+* `GPcols::GraphPart`: partitioning using cols as samples
+* `dmatrix::matrix{Float64}`: expansion coefficients of matrix
+"""
+function ghwt_tf_init_2d(matrix::Matrix{Float64})
+  #Partition matrix recuisively using Dhillon's method
+  GProws, GPcols = PartitionTreeMatrixDhillon(matrix)
+  ghwt_core!(GProws)
+  ghwt_core!(GPcols)
+
+
+  matrix_re = matrix[GProws.ind, GPcols.ind]
+
+  (N, jmax_row) = size(GProws.rs)
+  N = N-1
+
+  # expand on the row direction
+  (frows, fcols) = size(matrix_re)
+  dmatrix = zeros((N,jmax_row,fcols))
+  dmatrix[:,jmax_row,:] = matrix_re
+
+  ghwt_core!(GProws, dmatrix)
+
+  dmatrix = reshape(dmatrix, (frows*jmax_row, fcols))'
+
+  # expand on the column direction
+  (N, jmax_col) = size(GPcols.rs)
+  N = N - 1
+  dmatrix2 = zeros(N,jmax_col,size(dmatrix,2))
+  dmatrix2[:, jmax_col, :] = dmatrix
+  ghwt_core!(GPcols, dmatrix2)
+
+  dmatrix = reshape(dmatrix2, (fcols*jmax_col, frows*jmax_row))'
+
+  return dmatrix, GProws, GPcols
 end
