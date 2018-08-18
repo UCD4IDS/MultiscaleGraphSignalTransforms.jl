@@ -14,6 +14,6 @@ include("HGLET.jl")
 using Reexport
 @reexport using .GraphSignal, .GraphPartition, .BasisSpecification, .GHWT, .GHWT_tf_1d, .HGLET
 
-export dvec2dmatrix, dmatrix2dvec, levlist2levlengths!, bsfull, bs_haar, bs_level, dvec_Threshold, rs_to_region, ghwt_tf_init_2d,  ghwt_tf_bestbasis_2d
+export dvec2dmatrix, dmatrix2dvec, levlist2levlengths!, bsfull, bs_haar, bs_level, dvec_Threshold, rs_to_region, ghwt_tf_init_2d, ghwt_tf_bestbasis_2d, ghwt_synthesis_2d
 
 end

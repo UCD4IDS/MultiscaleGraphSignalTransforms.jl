@@ -6,196 +6,275 @@ using ..GraphSignal, ..GraphPartition, ..BasisSpecification
 
 include("common.jl")
 
-export tf_core, ghwt_tf_bestbasis, tf_basisrecover, tf_threshold, tf_synthesis
+export ghwt_tf_bestbasis, tf_threshold, tf_synthesis
 
 
 """
-    dmatrix_new, tag_new, tag_r_new,tag_tf = tf_core(dmatrix::Matrix{Float64},tag::Matrix{<:Any},tag_r::Matrix{<:Any})
+    coeffdict = tf_init(dmatrix::Matrix{Float64},GP::GraphPart)
 
-Perform one iteration of the time-frequancy analysis
+Store the expanding coeffcients from matrix into a list of dictionary (inbuilt hashmap in Julia)
 
 ### Input Arguments
-* `dvec::Matrix{Float64}`: the expansion coefficients corresponding to the chosen basis or sums of cost of them
-* `tag::Matrix{<:Any}`: indicating the tag of the coefficient of the element
-* `tag_r::Matrix{<:Any}`: indicating the region of the elements
-
-### Output Arguments
-* `dmatrix_new::Matrix{Float64}`: Sums of cost, each of which is computed from at most four elements in dmatrix. The
-smaller of the cost from the frequency direction or time direction is chosen.
-* `tag_new::Matrix{<:Any}`: indicating the tag of the coefficient of the element
-* `tag_r_new::Matrix{<:Any}`: indicating the region of the elements
-* `tag_tf::Matrix{<:Any}`: indicating whether time cost (0) or frequency cost (1) is chosen
-"""
-function  tf_core(dmatrix::Matrix{Float64},tag::Matrix{<:Any},tag_r::Matrix{<:Any})
-  costfun = cost_functional(1)
-  (m,n) = size(dmatrix)
-  dmatrix_new = zeros(m,n-1)
-  tag_new = -1*ones(m,n-1)
-  tag_r_new = -1*ones(m,n-1)
-  tag_tf = -1*ones(m,n-1)
-
-  for j = 1:(n-1)  # j is the level
-    region = unique(tag_r[:,j]) # indicate the region number on level j
-    deleteat!(region,find(region.==-1)) #remove complementary number -1
-    regioncount = length(region)
-    i = 1
-    for r = 1:regioncount # iterate region wise
-      parent_ind = find(tag_r[:,j] .== region[r])
-      child1_ind = find(tag_r[:,j+1] .== region[r]*2)
-      child2_ind = find(tag_r[:,j+1] .== region[r]*2+1)
-      for k = parent_ind[1]:parent_ind[end]
-        if tag[k,j]%2 == 0 # only look at even tags, since all the odds are paired with evens
-
-          tempind1 = find(tag[child1_ind,j+1].==tag[k,j]/2) #index of child1
-          tempind2 = find(tag[child2_ind,j+1].==tag[k,j]/2) #index of child2
-          if isempty(tempind2)
-            timecos = costfun(dmatrix[child1_ind[1]-1+tempind1,j+1])
-          elseif isempty(tempind1)
-            timecos = costfun(dmatrix[child2_ind[1]-1+tempind2,j+1])
-          else
-            timecos = costfun([dmatrix[child1_ind[1]-1+tempind1,j+1] dmatrix[child2_ind[1]-1+tempind2,j+1]])
-          end # children correspond to time direction
-
-          if k == parent_ind[end]
-            freqcos = costfun(dmatrix[k,j])
-          elseif tag[k+1,j] == tag[k,j] + 1 #check if it is paired with some odd tag
-            freqcos = costfun([dmatrix[k,j] dmatrix[k+1,j]])
-          else
-            freqcos = costfun(dmatrix[k,j])
-          end # parents correspond to frequency direction
-
-          if timecos <= freqcos
-            dmatrix_new[i,j] = timecos
-            tag_tf[i,j] = 0
-          else
-            dmatrix_new[i,j] = freqcos
-            tag_tf[i,j] = 1
-          end
-          tag_new[i,j] = tag[k,j]/2
-          tag_r_new[i,j] = tag_r[k,j]
-          i = i+1
-        end
-      end
-    end
-  end
-
-  ind = sum(tag_new.!=-1,2).!=0 #the index of rows not completely equal to -1
-  ind = ind[:,1]
-  dmatrix_new = dmatrix_new[ind,:]
-  tag_new = Matrix{Int32}(tag_new[ind,:])
-  tag_r_new = Matrix{Int32}(tag_r_new[ind,:])
-  tag_tf = Matrix{Int8}(tag_tf[ind,:])
-  return dmatrix_new, tag_new, tag_r_new,tag_tf
-end
-
-
-
-
-"""
-    bestbasis, bestbasis_tag = ghwt_tf_bestbasis(dmatrix, GP)
-Find the best basis with time-frequency analysis
-
-### Input Arguments
-* `dmatrix::Matrix{Float64}`: the expansion coefficients corresponding to the chosen basis
+* `dmatrix`: The expanding GHWT coefficients of all levels corresponding to input GP
 * `GP::GraphPart`: an input GraphPart object
 
 ### Output Arguments
-* `bestbasis::Matrix{Float64}`: Sums of cost, each of which is computed from at most four elements in dmatrix. The
-smaller of the cost from the frequency direction or time direction is chosen.
-* `bestbasis_tag::Matrix{Int8}`: Indicating which of the coefficients are chosen
+* `coeffdict`: The expanding GHWT coeffcients stored in a list of "dictionary" (inbuilt hashmap in Julia),
+* `coeffdict`: The entry `coeffdict[j][(k,l)]` corresponds to the coefficient of basis-vector on level j with region k and tag l.
+
+Copyright 2018 The Regents of the University of California
+
+Implemented by Yiqun Shao (Adviser: Dr. Naoki Saito)
 """
 
-function ghwt_tf_bestbasis(dmatrix, GP)
-  tag = GP.tag
-  tag_r = rs_to_region(GP.rs, GP.tag) # From rs and tag, find the region information.
-  (m,n) = size(dmatrix)
-  TAG = Vector(n) # store the tag information in every iteration
-  TAG_r = Vector(n) # store the tag_r information in every iteration
-  TAG_tf = Vector(n) # store the tag_tf information in every iteration
-  DMATRIX = Vector(n) # store the cost in every iteration
+function tf_init(dmatrix::Matrix{Float64},GP::GraphPart)
+    # Obtain the tag information
+    tag = convert(Array{Int64,2},GP.tag)
 
-  TAG[1] = tag
-  TAG_r[1] = tag_r
-  TAG_tf[1] = zeros(m,n)
-  DMATRIX[1] = dmatrix[:,:,1]
+    # Obtain the region information
+    tag_r = convert(Array{Int64,2},rs_to_region(GP.rs, GP.tag))
 
-  for i=1:(n-1) # compare the costs by iterations
-    DMATRIX[i+1], TAG[i+1], TAG_r[i+1],TAG_tf[i+1] = tf_core(DMATRIX[i],TAG[i],TAG_r[i])
-  end
+    (m,n) = size(dmatrix)
 
+    # Initialize coeffdict
+    coeffdict = Array{Dict{Tuple{Int64,Int64},Float64}}(n)
 
-  bestbasis_tag = TAG_tf[n]
-  for i = (n-1):-1:1 # recover the bestbasis from tag_tf
-    bestbasis_tag = tf_basisrecover(TAG_tf[i], bestbasis_tag, TAG[i], TAG_r[i])
-  end
-
-  bestbasis = deepcopy(dmatrix)
-  bestbasis[bestbasis_tag.==-1] = 0
-  bestbasis_tag = Matrix{Int8}( bestbasis_tag + 1 )
-  return bestbasis, bestbasis_tag
+    # Fill in the values with the rule that `coeffdict[j][(k,l)]` represents
+    # the coefficient of basis-vector on level j with region k and tag l.
+    for i = 1:n
+        coeffdict[i]= Dict{Tuple{Int64,Int64},Float64}((tag_r[j,i],tag[j,i]) => dmatrix[j,i] for j=1:m)
+    end
+    return coeffdict
 end
 
 
+
+
+
 """
-tag_tf_b_new = tf_basisrecover(tag_tf_b::Matrix{<:Any}, tag_tf_f::Matrix{<:Any}, tag::Matrix{<:Any}, tag_r::Matrix{<:Any})
-One iteration in recovering the bestbasis in ghwt_tf_bestbasis method.
+    coeffdict_new,tag_tf = tf_core_new(coeffdict::Array{Dict{Tuple{Int64,Int64},Float64},1})
+
+
+One forward iteration of time-frequency adapted GHWT method. For each entry in `coeffdict_new`, we compare
+two (or one) entries in 'coeffdict' on time-direction and two (or one) entries in 'coeffdict' on frequency-direction.
+Those two groups reprensent the same subspace. We compare the cost-functional value of them and choose the smaller one
+as a new entry in 'coeffdict_new'.
+
 
 ### Input Arguments
-* `tag_new::Matrix{<:Any}`: indicating the tag of the coefficient of the element
-* `tag_r_new::Matrix{<:Any}`: indicating the region of the elements
-* `tag_tf_f::Matrix{<:Any}`:in the current iteration, indicating whether time cost (0) or frequency cost (1) is chosen
-* `tag_tf_b::Matrix{<:Any}`:in the previous iteration, indicating whether time cost (0) or frequency cost (1) is chosen
+* `coeffdict`: The entries of which reprensents the cost functional value of some basis-vectors' coefficients.
+
+### Output Arguments
+* `coeffdict_new`: The entries of which represents the cost functional value of some basis-vectors' coefficients
+* `tag_tf`: Indicating whether the time-direction (0) or frequency direction (1) was chosen for each entry in coeffdict_new.
+
+
+Copyright 2018 The Regents of the University of California
+
+Implemented by Yiqun Shao (Adviser: Dr. Naoki Saito)
+"""
+
+function tf_core_new(coeffdict::Array{Dict{Tuple{Int64,Int64},Float64},1})
+    # We choose '1-norm' as the optional cost functional
+    costfun = cost_functional(1)
+    jmax = length(coeffdict)
+
+    # Initialization
+    coeffdict_new = Array{Dict{Tuple{Int64,Int64},Float64}}(jmax-1)
+    tag_tf = Array{Dict{Tuple{Int64,Int64},Bool}}(jmax-1)
+
+    # Iterate through levels
+    for j = 1:(jmax-1)
+        # the temporary dictionary, which will be the j-th level of `coeffdict_new`
+        temp_coeff = Dict{Tuple{Int64,Int64},Float64}()
+
+        # the temporary dictionary, which will be the j-th level of 'tag_tf'
+        temp_tf = Dict{Tuple{Int64,Int64},Bool}()
+
+        # iterate through the entries in coeffdict on level j
+        for key in keys(coeffdict[j])
+            # coeffdict[j][k,l] represent the entry on level j with region k and tag l
+            k = key[1] # region index
+            l = key[2] # tag index
+
+            # only look at the entry with even tag l to avoid duplication
+            if l%2 == 0
+
+                # search for the (j,k,l+1) entry.
+                # the (j,k,l) and (j,k,l+1) span the same subspace as (j+1,2*k,l/2) and (j+1,2*k+1,l/2)
+                # (j,k,l) and (j,k,l+1) are `frequency-direction`
+                # (j,k,l) and (j,k,l+1) are `time-direction`
+
+                if haskey(coeffdict[j],(k,l+1)) # check for degenerate case ((j,k,l+1) doesn't exist)
+                    freqcos = costfun([coeffdict[j][(k,l)],coeffdict[j][(k,l+1)]])
+                else
+                    freqcos = costfun([coeffdict[j][(k,l)]])
+                end
+
+                if ~haskey(coeffdict[j+1],(2*k,l/2)) # check for degenerate case ((j+1,2*k,l/2) or (j+1,2*k+1,l/2) doesn't exist)
+                    timecos = costfun([coeffdict[j+1][(2*k+1,l/2)]])
+                elseif ~haskey(coeffdict[j+1],(2*k+1,l/2))
+                    timecos = costfun([coeffdict[j+1][(2*k,l/2)]])
+                else
+                    timecos = costfun([coeffdict[j+1][(2*k+1,l/2)],coeffdict[j+1][(2*k,l/2)]])
+                end
+
+                # compare the cost-functional value and record into 'tag_tf'
+                if timecos <= freqcos
+                    temp_coeff[(k,l/2)] = timecos
+                    temp_tf[(k,l/2)] = false
+                else
+                    temp_coeff[(k,l/2)] = freqcos
+                    temp_tf[(k,l/2)] = true
+                end
+            end
+        end
+        coeffdict_new[j] = temp_coeff
+        tag_tf[j] = temp_tf
+    end
+    return coeffdict_new,tag_tf
+end
+
+
+
+
+
+
+"""
+    tag_tf_b_new = tf_basisrecover_new(tag_tf_b::Array{Dict{Tuple{Int64,Int64},Bool}},tag_tf_f::Array{Dict{Tuple{Int64,Int64},Bool}})
+
+
+One backward iteration of time-frequency adapted GHWT method to recover the best-basis from the `tag_tf`s recorded.
+
+### Input Arguments
+* `tag_tf_b`: The `dictionary` recording the time-or-frequency information on some iteration 'i' in the main algorithm
+* `tag_tf_f`: The `dictionary` recording the time-or-frequency information on some iteration 'i+1' in the main algorithm
 
 
 ### Output Arguments
-* `tag_tf_b_new::Matrix{Float64}`: same as tag_tf_b, but only the costs corresponding to bestbasis is chosen
+* `tag_tf_b_new`: The updated 'tag_tf_b'. Eventually the 'tag_tf' on iteration 1 will represent the selected best-basis
+
+
+Copyright 2018 The Regents of the University of California
+
+Implemented by Yiqun Shao (Adviser: Dr. Naoki Saito)
 """
 
-
-function tf_basisrecover(tag_tf_b::Matrix{<:Any}, tag_tf_f::Matrix{<:Any}, tag::Matrix{<:Any}, tag_r::Matrix{<:Any})
-  m,n = size(tag_tf_b)
-  tag_tf_b_new = -1*ones(m,n)
-
-  for j = 1:(n-1)
-    region = unique(tag_r[:,j])
-    deleteat!(region,find(region.==-1))
-    regioncount = length(region)
-    i = 1
-    for r = 1:regioncount
-      parent_ind = find(tag_r[:,j] .== region[r])
-      child1_ind = find(tag_r[:,j+1] .== region[r]*2)
-      child2_ind = find(tag_r[:,j+1] .== region[r]*2+1)
-      for k = parent_ind[1]:parent_ind[end]
-        if tag[k,j]%2 == 0
-          if tag_tf_f[i,j] == 0
-            tempind1 = find(tag[child1_ind,j+1].==tag[k,j]/2)
-            tempind2 = find(tag[child2_ind,j+1].==tag[k,j]/2)
-            if isempty(tempind2)
-              tag_tf_b_new[child1_ind[1]-1+tempind1,j+1] = tag_tf_b[child1_ind[1]-1+tempind1,j+1]
-            elseif isempty(tempind1)
-              tag_tf_b_new[child2_ind[1]-1+tempind2,j+1] = tag_tf_b[child2_ind[1]-1+tempind2,j+1]
-            else
-              tag_tf_b_new[child1_ind[1]-1+tempind1,j+1] = tag_tf_b[child1_ind[1]-1+tempind1,j+1]
-              tag_tf_b_new[child2_ind[1]-1+tempind2,j+1] = tag_tf_b[child2_ind[1]-1+tempind2,j+1]
-            end
-          elseif tag_tf_f[i,j] == 1
-            if k == parent_ind[end]
-              tag_tf_b_new[k,j] = tag_tf_b[k,j]
-            elseif tag[k+1,j] == tag[k,j]+1
-              tag_tf_b_new[k,j] = tag_tf_b[k,j]
-              tag_tf_b_new[k+1,j] = tag_tf_b[k+1,j]
-            else
-              tag_tf_b_new[k,j] = tag_tf_b[k,j]
-            end
-          end
-          i = i+1
-        end
-      end
+function tf_basisrecover_new(tag_tf_b::Array{Dict{Tuple{Int64,Int64},Bool}},tag_tf_f::Array{Dict{Tuple{Int64,Int64},Bool}})
+    # Initialization
+    jmax = length(tag_tf_b)
+    tag_tf_b_new = Array{Dict{Tuple{Int64,Int64},Bool}}(jmax)
+    for j = 1:jmax
+        tag_tf_b_new[j] = Dict{Tuple{Int64,Int64},Bool}()
     end
-  end
-  return tag_tf_b_new
+
+    # Iterate on the levels
+    for j = 1:(jmax-1)
+        for key in keys(tag_tf_f[j])
+            k = key[1]
+            l = key[2]
+
+            # The entries on frequency-direction are selected
+            if tag_tf_f[j][(k,l)] == true
+                if ~haskey(tag_tf_b[j],(k,2*l))
+                    tag_tf_b_new[j][(k,2*l+1)] =  tag_tf_b[j][(k,2*l+1)]
+                elseif  ~haskey(tag_tf_b[j],(k,2*l+1))
+                    tag_tf_b_new[j][(k,2*l)] = tag_tf_b[j][(k,2*l)]
+                else
+                    tag_tf_b_new[j][(k,2*l)] =  tag_tf_b[j][(k,2*l)]
+                    tag_tf_b_new[j][(k,2*l+1)] =  tag_tf_b[j][(k,2*l+1)]
+                end
+            else
+            # The entries on time-direction are selected
+                if ~haskey(tag_tf_b[j+1],(2*k,l))
+                    tag_tf_b_new[j+1][(2*k+1,l)] =  tag_tf_b[j+1][(2*k+1,l)]
+                elseif  ~haskey(tag_tf_b[j+1],(2*k+1,l))
+                    tag_tf_b_new[j+1][(2*k,l)] =  tag_tf_b[j+1][(2*k,l)]
+                else
+                    tag_tf_b_new[j+1][(2*k+1,l)] =  tag_tf_b[j+1][(2*k+1,l)]
+                    tag_tf_b_new[j+1][(2*k,l)] =  tag_tf_b[j+1][(2*k,l)]
+                end
+            end
+        end
+    end
+    return tag_tf_b_new
 end
 
+
+"""
+bestbasis_tag_matrix, bestbasis = ghwt_tf_bestbasis_new(dmatrix::Matrix{Float64},GP::GraphPart)
+
+Implementation of time-frequency adapted GHWT method.
+Modified from the algorithm in paper 'A Fast Algorithm for Adapted Time Frequency Tilings' by Christoph M Thiele and Lars F Villemoes.
+
+### Input Arguments
+### Input Arguments
+* `dmatrix`: The expanding GHWT coefficients of all levels corresponding to input GP.
+* `GP::GraphPart`: an input GraphPart object.
+
+### Output Arguments
+* `bestbasis_tag_matrix`: binary 0-1 matrix indicating the location of best-basis in dmatrix
+* `bestbasis`: same size as dmatrix, but only coefficients of best-basis vectors are nonzero
+
+Copyright 2018 The Regents of the University of California
+
+Implemented by Yiqun Shao (Adviser: Dr. Naoki Saito)
+"""
+
+function ghwt_tf_bestbasis(dmatrix::Matrix{Float64},GP::GraphPart)
+    (m,n) = size(dmatrix)
+
+    # Initialization. Store the expanding coeffcients from matrix into a list of dictionary (inbuilt hashmap in Julia)
+    # The entry `coeffdict[j][(k,l)]` corresponds to the coefficient of basis-vector on level j with region k and tag l.
+    tag = convert(Array{Int64,2},GP.tag)
+    tag_r = convert(Array{Int64,2},rs_to_region(GP.rs, GP.tag))
+    (m,n) = size(dmatrix)
+    coeffdict = Array{Dict{Tuple{Int64,Int64},Float64}}(n)
+    for i = 1:n
+        coeffdict[i]= Dict{Tuple{Int64,Int64},Float64}((tag_r[j,i],tag[j,i]) => dmatrix[j,i] for j=1:m)
+    end
+
+    # TAG_tf stores the time-or-frequency information on every iteration
+    # COEFFDICT stores the corresponding cost-functional values.
+    COEFFDICT = Vector(n)
+    TAG_tf = Vector(n)
+
+    # Initialization of the first iteration
+    COEFFDICT[1] = coeffdict
+    TAG_tf_init = Array{Dict{Tuple{Int64,Int64},Bool}}(n)
+    for j = 1:n
+        TAG_tf_init[j] = Dict(key => true for key in keys(coeffdict[j]))
+    end
+    TAG_tf[1] = TAG_tf_init
+
+    # Iterate forward. For each entry in `COEFFDICT[i+1]`, we compare two (or one) entries in 'COEFFDICT[i]' on time-direction and two (or one) on frequency-direction.
+    # Those two groups reprensent the same subspace. We compare the cost-functional value of them and choose the smaller one as a new entry in 'COEFFDICT[i+1]'
+    # 'TAG_tf[i+1]' records if frequency-direction (1) or time-direction (0) was chosen.
+    for i = 1:(n-1)
+        COEFFDICT[i+1], TAG_tf[i+1] = tf_core_new(COEFFDICT[i])
+    end
+
+    # Iterate backward with the existing tag_tf information to recover the best-basis.
+    bestbasis_tag = TAG_tf[n]
+    for i = (n-1):-1:1
+        bestbasis_tag = tf_basisrecover_new(TAG_tf[i],bestbasis_tag)
+    end
+
+    # Change the data structure from dictionary to matrix
+    bestbasis = zeros(m,n)
+    bestbasis_tag_matrix = zeros(m,n)
+    for j = 1:n
+        for i = 1:m
+            k = tag_r[i,j]
+            l = tag[i,j]
+            if haskey(bestbasis_tag[j],(k,l))
+                bestbasis_tag_matrix[i,j] = 1
+                bestbasis[i,j] = dmatrix[i,j]
+            end
+        end
+    end
+    return bestbasis, bestbasis_tag_matrix
+end
 
 
 """
@@ -239,7 +318,6 @@ function tf_threshold(bestbasis::Matrix{Float64}, GP::GraphPart, keep::Float64, 
 
   bestbasis_new = reshape(bestbasis_new,size(bestbasis))
 end
-
 
 
 
@@ -365,6 +443,5 @@ function tf_synthesis(bestbasis::Matrix{Float64},bestbasis_tag::Matrix{<:Any},GP
   replace_data!(GS, f) # create the new graph signal
   return f, GS
 end
-
 
 end

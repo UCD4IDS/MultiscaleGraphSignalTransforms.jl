@@ -244,8 +244,8 @@ function partition_fiedler_troubleshooting(pm::Vector{Int},v::Vector{Float64},
         end
         # if one region has no points after all the above processing
         if sum(pm .< 0) == 0 || sum(pm .> 0) == 0
-            pm[1:ceil(N / 2)] = 1
-            pm[(ceil(N / 2) + 1):N] = -1
+            pm[1:Int(ceil(N / 2))] = 1
+            pm[Int(ceil(N / 2) + 1):N] = -1
         end
     end
 
@@ -255,3 +255,32 @@ function partition_fiedler_troubleshooting(pm::Vector{Int},v::Vector{Float64},
     end
     return pm
 end # of partition_fiedler_troubleshooting
+
+"""
+    pm = partition_fiedler_troubleshooting(pm)
+
+Troubleshoot potential issues with the partitioning
+
+### Input Arguments
+* `pm::Vector{Int}`: an input partition info (+1 or -1) of each node
+
+### Ouput Arguments
+* `pm::Vector{Int}`: a final partition info vector
+
+Copyright 2015 The Regents of the University of California
+
+Implemented by Jeff Irion (Adviser: Dr. Naoki Saito)
+Translated and revised by Naoki Saito, Feb. 10, 2017
+"""
+function partition_fiedler_troubleshooting(pm::Vector{Int})
+    N = length(pm)
+    if sum(pm .< 0) == 0 || sum(pm .> 0) == 0
+        pm[1:Int(ceil(N / 2))] = 1
+        pm[Int(ceil(N / 2) + 1):N] = -1
+    end
+    # make sure that the first point is assigned as a 1
+    if pm[1] < 0
+        pm = -pm
+    end
+    return pm
+end

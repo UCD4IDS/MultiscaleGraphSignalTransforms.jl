@@ -633,7 +633,7 @@ function BSfull(GP::GraphPart, BS::BasisSpec, trans::Array{Bool,2})
 
     ## 1. Fill out the redundant descriptions
     ind = 0
-    for row  = 1:length(BS_temp.levlist)
+    for row  = 1:length(levlist)
         levlistfull[ind+1:ind+levlengths[row]] = levlist[row]
 
         levlengthsfull[ind+1:ind+levlengths[row]] = levlengths[row]
@@ -668,7 +668,7 @@ end
     * `f`:    the reconstructed signal
     * `GS`:   the reconstructed GraphSig object
 """
-function HGLET_GHWT_Synthesis(dvec::Array{Float64,2},GP::GraphPart,BS::BasisSpec,trans::Array{Bool,2},G::GraphSig)
+function HGLET_GHWT_Synthesis(dvec::Matrix{Float64},GP::GraphPart,BS::BasisSpec,trans::Array{Bool,2},G::GraphSig)
 # fill out trans
 _,_,transfull = BSfull(GP,BS,trans)
 
