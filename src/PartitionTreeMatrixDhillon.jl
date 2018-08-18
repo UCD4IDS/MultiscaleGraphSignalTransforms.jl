@@ -15,7 +15,6 @@ include("utils.jl")
 * `GProws::GraphPart`: partitioning using rows as samples
 * `GPcols::GraphPart`: partitioning using cols as samples
 """
-
 function PartitionTreeMatrixDhillon(matrix::Matrix{Float64})
   ## 0. Preliminary stuff
 

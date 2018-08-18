@@ -30,7 +30,6 @@ is a data structure for a GraphSig object containing the following fields:
                    - red/black/blue: make the nodes red, black, or blue
                    - verbatim{{...}}: execute the command in the brackets
 """
-
 type GraphSig
     W::SparseMatrixCSC{Float64,Int} # edge weight matrix
     xy::Matrix{Float64}               # spatial coordinates (could be >= 3D)
@@ -267,8 +266,6 @@ Add noise to the data of a GraphSig object
 * `G::GraphSig`: the GraphSig object with added noise
 * `sigma`: the standard deviation of the noise
 """
-
-
 function AddNoise(G::GraphSig; SNR::Float64=Float64(1.24), noisetype::String = "gaussian")
   f = deepcopy(G.f)
 

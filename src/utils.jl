@@ -202,8 +202,6 @@ coefficient in the expansion tree.
 ### Output Arguments
 * `tag_r::Matrix{UInt32}`: showing information of the partition tree, same size as dmatrix
 """
-
-
 function rs_to_region(rs::Matrix{<:Any}, tag::Matrix{<:Any})
   (m,n) = size(tag)
   tag_r = zeros(m,n)
@@ -288,7 +286,6 @@ largest coefficients in magnitude.
 * `relerror`:   a vector of relative approximation errors
 
 """
-
 function orth2relerror(orth::Array{Float64,1})
     # sort the coefficients
     orth = sort(orth.^2, rev = true)

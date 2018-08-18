@@ -369,13 +369,12 @@ function dvec_Threshold(dvec::Vector{Float64}, SORH::String, keep::Float64,
 ### Output Argument
 *   `dvec_new::Vector{Float64}`        the thresholded expansion coefficients
 *   `kept::Float64`        the number of coefficients kept
-
-
 """
-#Apply to 1-D only for now. Need to modify in the future
 function dvec_Threshold(dvec::Vector{Float64}, SORH::String, keep::Float64,
                 GP::GraphPart, BS::BasisSpec)
-
+#
+# Apply to 1-D only for now. Need to modify in the future
+#
     dvec_new = deepcopy(dvec)
     # Obtain the number of coefficients kept
     if keep > 1 || keep < 0

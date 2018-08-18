@@ -17,7 +17,6 @@ Copyright 2015 The Regents of the University of California
 Implemented by Jeff Irion (Adviser: Dr. Naoki Saito)
 Translated and revised by Naoki Saito, Feb. 9, 2017
 """
-
 function partition_fiedler(W::SparseMatrixCSC{Float64,Int};
                            method::Symbol = :Lrw,
                            v::Vector{Float64} =Vector{Float64}(0))
@@ -199,7 +198,7 @@ Troubleshoot potential issues with the partitioning
 * `pm::Vector{Int}`: an input partition info (+1 or -1) of each node
 * `v::Vector{Float64}`: the Fiedler vector of the graph
 * `W::SparseMatrixCSC{Float64,Int}`: an input edge weight matrix
-* `val::Float64`: the algebraic connectivity (i.e., `\lambda_2`)
+* `val::Float64`: the algebraic connectivity (i.e., ``\\lambda_2``)
 
 ### Ouput Arguments
 * `pm::Vector{Int}`: a final partition info vector
