@@ -20,18 +20,15 @@ using MTSG
 
 ## REFERENCES
 
-1. J. Irion and N. Saito, *Hierarchical Graph Laplacian Eigen Transforms*, 
-Japan SIAM Letters, vol. 6, pp. 21-24, 2014.
+1. J. Irion and N. Saito, [Hierarchical graph Laplacian eigen transforms](http://doi.org/10.14495/jsiaml.6.21), *Japan SIAM Letters*, vol. 6, pp. 21-24, 2014.
 
-2. J. Irion and N. Saito, *The Generalized Haar-Walsh Transform*, Proc. 2014
-IEEE Statistical Signal Processing Workshop, pp. 488-491, 2014.
+2. J. Irion and N. Saito, [The generalized Haar-Walsh transform](http://dx.doi.org/10.1109/SSP.2014.6884678), *Proc. 2014 IEEE Statistical Signal Processing Workshop*, pp. 488-491, 2014.
 
-3. J. Irion and N. Saito, *Applied and Computational Harmonic Analysis on 
-Graphs and Networks*, Wavelets and Sparsity XVI, (M. Papadakis, V. K. Goyal, D.
-Van De Ville, eds.), Proc. SPIE 9597, Paper #95971F, Invited paper, 2015.
+3. J. Irion and N. Saito, [Applied and computational harmonic analysis on 
+graphs and networks](http://dx.doi.org/10.1117/12.2186921), *Wavelets and Sparsity XVI*, (M. Papadakis, V. K. Goyal, D. Van De Ville, eds.), *Proc. SPIE 9597*, Paper #95971F, Invited paper, 2015.
 
-4. J. Irion, *Multiscale Transforms for Signals on Graphs: Methods and Applications*, Ph.D. dissertation, University of California, Davis, Dec. 2015.
+4. J. Irion, [Multiscale Transforms for Signals on Graphs: Methods and Applications](https://jefflirion.github.io/publications_and_presentations/irion_dissertation.pdf), Ph.D. dissertation, University of California, Davis, Dec. 2015.
 
-5. J. Irion and N. Saito, *Learning sparsity and structure of matrices with multiscale graph basis dictionarie*, Proc. 2016 IEEE 26th International Workshop on Machine Learning for Signal Processing (MLSP), (A. Uncini, K. Diamantaras, F. A. N. Palmieri, and J. Larsen, eds.), 2016.
+5. J. Irion and N. Saito, [Learning sparsity and structure of matrices with multiscale graph basis dictionaries](http://dx.doi.org/10.1109/MLSP.2016.7738892), *Proc. 2016 IEEE 26th International Workshop on Machine Learning for Signal Processing (MLSP)*, (A. Uncini, K. Diamantaras, F. A. N. Palmieri, and J. Larsen, eds.), 2016.
 
-6. J. Irion and N. Saito, *Efficient Approximation and Denoising of Graph Signals Using the Multiscale Basis Dictionaries*, IEEE Transactions on Signal and Information Processing over Networks, Vol. 3, no. 3, pp. 607-616, 2017.
+6. J. Irion and N. Saito, [Efficient approximation and denoising of graph signals using the multiscale basis dictionaries](http://dx.doi.org/10.1109/TSIPN.2016.2632039), *IEEE Transactions on Signal and Information Processing over Networks*, Vol. 3, no. 3, pp. 607-616, 2017.
