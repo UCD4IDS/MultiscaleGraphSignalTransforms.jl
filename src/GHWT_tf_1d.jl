@@ -2,7 +2,7 @@ module GHWT_tf_1d
 
 include("utils.jl")
 
-using ..GraphSignal, ..GraphPartition, ..BasisSpecification
+using ..GraphSignal, ..GraphPartition, ..BasisSpecification, LinearAlgebra
 
 include("common.jl")
 
@@ -26,7 +26,6 @@ Copyright 2018 The Regents of the University of California
 
 Implemented by Yiqun Shao (Adviser: Dr. Naoki Saito)
 """
-
 function tf_init(dmatrix::Matrix{Float64},GP::GraphPart)
     # Obtain the tag information
     tag = convert(Array{Int64,2},GP.tag)
@@ -73,15 +72,14 @@ Copyright 2018 The Regents of the University of California
 
 Implemented by Yiqun Shao (Adviser: Dr. Naoki Saito)
 """
-
 function tf_core_new(coeffdict::Array{Dict{Tuple{Int64,Int64},Float64},1})
     # We choose '1-norm' as the optional cost functional
     costfun = cost_functional(1)
     jmax = length(coeffdict)
 
     # Initialization
-    coeffdict_new = Array{Dict{Tuple{Int64,Int64},Float64}}(jmax-1)
-    tag_tf = Array{Dict{Tuple{Int64,Int64},Bool}}(jmax-1)
+    coeffdict_new = Array{Dict{Tuple{Int64,Int64},Float64}}(undef, jmax-1)
+    tag_tf = Array{Dict{Tuple{Int64,Int64},Bool}}(undef, jmax-1)
 
     # Iterate through levels
     for j = 1:(jmax-1)
@@ -159,11 +157,11 @@ Copyright 2018 The Regents of the University of California
 
 Implemented by Yiqun Shao (Adviser: Dr. Naoki Saito)
 """
-
 function tf_basisrecover_new(tag_tf_b::Array{Dict{Tuple{Int64,Int64},Bool}},tag_tf_f::Array{Dict{Tuple{Int64,Int64},Bool}})
     # Initialization
     jmax = length(tag_tf_b)
-    tag_tf_b_new = Array{Dict{Tuple{Int64,Int64},Bool}}(jmax)
+    #tag_tf_b_new = Array{Dict{Tuple{Int64,Int64},Bool}}(jmax)
+    tag_tf_b_new = Array{Dict{Tuple{Int64,Int64},Bool}}(undef, jmax)
     for j = 1:jmax
         tag_tf_b_new[j] = Dict{Tuple{Int64,Int64},Bool}()
     end
@@ -220,7 +218,6 @@ Copyright 2018 The Regents of the University of California
 
 Implemented by Yiqun Shao (Adviser: Dr. Naoki Saito)
 """
-
 function ghwt_tf_bestbasis(dmatrix::Matrix{Float64},GP::GraphPart)
     (m,n) = size(dmatrix)
 
@@ -229,19 +226,19 @@ function ghwt_tf_bestbasis(dmatrix::Matrix{Float64},GP::GraphPart)
     tag = convert(Array{Int64,2},GP.tag)
     tag_r = convert(Array{Int64,2},rs_to_region(GP.rs, GP.tag))
     (m,n) = size(dmatrix)
-    coeffdict = Array{Dict{Tuple{Int64,Int64},Float64}}(n)
+    coeffdict = Array{Dict{Tuple{Int64,Int64},Float64}}(undef, n)
     for i = 1:n
         coeffdict[i]= Dict{Tuple{Int64,Int64},Float64}((tag_r[j,i],tag[j,i]) => dmatrix[j,i] for j=1:m)
     end
 
     # TAG_tf stores the time-or-frequency information on every iteration
     # COEFFDICT stores the corresponding cost-functional values.
-    COEFFDICT = Vector(n)
-    TAG_tf = Vector(n)
+    COEFFDICT = Vector(undef, n)
+    TAG_tf = Vector(undef, n)
 
     # Initialization of the first iteration
     COEFFDICT[1] = coeffdict
-    TAG_tf_init = Array{Dict{Tuple{Int64,Int64},Bool}}(n)
+    TAG_tf_init = Array{Dict{Tuple{Int64,Int64},Bool}}(undef, n)
     for j = 1:n
         TAG_tf_init[j] = Dict(key => true for key in keys(coeffdict[j]))
     end
@@ -291,7 +288,6 @@ end
 ### Output Argument
  *   `bestbasis_new::Matrix{Float64}`       the thresholded expansion coefficients
 """
-
 function tf_threshold(bestbasis::Matrix{Float64}, GP::GraphPart, keep::Float64, SORH::String)
 
   tag = GP.tag
@@ -343,7 +339,7 @@ function tf_synthesis(bestbasis::Matrix{Float64},bestbasis_tag::Matrix{<:Any},GP
   bestbasis_new = deepcopy(bestbasis)
   jmax = size(rs,2)
   for j = 1:(jmax-1)
-    regioncount = countnz(rs[:,j]) - 1
+    regioncount = count(!iszero, rs[:,j]) - 1
     for r = 1:regioncount
       # the index that marks the start of the first subregion
       rs1 = rs[r,j]
@@ -355,7 +351,7 @@ function tf_synthesis(bestbasis::Matrix{Float64},bestbasis_tag::Matrix{<:Any},GP
       n = rs3 - rs1
 
       # only proceed forward if the coefficients do not exist
-      if countnz(bestbasis_tag[rs1:(rs3-1),j]) !=0
+      if count(!iszero, bestbasis_tag[rs1:(rs3-1),j]) !=0
         if n == 1
           # scaling coefficient
           if bestbasis_tag[rs1,j] == 1 # check ind

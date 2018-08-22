@@ -2,7 +2,7 @@ module GHWT
 
 include("utils.jl")
 
-using ..GraphSignal, ..GraphPartition, ..BasisSpecification
+using ..GraphSignal, ..GraphPartition, ..BasisSpecification, LinearAlgebra
 
 include("common.jl")
 
@@ -50,7 +50,7 @@ function ghwt_core!(GP::GraphPart)
     # 1. Perform the transform
     #
     for j = (jmax - 1):-1:1 # # Bottom-1 (jmax-1) to up to the coarsest (j=1)
-        regioncount = countnz(rs[:, j]) - 1
+        regioncount = count(!iszero,rs[:, j]) - 1
         for r = 1:regioncount
             rs1 = rs[r, j]      # the start of the 1st subregion
             rs3 = rs[r + 1, j]  # 1 + the end of the 2nd subregion
@@ -144,7 +144,7 @@ function ghwt_core!(GP::GraphPart, dmatrix::Array{Float64,3})
     # 1. Perform the transform
     #
     for j = (jmax - 1):-1:1 # Bottom-1 (jmax-1) to up to the coarsest (j=1)
-        regioncount = countnz(rs[:, j]) - 1
+        regioncount = count(!iszero,rs[:, j]) - 1
         for r = 1:regioncount
             rs1 = rs[r, j]      # the start of the 1st subregion
             rs3 = rs[r + 1, j]  # 1 + the end of the 2nd subregion
@@ -303,7 +303,7 @@ function fine2coarse!(GP::GraphPart;
     if isempty(GP.rsf2c)
         GP.rsf2c = zeros(Tl, N + 1, jmax)
     end
-    GP.rsf2c[1, :] = 1
+    GP.rsf2c[1, :] .= 1
     GP.rsf2c[2, 1] = N + 1
     if isempty(GP.tagf2c)
         GP.tagf2c = zeros(Ts, N, jmax)
@@ -413,14 +413,14 @@ function ghwt_synthesis(dvec::Matrix{Float64}, GP::GraphPart, BS::BasisSpec)
         rs = GP.rs
         tag = GP.tag
         for j = 1:(jmax - 1)    # from top to bottom-1
-            regioncount = countnz(rs[:, j]) - 1
+            regioncount = count(!iszero, rs[:, j]) - 1
             for r = 1:regioncount
                 rs1 = rs[r, j]      # the start of the 1st subregion
                 rs3 = rs[r + 1, j]  # 1 + the end of the 2nd subregion
                 n = rs3 - rs1       # # of points in the current region
                 # only proceed forward if coefficients do not exist
-                if countnz(dmatrix[rs1:(rs3 - 1), j + 1, :]) == 0 &&
-                    countnz(dmatrix[rs1:(rs3 - 1), j, :]) > 0
+                if count(!iszero, dmatrix[rs1:(rs3 - 1), j + 1, :]) == 0 &&
+                    count(!iszero, dmatrix[rs1:(rs3 - 1), j, :]) > 0
                     if n == 1   # single node region
                         # SCALING COEFFICIENT (n == 1)
                         dmatrix[rs1, j + 1, :] = dmatrix[rs1, j, :]
@@ -496,13 +496,13 @@ function ghwt_synthesis(dvec::Matrix{Float64}, GP::GraphPart, BS::BasisSpec)
         tagf2c = GP.tagf2c
         compinfof2c = GP.compinfof2c
         for j = (jmax - 1):-1:1 # from bottom-1 to top
-            regioncount = countnz(rsf2c[:, j]) - 1
+            regioncount = count(!iszero, rsf2c[:, j]) - 1
             for r = 1:regioncount
                 rs1 = rsf2c[r, j] # the start of the 1st subregin
                 rs3 = rsf2c[r + 1, j] # 1 + the end of the 2nd subregion
                 # only proceed forward if coefficients do not exist
-                if countnz(dmatrix[rs1:(rs3 - 1), j, :]) == 0 &&
-                    countnz(dmatrix[rs1:(rs3 - 1), j + 1, :]) > 0
+                if count(!iszero, dmatrix[rs1:(rs3 - 1), j, :]) == 0 &&
+                    count(!iszero, dmatrix[rs1:(rs3 - 1), j + 1, :]) > 0
                     # one subregion ==> copy the coefficients
                     if tagf2c[rs1, j + 1] == tagf2c[rs3 - 1, j + 1]
                         dmatrix[rs1:(rs3 - 1), j, :] =
@@ -643,7 +643,7 @@ function ghwt_c2f_bestbasis(dmatrix::Array{Float64,3}, GP::GraphPart;
 
     # constants and dmatrix cleanup
     (N, jmax, fcols) = Base.size(dmatrix)
-    dmatrix[ abs.(dmatrix) .< 10^2 * eps() ] = 0
+    dmatrix[ abs.(dmatrix) .< 10^2 * eps() ] .= 0
 
     # "flatten" dmatrix
     if fcols > 1
@@ -663,7 +663,7 @@ function ghwt_c2f_bestbasis(dmatrix::Array{Float64,3}, GP::GraphPart;
 
     # perform the basis search
     for j = (jmax - 1):-1:1
-        regioncount = countnz(GP.rs[:, j]) - 1
+        regioncount = count(!iszero, GP.rs[:, j]) - 1
         for r = 1:regioncount
             indr = GP.rs[r, j]:(GP.rs[r + 1, j]-1)
             ##### compute the cost of the current best basis
@@ -711,7 +711,7 @@ function ghwt_f2c_bestbasis(dmatrix::Array{Float64,3}, GP::GraphPart;
 
     # constants and dmatrix cleanup
     (N, jmax, fcols) = Base.size(dmatrix)
-    dmatrix[ abs.(dmatrix) .< 10^2 * eps() ] = 0
+    dmatrix[ abs.(dmatrix) .< 10^2 * eps() ] .= 0
 
     # "flatten" dmatrix
     if fcols > 1
@@ -735,7 +735,7 @@ function ghwt_f2c_bestbasis(dmatrix::Array{Float64,3}, GP::GraphPart;
 
     # perform the basis search
     for j = (jmax - 1):-1:1
-        regioncount = countnz(GP.rsf2c[:, j]) - 1
+        regioncount = count(!iszero, GP.rsf2c[:, j]) - 1
         for r = 1:regioncount
             indr = GP.rsf2c[r, j]:(GP.rsf2c[r + 1, j] - 1)
             ##### compute the cost of the current best basis

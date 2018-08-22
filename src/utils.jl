@@ -1,3 +1,4 @@
+using LinearAlgebra
 """
     T = ind_class(N::Int)
 
@@ -76,11 +77,11 @@ function dmatrix_flatten(dmatrix::Array{Float64,3}, flatten::Any)
     # p-norms or p-quasinorms
     if isa(flatten, Number)
         if flatten == 1
-            dmatrix = sum(abs.(dmatrix), 3)
+            dmatrix = sum(abs.(dmatrix), dims = 3)
         elseif flatten == 0
-            dmatrix = sum(dmatrix != 0, 3)
+            dmatrix = sum(dmatrix != 0, dims = 3)
         else
-            dmatrix = (sum(abs.(dmatrix).^flatten, 3)).^(1 / flatten)
+            dmatrix = (sum(abs.(dmatrix).^flatten, dims = 3)).^(1 / flatten)
         end
 
         # histogram
@@ -136,11 +137,11 @@ function dmatrix_flatten(dmatrix::Array{Float64,3}, flatten::Any)
             dmatrix = sum(dmatrix, 3)
             # default (1-norm)
         else
-            warn("the specified flatten symbol $(flatten) is not recognized; hence we assume it as 1-norm.")
+            @warn("the specified flatten symbol $(flatten) is not recognized; hence we assume it as 1-norm.")
             dmatrix = sum(abs.(dmatrix), 3)
         end
     else
-        warn("the specified flatten argument $(flatten) is neither of number nor of symbol type; hence we assume it as 1-norm.")
+        @warn("the specified flatten argument $(flatten) is neither of number nor of symbol type; hence we assume it as 1-norm.")
         dmatrix = sum(abs.(dmatrix), 3)
     end
     return dmatrix
@@ -159,10 +160,10 @@ Determine the cost functional to be used by the best-basis algorithm.
 """
 function cost_functional(cfspec::Any)
     if isa(cfspec, Number)
-        return function (x) return vecnorm(x, cfspec) end
+        return function (x) return norm(x, cfspec) end
     elseif isa(cfspec, Function)
         return function (x) return cfspec(x) end
-    else return function (x) return vecnorm(x, 1) end # by default 1-norm
+    else return function (x) return norm(x, 1) end # by default 1-norm
         # else return function (x) return norm(x, 0.1) end # by default 0.1-quasinorm
     end
 end # of function cost_functional
@@ -206,7 +207,7 @@ function rs_to_region(rs::Matrix{<:Any}, tag::Matrix{<:Any})
   (m,n) = size(tag)
   tag_r = zeros(m,n)
   for j = 1:(n-1)
-    regioncount = countnz(rs[:,j]) - 1
+    regioncount = count(!iszero, rs[:,j]) - 1
     for r = 1:regioncount
       rs1 = rs[r,j]
       rs3 = rs[r+1,j]
@@ -227,7 +228,7 @@ function rs_to_region(rs::Matrix{<:Any}, tag::Matrix{<:Any})
         # the parent region has 2 child regions
         else
         tag_r[rs1:rs2-1,j+1] = 2*tag_r[rs1:rs2-1,j]
-        tag_r[rs2:rs3-1,j+1] = 2*tag_r[rs2:rs3-1,j]+1
+        tag_r[rs2:rs3-1,j+1] = 2*tag_r[rs2:rs3-1,j] .+ 1
         end
       end
     end
@@ -291,7 +292,7 @@ function orth2relerror(orth::Array{Float64,1})
     orth = sort(orth.^2, rev = true)
 
     #compute the relative errors
-    relerror = ((abs.(sum(orth) - cumsum(orth))).^(1/2))/sum(orth).^(1/2)
+    relerror = ((abs.(sum(orth) .- cumsum(orth))).^(1/2))/sum(orth).^(1/2)
 
     return relerror
 end

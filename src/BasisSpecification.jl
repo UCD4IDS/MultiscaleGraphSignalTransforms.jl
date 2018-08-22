@@ -1,6 +1,6 @@
 module BasisSpecification
 
-using ..GraphSignal, ..GraphPartition
+using ..GraphSignal, ..GraphPartition, LinearAlgebra
 
 export BasisSpec #, bsfull, bs_haar, bs_level
 
@@ -21,7 +21,7 @@ Implemented by Jeff Irion (Adviser: Dr. Naoki Saito) |
 Translated to julia and revised by Naoki Saito, Feb. 22, 2017
 Modified by Yiqun Shao, May. 20, 2018
 """
-type BasisSpec
+mutable struct BasisSpec
     levlist :: Vector{Int}
     levlengths :: Vector{Int}
     c2f::Bool
@@ -29,14 +29,14 @@ type BasisSpec
 
     # An inner constructor here.
     function BasisSpec(levlist :: Vector{Int};
-                       levlengths :: Vector{Int} = Vector{Int}(0),
+                       levlengths :: Vector{Int} = Vector{Int}(undef, 0),
                        c2f::Bool = true,
                        description::String = "")
 
         # Sanity check here.
         if Base.length(levlengths) != Base.length(levlist) && Base.length(levlengths) != 0
-            warn("length(levlengths) != length(levlist). Hence, use null levlengths")
-            new( levlist, Vector{Int}(0), c2f, description )
+            @warn("length(levlengths) != length(levlist). Hence, use null levlengths")
+            new( levlist, Vector{Int}(undef, 0), c2f, description )
         else
             new( levlist, levlengths, c2f, description )
         end

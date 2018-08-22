@@ -2,6 +2,9 @@ module GraphSignal
 
 using Distances                 # This is necessary in Ggrid
 using Distributions             # This is necessary in AddNoise
+using SparseArrays
+using Statistics
+using LinearAlgebra
 
 export GraphSig, replace_data!, snr, gpath, ggrid, Adj2InvEuc, AddNoise
 
@@ -30,7 +33,7 @@ is a data structure for a GraphSig object containing the following fields:
                    - red/black/blue: make the nodes red, black, or blue
                    - verbatim{{...}}: execute the command in the brackets
 """
-type GraphSig
+mutable struct GraphSig
     W::SparseMatrixCSC{Float64,Int} # edge weight matrix
     xy::Matrix{Float64}               # spatial coordinates (could be >= 3D)
     f::Matrix{Float64}                # the data sequences (signals) on the nodes
@@ -43,7 +46,7 @@ type GraphSig
 
     # An inner constructor here.
     function GraphSig(W::SparseMatrixCSC{Float64,Int};
-                      xy::Matrix{Float64} = Matrix{Float64}(0, 0),
+                      xy::Matrix{Float64} = Matrix{Float64}(undef, 0, 0),
                       f::Matrix{Float64} = zeros(Base.size(W, 1), 1),
                       name::String = "",
                       plotspecs :: String = "",
@@ -57,7 +60,7 @@ type GraphSig
         elseif Base.size(W, 1) != Base.size(f, 1)
             error("Signal length != # Nodes!!")
         elseif Base.size(W, 1) != Base.size(xy, 1) && Base.size(xy, 1) != 0
-            warn("# Node coordinates != # Nodes. Hence, use null coordinates.")
+            @warn("# Node coordinates != # Nodes. Hence, use null coordinates.")
             new( W, Matrix{Float64}(0, 0), f, name, plotspecs, Base.size(W, 1),
                  0, (Base.size(W, 1), Base.size(W, 2) + Base.size(f, 2)) )
         else # Finally, the full constructor!
@@ -111,12 +114,12 @@ end # of function replace_data!
 """
 function snr(G1::GraphSig, G2::GraphSig, stdp=false)
 # In julia, the Frobenius norm of a matrix can be computed via `vecnorm`.
-  tmp = vecnorm(G2.f - G1.f)
+  tmp = norm(G2.f - G1.f)
   if tmp < 10 * eps()
-    warn("Two signals are the same, hence SNR = Inf")
+    @warn("Two signals are the same, hence SNR = Inf")
     value = Inf
   else
-    value = 20 * log10(vecnorm(G1.f) / tmp)
+    value = 20 * log10(norm(G1.f) / tmp)
   end
 
   if stdp
@@ -151,7 +154,8 @@ function gpath(N::Int,
 
     # the weight matrix
     ev = ones(N - 1)               # subdiagonal entries
-    W = spdiagm((ev, ev), (-1, 1)) # size(W) is (N, N)
+    W  = spdiagm(-1 => ev, 1 => ev)
+    #W = spdiagm((ev, ev), (-1, 1)) # size(W) is (N, N)
     # MATLAB:
     # ev = ones(N,1);
     # W = spdiags([ev 0*ev ev], [-1 0 1], N, N);
@@ -274,7 +278,7 @@ function AddNoise(G::GraphSig; SNR::Float64=Float64(1.24), noisetype::String = "
     noise = randn(size(f))
 
     # scale the noise to the desired SNR level
-    sigma = vecnorm(f,2)/10.0^(0.05*SNR)/vecnorm(noise,2)
+    sigma = norm(f,2)/10.0^(0.05*SNR)/norm(noise,2)
     noise = sigma*noise
 
     # generate the noisy signal
@@ -291,7 +295,7 @@ function AddNoise(G::GraphSig; SNR::Float64=Float64(1.24), noisetype::String = "
     end
 
     # scale the noise to the desired SNR level
-    sigma = vecnorm(f,2)/10.0^(0.05*SNR)/vecnorm(noise,2)
+    sigma = norm(f,2)/10.0^(0.05*SNR)/norm(noise,2)
     noise = sigma*noise
 
     # generate the noisy signal
