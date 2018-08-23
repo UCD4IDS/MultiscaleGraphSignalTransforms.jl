@@ -1,6 +1,6 @@
 include("PartitionTreeMatrixDhillon.jl")
 include("partition_fiedler.jl")
-
+using LinearAlgebra
 """
     tf2d_init(tag::Matrix{Int64},tag_r::Matrix{Int64})
 
@@ -57,7 +57,6 @@ Copyright 2018 The Regents of the University of California
 
 Implemented by Yiqun Shao (Adviser: Dr. Naoki Saito)
 """
-
 function tf_core_2d_col(dmatrix::Matrix{Float64},tag2ind::Dict{Tuple{Int64,Int64,Int64},Int64},ind2tag::Dict{Int64,Tuple{Int64,Int64,Int64}},jmax::Int64)
     # power of the cost-functional
     costp = 1
@@ -188,7 +187,6 @@ Copyright 2018 The Regents of the University of California
 
 Implemented by Yiqun Shao (Adviser: Dr. Naoki Saito)
 """
-
 function ghwt_tf_bestbasis_2d(dmatrix::Matrix{Float64},GProws::GraphPart,GPcols::GraphPart)
     # Initialization
     tag_r_row = rs_to_region(GProws.rs, GProws.tag)
@@ -200,30 +198,30 @@ function ghwt_tf_bestbasis_2d(dmatrix::Matrix{Float64},GProws::GraphPart,GPcols:
     jmax_row = size(GProws.tag,2)
 
     # (level,region,tag) information on the columns
-    TAG2IND_col = Vector(jmax_col)
+    TAG2IND_col = Vector(undef, jmax_col)
     TAG2IND_col[1] = tag2ind_col
-    IND2TAG_col = Vector(jmax_col)
+    IND2TAG_col = Vector(undef, jmax_col)
     IND2TAG_col[1] = ind2tag_col
 
     # (level,region,tag) information on the rows
-    TAG2IND_row = Vector(jmax_row)
+    TAG2IND_row = Vector(undef, jmax_row)
     TAG2IND_row[1] = tag2ind_row
-    IND2TAG_row = Vector(jmax_row)
+    IND2TAG_row = Vector(undef, jmax_row)
     IND2TAG_row[1] = ind2tag_row
 
     # recording if time or frequency direction is chosen
-    TAG_tf = Matrix(jmax_row,jmax_col)
+    TAG_tf = Matrix(undef, jmax_row,jmax_col)
 
     # storing the cost functional values
-    DMATRIX = Matrix(jmax_row, jmax_col)
+    DMATRIX = Matrix(undef, jmax_row, jmax_col)
 
     DMATRIX[1,1] = dmatrix
 
     # comparison in the row direction
     for i=1:(jmax_row - 1)
-        DMATRIX[i+1,1], TAG2IND_row[i+1], IND2TAG_row[i+1], TAG_tf[i+1,1] = tf_core_2d_col(DMATRIX[i,1]', TAG2IND_row[i], IND2TAG_row[i],jmax_row+1-i)
-        TAG_tf[i+1,1] = (TAG_tf[i+1,1] + UInt8(2))'
-        DMATRIX[i+1,1] = DMATRIX[i+1,1]'
+        DMATRIX[i+1,1], TAG2IND_row[i+1], IND2TAG_row[i+1], TAG_tf[i+1,1] = tf_core_2d_col(Array{Float64,2}(DMATRIX[i,1]'), TAG2IND_row[i], IND2TAG_row[i],jmax_row+1-i)
+        TAG_tf[i+1,1] = Array{UInt8,2}((TAG_tf[i+1,1] .+ UInt8(2))')
+        DMATRIX[i+1,1] = Array{Float64,2}(DMATRIX[i+1,1]')
     end
 
     # comparison in the column direction
@@ -236,9 +234,9 @@ function ghwt_tf_bestbasis_2d(dmatrix::Matrix{Float64},GProws::GraphPart,GPcols:
     for i = 2:jmax_row
         for j = 2:jmax_col
             (temp_col,_,_,temp_tf_col) = tf_core_2d_col(DMATRIX[i,j-1], TAG2IND_col[j-1], IND2TAG_col[j-1],jmax_col + 2 - j)
-            (temp_row,_,_,temp_tf_row) = tf_core_2d_col(DMATRIX[i-1,j]', TAG2IND_row[i-1], IND2TAG_row[i-1],jmax_row + 2 - i)
-            temp_row = temp_row'
-            temp_tf_row = (temp_tf_row + UInt8(2))'
+            (temp_row,_,_,temp_tf_row) = tf_core_2d_col(Array{Float64,2}(DMATRIX[i-1,j]'), TAG2IND_row[i-1], IND2TAG_row[i-1],jmax_row + 2 - i)
+            temp_row = Array{Float64,2}(temp_row')
+            temp_tf_row = Array{UInt8,2}((temp_tf_row .+ UInt8(2))')
 
             row_or_col = temp_col.<=temp_row
             DMATRIX[i,j] = row_or_col.*temp_col + .~row_or_col.*temp_row
@@ -314,7 +312,8 @@ function ghwt_tf_bestbasis_2d(dmatrix::Matrix{Float64},GProws::GraphPart,GPcols:
         end
         infovec = newinfovec[:,newinfovec[1,:].!=-1]
     end
-return dmatrix[sub2ind(size(dmatrix),infovec[3,:],infovec[4,:])]',infovec[3:4,:]
+#return Array{Float64,2}(dmatrix[sub2ind(size(dmatrix),infovec[3,:],infovec[4,:])]'),infovec[3:4,:]
+return Array{Float64,2}(dmatrix[(LinearIndices(size(dmatrix)))[CartesianIndex.(infovec[3,:],infovec[4,:])]]'),infovec[3:4,:]
 end
 
 
@@ -339,11 +338,10 @@ Copyright 2018 The Regents of the University of California
 
 Implemented by Yiqun Shao (Adviser: Dr. Naoki Saito)
 """
-
 function ghwt_tf_synthesis_2d_core!(dmatrix::Array{Float64,3},tag::Array{Int64,2},rs::Array{Int64,2})
     jmax = size(tag,2)
     for j = 1:jmax-1
-        regioncount = countnz(rs[:,j]) - 1
+        regioncount = count(!iszero, rs[:,j]) - 1
         for r = 1:regioncount
             # the index that marks the start of the first subregion
             rs1 = rs[r,j]
@@ -355,7 +353,7 @@ function ghwt_tf_synthesis_2d_core!(dmatrix::Array{Float64,3},tag::Array{Int64,2
             n = rs3 - rs1
 
             # proceed if not all coefficients are zero in this region
-            if countnz(dmatrix[rs1:rs3-1,j,:]) > 0
+            if count(!iszero, dmatrix[rs1:rs3-1,j,:]) > 0
 
                 if n == 1
                     ### SCALING COEFFICIENT (n == 1)
@@ -438,18 +436,17 @@ Copyright 2018 The Regents of the University of California
 
 Implemented by Yiqun Shao (Adviser: Dr. Naoki Saito)
 """
-
 function ghwt_synthesis_2d(dmatrix::Matrix{Float64}, GProws::GraphPart, GPcols::GraphPart)
     tag_col, rs_col = GPcols.tag, GPcols.rs
     tag_row, rs_row = GProws.tag, GProws.rs
     fcols, jmax_col = size(tag_col);
     frows, jmax_row = size(tag_row);
-    matrix_r = dmatrix';
+    matrix_r = Array{Float64,2}(dmatrix');
     matrix_r = reshape(matrix_r, fcols, jmax_col, frows*jmax_row);
     ghwt_tf_synthesis_2d_core!(matrix_r, Matrix{Int64}(tag_col), Matrix{Int64}(rs_col));
     matrix_r = matrix_r[:,end,:];
     #matrix_r = reshape(matrix_r, fcols, frows*jmax_row);
-    matrix_r = reshape(matrix_r',frows,jmax_row, fcols);
+    matrix_r = reshape(Array{Float64,2}(matrix_r'),frows,jmax_row, fcols);
     ghwt_tf_synthesis_2d_core!(matrix_r, Matrix{Int64}(tag_row), Matrix{Int64}(rs_row));
     matrix_r = matrix_r[:,end,:];
     #matrix_r = reshape(matrix_r,frows, fcols);

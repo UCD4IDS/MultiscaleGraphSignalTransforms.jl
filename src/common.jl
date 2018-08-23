@@ -1,4 +1,4 @@
-using .GraphSignal, .GraphPartition, .BasisSpecification
+using .GraphSignal, .GraphPartition, .BasisSpecification, LinearAlgebra
 
 """
     dmatrix = dvec2dmatrix(dvec::Matrix{Float64}, GP::GraphPart, BS::BasisSpec)
@@ -123,7 +123,7 @@ function dmatrix2dvec(dmatrix::Array{Float64,3}, GP::GraphPart, BS::BasisSpec)
     if isempty(BS.levlengths)
         levlist2levlengths!(GP, BS)
     else
-        warn("We assume that levlengths of the input BS were already computed properly prior to dmatrix2dvec.")
+        @warn("We assume that levlengths of the input BS were already computed properly prior to dmatrix2dvec.")
     end
     levlist = BS.levlist
     levlengths = BS.levlengths
@@ -170,7 +170,8 @@ function levlist2levlengths!(GP::GraphPart, BS::BasisSpec)
         for row = 1:length(levlist)
             # find the regionstart(s) of the next region
             # MATLAB: IX = find( GP.rs(:,levlist(row))==n+1, 1, 'last' );
-            IX = findlast( rs[:, levlist[row]], n + 1 )
+            IX = something(findlast(isequal(n+1), rs[:, levlist[row]]), 0)
+            #IX = findlast( rs[:, levlist[row]], n + 1 )
             levlengths[row] = rs[IX+1, levlist[row]] - rs[IX, levlist[row]]
             n += levlengths[row]
         end
@@ -181,7 +182,8 @@ function levlist2levlengths!(GP::GraphPart, BS::BasisSpec)
         end
         rsf2c = GP.rsf2c        # This must be here: GP.rsf2c cannot be null!
         for row = 1:length(levlist)
-            IX = findlast( rsf2c[:, levlist[row]], n + 1 )
+            IX = something(findlast(isequal(n+1), rsf2c[:, levlist[row]]), 0)
+            #IX = findlast( rsf2c[:, levlist[row]], n + 1 )
             levlengths[row] = rsf2c[IX + 1, levlist[row]] - rsf2c[IX, levlist[row]]
             n += levlengths[row]
         end

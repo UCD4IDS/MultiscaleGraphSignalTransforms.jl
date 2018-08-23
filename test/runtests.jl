@@ -1,5 +1,5 @@
 # This is a very preliminary test function; just a copy of bbtest.jl of small scale P6 with 10 random signals. More coming!
-using MTSG, MAT
+using Main.MTSG, MAT, LinearAlgebra, SparseArrays
 ###########################################################################################
 # Testing basic GHWT functions #
 ###########################################################################################
@@ -56,24 +56,24 @@ println("\n")
 
 
 #############################
-f = [2. -2. 1. 3. -1. -2.]'
-G = GraphSig(SparseMatrixCSC(diagm(ones(5),1)),f = f)
+f = Array{Float64}([2. -2. 1. 3. -1. -2.]')
+G = GraphSig(SparseMatrixCSC(diagm(1 => ones(5))),f = f)
 GP = partition_tree_fiedler(G,:Lrw)
 dmatrix = ghwt_analysis!(G, GP=GP)
 println("2. Testing time-frequency adapted GHWT functions on path signal: ", f)
-println("The original signal has L1 norm: ", vecnorm(f,1))
+println("The original signal has L1 norm: ", norm(f,1))
 
 # through the old way
 dvec,BS = ghwt_bestbasis(dmatrix, GP,cfspec=1)
 (f, GS) = ghwt_synthesis(reshape(dvec,(size(dvec)[1],1)), GP, BS, G)
-println("The coefficient vectors of GHWT best basis has L1 norm: ", vecnorm(dvec,1))
+println("The coefficient vectors of GHWT best basis has L1 norm: ", norm(dvec,1))
 println("Relative L2 error of the synthesized signal: ", norm(G.f[:]-f[:])/norm(G.f[:]))
 
 
 # through the time-frequency analysis
 bestbasis, bestbasis_tag = ghwt_tf_bestbasis(dmatrix[:,:,1], GP)
 (f_tf, GS_tf) = tf_synthesis(bestbasis, bestbasis_tag, GP, G)
-println("The coefficient vectors of time-frequency adapted GHWT best basis has L1 norm: ", vecnorm(bestbasis,1))
+println("The coefficient vectors of time-frequency adapted GHWT best basis has L1 norm: ", norm(bestbasis,1))
 println("Relative L2 error of the synthesized signal: ", norm(G.f[:]-f_tf[:])/norm(G.f[:]))
 
 println("\n")
@@ -95,6 +95,7 @@ matrix = [ 1.0 2.0 3.0; 4.0 5.0 6.0]
 
 # expand matrix in 2 directions (rows and cols)
 dmatrix, GProws, GPcols = ghwt_tf_init_2d(matrix)
+dmatrix = Array{Float64,2}(dmatrix)
 
 # find the best basis using the time-frequency analysis
 # infovec indicate the location of each coefficient in dmatrix
@@ -109,8 +110,8 @@ matrix_r_temp = ghwt_synthesis_2d(BBmatrix, GProws, GPcols)
 matrix_r = zeros(size(matrix))
 matrix_r[GProws.ind,GPcols.ind] = matrix_r_temp
 
-println("The toy matrix [1, 2, 3; 4, 5, 6] has 1-vecnorm as ", vecnorm(matrix,1))
-println("The bestbasis of toy matrix [1, 2, 3; 4, 5, 6] has 1-vecnorm as ", vecnorm(Bbasis,1))
+println("The toy matrix [1, 2, 3; 4, 5, 6] has 1-vecnorm as ", norm(matrix,1))
+println("The bestbasis of toy matrix [1, 2, 3; 4, 5, 6] has 1-vecnorm as ", norm(Bbasis,1))
 println("Relative L2 error of the synthesized matrix: ", norm(matrix[:] - matrix_r[:], 2)/norm(matrix[:],2))
 
 println("\n")
@@ -132,8 +133,8 @@ dmatrixHrw = dmatrixHrw, dmatrixHsym = dmatrixHsym) # best-basis among all combi
 
 fS5, GS5 = HGLET_GHWT_Synthesis(reshape(dvec5,(size(dvec5)[1],1)),GP,BS5,trans5,G)
 
-println("The original signal has L1 norm: ", vecnorm(G.f,1))
-println("The coefficients of best-basis selected from hybrid method has L1 norm: ", vecnorm(dvec5,1))
+println("The original signal has L1 norm: ", norm(G.f,1))
+println("The coefficients of best-basis selected from hybrid method has L1 norm: ", norm(dvec5,1))
 println("Relative L2 error of the synthesized signal: ", norm(G.f[:]-fS5[:])/norm(G.f[:]))
 
 println("\n")

@@ -1,3 +1,7 @@
+using SparseArrays
+using Statistics
+using LinearAlgebra
+using Arpack
 """
     (pm,v) = partition_fiedler(W; method, v)
 
@@ -19,7 +23,7 @@ Translated and revised by Naoki Saito, Feb. 9, 2017
 """
 function partition_fiedler(W::SparseMatrixCSC{Float64,Int};
                            method::Symbol = :Lrw,
-                           v::Vector{Float64} =Vector{Float64}(0))
+                           v::Vector{Float64} =Vector{Float64}(undef, 0))
 #
 # Easy case: the Fiedler vector is provided
 #
@@ -34,7 +38,7 @@ function partition_fiedler(W::SparseMatrixCSC{Float64,Int};
             # Note also, the result of the quadratic form is scalar
             # mathematically, but in julia, it's 1x1 array; so need to
             # convert it to a real scalar via `val = val[1]`.
-            val = v' * (diagm(vec(sum(W, 1))) - W) * v; val = val[1]
+            val = v' * (diagm(0 => vec(sum(W, dims = 1))) - W) * v; val = val[1]
             pm = partition_fiedler_troubleshooting(pm, v, W, val)
         else
             pm = partition_fiedler_troubleshooting(pm)
@@ -59,15 +63,15 @@ function partition_fiedler(W::SparseMatrixCSC{Float64,Int};
     end
 
     # Use L (unnormalized) if specified or edge weights are very small
-    if method == :L || minimum(sum(W, 1)) < 10^3 * sigma
+    if method == :L || minimum(sum(W, dims = 1)) < 10^3 * sigma
         if N > cutoff # for a relative large W
             v0 = ones(N) / sqrt(N)
             try
                 # MATLAB, [v,val,eigs_flag] = eigs(diag(sum(W))-W,2,sigma,opts);
-                val, vtmp = eigs(diagm(vec(sum(W, 1))) - W,
+                val, vtmp = eigs(diagm(0 => vec(sum(W, 1))) - W,
                                  nev = 2, sigma = sigma, v0 = v0)
             catch emsg
-                warn("Exception in eigs(L) occurred: ", emsg)
+                @warn("Exception in eigs(L) occurred: ", emsg)
                 eigs_flag = 2
             end
             if eigs_flag == 0   # no problem in `eigs` is detected.
@@ -82,7 +86,7 @@ function partition_fiedler(W::SparseMatrixCSC{Float64,Int};
         end
         if N <= cutoff || eigs_flag != 0 # if W is small or eigs had a problem,
                                          # then use full svd.
-            vtmp, val = svd(diagm(vec(sum(W, 1))) - W) # v <-> U, val <-> S
+            vtmp, val = svd(diagm(0 => vec(sum(W, dims = 1))) - W) # v <-> U, val <-> S
             # diagm(vec(sum(W,1))) is Matrix{Float64} while W is SparseMatrix
             # But the results of the subtraction becomes Matrix{Float64}.
             # Also be careful here! val[end-2] == val[end-1] can happen.
@@ -100,10 +104,10 @@ function partition_fiedler(W::SparseMatrixCSC{Float64,Int};
                 # MATLAB: [v,val,eigs_flag] = ...
                 #           eigs(diag(sum(W))-W,diag(sum(W)),2,sigma,opts);
                 # This is L*v = \lambda*D*v case.
-                val, vtmp = eigs(diagm(vec(sum(W, 1))) - W, diagm(vec(sum(W, 1))),
+                val, vtmp = eigs(diagm(0 => vec(sum(W, dims = 1))) - W, diagm(0 => vec(sum(W, dims = 1))),
                                  nev = 2, sigma = sigma, v0 = v0)
             catch emsg
-                warn("Exception in eigs(Lrw) occurred: ", emsg)
+                @warn("Exception in eigs(Lrw) occurred: ", emsg)
                 eigs_flag = 2
             end
 
@@ -111,15 +115,15 @@ function partition_fiedler(W::SparseMatrixCSC{Float64,Int};
                 val, ind = findmax(val) # val is set to be a scalar.
                 v = vtmp[:, ind]
                 # MATLAB: v = (full(sum(W,2)).^(-0.5)) .* v
-                v = vec((sum(W, 2).^(-0.5)) .* v) # This is the Fiedler vector!
+                v = vec((sum(W, dims = 2).^(-0.5)) .* v) # This is the Fiedler vector!
             end
         end
         if N <= cutoff || eigs_flag != 0 # if W is small or eigs had a problem,
                                          # then use full svd
-            colsumW = vec(sum(W, 1))
-            D = sparse(diagm(colsumW))
-            D2 = sparse(diagm(colsumW.^(-0.5)))
-            vtmp, val = svd(full(D2 * (D - W) * D2)) # SVD of Lsym
+            colsumW = vec(sum(W, dims = 1))
+            D = sparse(diagm(0 => colsumW))
+            D2 = sparse(diagm(0 => colsumW.^(-0.5)))
+            vtmp, val = svd(Matrix(D2 * (D - W) * D2)) # SVD of Lsym
             # MATLAB: [v,val,~] = svd(full(...
             # bsxfun(@times,bsxfun(@times,full(sum(W,2)).^(-0.5),diag(sum(W))-W),
             #  full(sum(W,1)).^(-0.5)) ) );
@@ -130,7 +134,7 @@ function partition_fiedler(W::SparseMatrixCSC{Float64,Int};
             # If that is the case, vtmp[:,end-2] could also be the Fiedler vec.
             val = val[end - 1]   # val is set to be a scalar.
             v = vtmp[:, end - 1] # v is set to be a vector.
-            v = vec((sum(W, 2).^(-0.5)) .* v) # This is the Fiedler vector of Lrw!
+            v = vec((sum(W, dims = 2).^(-0.5)) .* v) # This is the Fiedler vector of Lrw!
         end
     else                        # Unknown method is specified.
         error("Graph partitioning method :", method, " is not recognized!")
@@ -176,9 +180,9 @@ function partition_fiedler_pm(v::Vector{Float64})
     # assign each point to either region 1 or region -1, and assign any zero
     # entries to the smaller region
     if sum(v .>= tol) > sum(v .<= -tol) # more (+) than (-) entries
-        pm = 2*(v .>= tol) - 1
+        pm = 2*(v .>= tol) .- 1
     else
-        pm = 2*(v .<= -tol) - 1
+        pm = 2*(v .<= -tol) .- 1
     end
 
     # make sure the first point is assigned to region 1 (not -1)

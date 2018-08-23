@@ -33,11 +33,11 @@ function PartitionTreeMatrixDhillon(matrix::Matrix{Float64})
 
   # regionstarts
   rs_rows = zeros(Tl, (N+1,jmax))
-  rs_rows[1,:] = 1
+  rs_rows[1,:] .= 1
   rs_rows[2,1] = rows + 1
 
   rs_cols = zeros(Tl, (N+1,jmax))
-  rs_cols[1,:] = 1
+  rs_cols[1,:] .= 1
   rs_cols[2,1] = cols + 1
 
 
@@ -51,7 +51,7 @@ function PartitionTreeMatrixDhillon(matrix::Matrix{Float64})
     regioncount_cols = length(unique(vcat(rs_cols[:,j],[0]))) - 2
 
     # the number of total regions (including those with no nodes)
-    false_regioncount = max(countnz(rs_rows[:,j]),countnz(rs_cols[:,j])) - 1
+    false_regioncount = max(count(!iszero, rs_rows[:,j]),count(!iszero, rs_cols[:,j])) - 1
 
     # add a column for level j+1, if necessary
     if j == jmax
@@ -248,13 +248,13 @@ function second_largest_singular_vectors(A::Matrix{Float64})
   (rows, cols) = size(A)
 
   # compute D1 and D2 and make sure there are no zeros
-  D1 = sum(A,2)
-  D1[D1.==0] = max(0.01, minimum(D1[D1.>0]/10))
-  D2 = sum(A,1)
-  D2[D2.==0] = max(0.01, minimum(D2[D2.>0]/10))
+  D1 = sum(A,dims = 2)
+  D1[D1.==0] .= max(0.01, minimum(D1[D1.>0]/10))
+  D2 = sum(A,dims = 1)
+  D2[D2.==0] .= max(0.01, minimum(D2[D2.>0]/10))
 
   # compute the singular vectors
-  (u,D,v) = svd(diagm(D1[:].^(-0.5))*A*diagm(D2[:].^(-0.5)), thin = true)
+  (u,D,v) = svd(diagm(0 => D1[:].^(-0.5))*A*diagm(0 => D2[:].^(-0.5)), full = false)
 
   if (rows > 1) && (cols > 1)
 
@@ -279,8 +279,8 @@ function partition_vector(v:: Vector{Float64})
   l = size(v[:],1)
   m = mean(v)
   pm = zeros(l)
-  pm[v.>m] = 1
-  pm[v.<=m] = -1
+  pm[v.>m] .= 1
+  pm[v.<=m] .= -1
   if size(unique(pm),1) == 1
     f = UInt(floor(l/2))
     pm[1:f] = 1

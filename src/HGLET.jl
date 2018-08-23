@@ -2,7 +2,7 @@ module HGLET
 
 include("utils.jl")
 
-using ..GraphSignal, ..GraphPartition, ..BasisSpecification, ..GHWT
+using ..GraphSignal, ..GraphPartition, ..BasisSpecification, ..GHWT, SparseArrays
 
 include("common.jl")
 
@@ -25,8 +25,6 @@ Add noise to the data of a GraphSig object
 * `f`: the reconstructed signal
 * `GS`: the reconstructed GraphSig object
 """
-
-
 function HGLET_Synthesis(dvec::Matrix{Float64}, GP::GraphPart, BS::BasisSpec, G::GraphSig; method::Symbol = :L)
     # Preliminaries
 
@@ -43,7 +41,7 @@ function HGLET_Synthesis(dvec::Matrix{Float64}, GP::GraphPart, BS::BasisSpec, G:
     # Perform the synthesis transform ==> eigenvectors of L
     if method != :Lrw && method != :Lsym
         for j = jmax:-1:1
-            regioncount = countnz(GP.rs[:,j]) - 1
+            regioncount = count(!iszero, GP.rs[:,j]) - 1
             for r = 1:regioncount
                 # the index that marks the start of the region
                 rs1 = GP.rs[r,j]
@@ -56,7 +54,7 @@ function HGLET_Synthesis(dvec::Matrix{Float64}, GP::GraphPart, BS::BasisSpec, G:
 
                 # only proceed forward if coefficients do not exist
 
-                if (j == jmax || countnz(dmatrix[rs1:rs3-1,j+1,:]) == 0) && countnz(dmatrix[rs1:rs3-1,j,:]) > 0
+                if (j == jmax || count(!iszero, dmatrix[rs1:rs3-1,j+1,:]) == 0) && count(!iszero, dmatrix[rs1:rs3-1,j,:]) > 0
 
                     if n == 1
                         f[rs1,:] = dmatrix[rs1,j,:]
@@ -64,7 +62,7 @@ function HGLET_Synthesis(dvec::Matrix{Float64}, GP::GraphPart, BS::BasisSpec, G:
                         indrs = GP.ind[rs1:rs3-1]
 
                         # compute the eigenvectors of L ==> svd(L)
-                        vec,_,_ = svd(diagm(squeeze(sum(W[indrs,indrs],1),1))-W[indrs,indrs])
+                        vec,_,_ = svd(diagm(0 => dropdims(sum(W[indrs,indrs],dims = 1),dims = 1))-W[indrs,indrs])
                         vec = vec[:,end:-1:1]
 
                         # standardize the eigenvector signs
@@ -91,7 +89,7 @@ function HGLET_Synthesis(dvec::Matrix{Float64}, GP::GraphPart, BS::BasisSpec, G:
         end
     elseif method == :Lrw
         for j = jmax:-1:1
-            regioncount = countnz(GP.rs[:,j]) - 1
+            regioncount = count(!iszero, GP.rs[:,j]) - 1
             for r = 1:regioncount
                 # the index that marks the start of the region
                 rs1 = GP.rs[r,j]
@@ -104,20 +102,20 @@ function HGLET_Synthesis(dvec::Matrix{Float64}, GP::GraphPart, BS::BasisSpec, G:
 
                 # only proceed forward if coefficients do not exist
 
-                if (j == jmax || countnz(dmatrix[rs1:rs3-1,j+1,:]) == 0) && countnz(dmatrix[rs1:rs3-1,j,:]) > 0
+                if (j == jmax || count(!iszero, dmatrix[rs1:rs3-1,j+1,:]) == 0) && count(!iszero, dmatrix[rs1:rs3-1,j,:]) > 0
 
                     if n == 1
                         f[rs1,:] = dmatrix[rs1,j,:]
                     elseif n > 1
                         indrs = GP.ind[rs1:rs3-1]
 
-                        if minimum(sum(W[indrs,indrs],1)) > 10^3*eps()
+                        if minimum(sum(W[indrs,indrs], dims = 1)) > 10^3*eps()
                             useLrw = true
 
                             ### eigenvectors of L_rw ==> svd(L_sym)
                             W_temp = W[indrs,indrs]
-                            D_temp = spdiagm(squeeze(sum(W_temp,1),1))
-                            D_temp_p = spdiagm(squeeze(sum(W_temp,1),1).^(-1/2))
+                            D_temp = sparse(Diagonal(dropdims(sum(W_temp, dims = 1),dims = 1)))
+                            D_temp_p = sparse(Diagonal(dropdims(sum(W_temp,dims = 1), dims = 1).^(-1/2)))
                             vec,_,_ = svd(full(D_temp_p*(D_temp - W_temp)*D_temp_p))
                             vec = vec[:,end:-1:1]
 
@@ -156,7 +154,7 @@ function HGLET_Synthesis(dvec::Matrix{Float64}, GP::GraphPart, BS::BasisSpec, G:
         end
     elseif method == :Lsym
         for j = jmax:-1:1
-            regioncount = countnz(GP.rs[:,j]) - 1
+            regioncount = count(!iszero, GP.rs[:,j]) - 1
             for r = 1:regioncount
                 # the index that marks the start of the region
                 rs1 = GP.rs[r,j]
@@ -169,20 +167,20 @@ function HGLET_Synthesis(dvec::Matrix{Float64}, GP::GraphPart, BS::BasisSpec, G:
 
                 # only proceed forward if coefficients do not exist
 
-                if (j == jmax || countnz(dmatrix[rs1:rs3-1,j+1,:]) == 0) && countnz(dmatrix[rs1:rs3-1,j,:]) > 0
+                if (j == jmax || count(!iszero, dmatrix[rs1:rs3-1,j+1,:]) == 0) && count(!iszero, dmatrix[rs1:rs3-1,j,:]) > 0
 
                     if n == 1
                         f[rs1,:] = dmatrix[rs1,j,:]
                     elseif n > 1
                         indrs = GP.ind[rs1:rs3-1]
 
-                        if minimum(sum(W[indrs,indrs],1)) > 10^3*eps()
+                        if minimum(sum(W[indrs,indrs], dims = 1)) > 10^3*eps()
                             useLrw = true
 
                             ### eigenvectors of L_rw ==> svd(L_sym)
                             W_temp = W[indrs,indrs]
-                            D_temp = spdiagm(squeeze(sum(W_temp,1),1))
-                            D_temp_p = spdiagm(squeeze(sum(W_temp,1),1).^(-1/2))
+                            D_temp = sparse(Diagonal(dropdims(sum(W_temp,dims = 1),dims = 1)))
+                            D_temp_p = sparse(Diagonal(dropdims(sum(W_temp,dims = 1),dims = 1).^(-1/2)))
                             vec,_,_ = svd(full(D_temp_p*(D_temp - W_temp)*D_temp_p))
                             vec = vec[:,end:-1:1]
 
@@ -285,7 +283,7 @@ function HGLET_Analysis_All(G::GraphSig, GP::GraphPart)
 
     #Perform the transform ==> eigenvectors of L
     for j = jmax-1:-1:1
-        regioncount = countnz(rs[:,j]) - 1
+        regioncount = count(!iszero, rs[:,j]) - 1
         for r = 1:regioncount
             # the index that marks the start of the region
             rs1 = rs[r,j]
@@ -303,7 +301,7 @@ function HGLET_Analysis_All(G::GraphSig, GP::GraphPart)
                 indrs = ind[rs1:rs3-1]
 
                 # compute the eigenvectors of L ==> svd(L)
-                vec,_,_ = svd(diagm(squeeze(sum(W[indrs,indrs],1),1))-W[indrs,indrs])
+                vec,_,_ = svd(diagm(0 => dropdims(sum(W[indrs,indrs],dims = 1),dims = 1))-W[indrs,indrs])
                 vec = vec[:,end:-1:1]
 
                 # standardize the eigenvector signs
@@ -328,7 +326,7 @@ function HGLET_Analysis_All(G::GraphSig, GP::GraphPart)
     end
 
     for j = jmax-1:-1:1
-        regioncount = countnz(rs[:,j])-1
+        regioncount = count(!iszero, rs[:,j])-1
         for r = 1:regioncount
             # the index that marks the start of the region
             rs1 = rs[r,j]
@@ -348,14 +346,14 @@ function HGLET_Analysis_All(G::GraphSig, GP::GraphPart)
                 indrs = ind[rs1:rs3-1]
 
                 # compute the eigenvectors
-                if minimum(sum(W[indrs,indrs],1)) > 10^3*eps()
+                if minimum(sum(W[indrs,indrs],dims = 1)) > 10^3*eps()
                     useLrw = true
 
                     ### eigenvectors of L_rw ==> svd(L_sym)
                     W_temp = W[indrs,indrs]
-                    D_temp = spdiagm(squeeze(sum(W_temp,1),1))
-                    D_temp_p = spdiagm(squeeze(sum(W_temp,1),1).^(-1/2))
-                    vec,_,_ = svd(full(D_temp_p*(D_temp - W_temp)*D_temp_p))
+                    D_temp = sparse(Diagonal(dropdims(sum(W_temp,dims = 1), dims = 1)))
+                    D_temp_p = sparse(Diagonal(dropdims(sum(W_temp,dims = 1),dims = 1).^(-1/2)))
+                    vec,_,_ = svd(Matrix(D_temp_p*(D_temp - W_temp)*D_temp_p))
                     vec = vec[:,end:-1:1]
 
                 else
@@ -386,7 +384,7 @@ function HGLET_Analysis_All(G::GraphSig, GP::GraphPart)
 
                 # obtain the expansion coeffcients for L_rw
                 if useLrw
-                    dmatrixHrw[rs1:rs3-1,j,:] = vec'*diagm(squeeze(sum(W_temp,1),1).^(1/2))*G.f[indrs,:]
+                    dmatrixHrw[rs1:rs3-1,j,:] = vec'*diagm(0 => dropdims(sum(W_temp,dims = 1),dims = 1).^(1/2))*G.f[indrs,:]
                 else
                     dmatrixHrw[rs1:rs3-1,j,:] = vec'*G.f[indrs,:]
                 end
@@ -424,7 +422,6 @@ Select the best basis from several matrices of expansion coefficients
                    10 = HGLET with Lsym
                    11 = GHWT
 """
-
 function HGLET_GHWT_BestBasis(GP::GraphPart; dmatrixH::Array{Float64,3} = Array{Float64,3}(0,0,0),dmatrixHrw::Array{Float64,3} = Array{Float64,3}(0,0,0)
 ,dmatrixHsym::Array{Float64,3} = Array{Float64,3}(0,0,0),dmatrixG::Array{Float64,3} = Array{Float64,3}(0,0,0), costfun::Any = 0.1,flatten::Any = 1)
     # specify transform codes
@@ -439,38 +436,38 @@ function HGLET_GHWT_BestBasis(GP::GraphPart; dmatrixH::Array{Float64,3} = Array{
     # constants and dmatrix cleanup
     if !isempty(dmatrixHsym)
         N, jmax, fcols = size(dmatrixHsym)
-        dmatrixHsym[abs.(dmatrixHsym).<10^2*eps()] = 0
+        dmatrixHsym[abs.(dmatrixHsym).<10^2*eps()] .= 0
     end
     if !isempty(dmatrixG)
         N, jmax, fcols = size(dmatrixG)
-        dmatrixG[abs.(dmatrixG).<10^2*eps()] = 0
+        dmatrixG[abs.(dmatrixG).<10^2*eps()] .= 0
     end
     if !isempty(dmatrixHrw)
         N, jmax, fcols = size(dmatrixHrw)
-        dmatrixHrw[abs.(dmatrixHrw).<10^2*eps()] = 0
+        dmatrixHrw[abs.(dmatrixHrw).<10^2*eps()] .= 0
     end
     if !isempty(dmatrixH)
         N, jmax, fcols = size(dmatrixH)
-        dmatrixH[abs.(dmatrixH).<10^2*eps()] = 0
+        dmatrixH[abs.(dmatrixH).<10^2*eps()] .= 0
     end
 
     # flatten dmatrix
     if fcols > 1
         if !isempty(dmatrixHsym)
             dmatrix0Hsym = deepcopy(dmatrixHsym)
-            dmatrixdHsym = squeeze(dmatrix_flatten(dmatrixHsym,flatten),1)
+            dmatrixdHsym = dropdims(dmatrix_flatten(dmatrixHsym,flatten),dims = 1)
         end
         if !isempty(dmatrixG)
             dmatrix0G = deepcopy(dmatrixG)
-            dmatrixG = squeeze(dmatrix_flatten(dmatrixG,flatten),1)
+            dmatrixG = dropdims(dmatrix_flatten(dmatrixG,flatten),dims = 1)
         end
         if !isempty(dmatrixHrw)
             dmatrix0Hrw = deepcopy(dmatrixHrw)
-            dmatrixHrw = squeeze(dmatrix_flatten(dmatrixHrw,flatten),1)
+            dmatrixHrw = dropdims(dmatrix_flatten(dmatrixHrw,flatten),dims = 1)
         end
         if !isempty(dmatrixH)
             dmatrix0H = deepcopy(dmatrixH)
-            dmatrixH = squeeze(dmatrix_flatten(dmatrixH,flatten),1)
+            dmatrixH = dropdims(dmatrix_flatten(dmatrixH,flatten),dims = 1)
         end
     end
 
@@ -479,19 +476,19 @@ function HGLET_GHWT_BestBasis(GP::GraphPart; dmatrixH::Array{Float64,3} = Array{
     # allocate/initialize ==> order matters here
     if !isempty(dmatrixHsym)
         dvec = dmatrixHsym[:,jmax]
-        trans = repmat(transHsym,N,1)
+        trans = repeat(transHsym,N,1)
     end
     if !isempty(dmatrixG)
         dvec = dmatrixG[:,jmax]
-        trans = repmat(transG,N,1)
+        trans = repeat(transG,N,1)
     end
     if !isempty(dmatrixHrw)
         dvec = dmatrixHrw[:,jmax]
-        trans = repmat(transHrw,N,1)
+        trans = repeat(transHrw,N,1)
     end
     if !isempty(dmatrixH)
         dvec = dmatrixH[:,jmax]
-        trans = repmat(transH,N,1)
+        trans = repeat(transH,N,1)
     end
     levlist = jmax*ones(Int,N)
 
@@ -500,7 +497,7 @@ function HGLET_GHWT_BestBasis(GP::GraphPart; dmatrixH::Array{Float64,3} = Array{
 
     # perform the basis search
     for j = jmax:-1:1
-        regioncount = countnz(GP.rs[:,j]) - 1
+        regioncount = count(!iszero, GP.rs[:,j]) - 1
         for r = 1:regioncount
             indr = GP.rs[r,j]:(GP.rs[r+1,j]-1)
             ### compute the cost of the current best basis
@@ -595,7 +592,7 @@ function BBchange(costNew::Float64, dvec::Vector{Float64}, j::Int, trans::Array{
     levlist = zeros(Int,n,1)
     levlist[1] = j
 
-    trans = repmat(trans,n,1)
+    trans = repeat(trans,n,1)
 
     return costBB, dvec, levlist, trans
 end
@@ -634,11 +631,11 @@ function BSfull(GP::GraphPart, BS::BasisSpec, trans::Array{Bool,2})
     ## 1. Fill out the redundant descriptions
     ind = 0
     for row  = 1:length(levlist)
-        levlistfull[ind+1:ind+levlengths[row]] = levlist[row]
+        levlistfull[ind+1:ind+levlengths[row]] .= levlist[row]
 
-        levlengthsfull[ind+1:ind+levlengths[row]] = levlengths[row]
+        levlengthsfull[ind+1:ind+levlengths[row]] .= levlengths[row]
 
-        transfull[ind+1:ind+levlengths[row],:] = repmat(trans[[row],:],levlengths[row],1)
+        transfull[ind+1:ind+levlengths[row],:] = repeat(trans[[row],:],levlengths[row],1)
 
         ind = ind + levlengths[row]
     end
@@ -764,7 +761,7 @@ function HGLET_GHWT_BestBasis_minrelerror(GP::GraphPart,G::GraphSig;dmatrixH::Ar
                 sumrelerror_temp = sumrelerror_f2c
                 dvec_temp = copy(dvec_f2c)
                 BS_temp = deepcopy(BS_f2c)
-                trans_temp = repmat([true true], length(BS_f2c.levlist),1)
+                trans_temp = repeat([true true], length(BS_f2c.levlist),1)
             end
         end
 

@@ -1,6 +1,6 @@
 module GraphPartition
 
-using ..GraphSignal
+using ..GraphSignal, SparseArrays, LinearAlgebra
 
 include("partition_fiedler.jl")
 include("utils.jl")
@@ -29,7 +29,7 @@ Implemented by Jeff Irion (Adviser: Dr. Naoki Saito) |
 Translated and modified by Naoki Saito, Feb. 7, 2017
 Revised for two parameters by Naoki Saito, Feb. 24, 2017
 """
-type GraphPart{Tl <: Unsigned, Ts <: Unsigned}
+mutable struct GraphPart{Tl <: Unsigned, Ts <: Unsigned}
     ind::Vector{Tl}    # ordering of the indices on the finest level
     rs::Matrix{Tl}     # `rs[i,j]` = the index in `ind` of the first
                        # point in Region `i` at level j
@@ -42,47 +42,47 @@ type GraphPart{Tl <: Unsigned, Ts <: Unsigned}
 
     # An inner constructor here.
     function GraphPart{Tl, Ts}(ind::Vector{Tl}, rs::Matrix{Tl};
-                       tag::Matrix{Ts} = Matrix{Ts}(0, 0),
-                       compinfo::Matrix{Tl} = Matrix{Tl}(0, 0),
-                       rsf2c::Matrix{Tl} = Matrix{Tl}(0, 0),
-                       tagf2c::Matrix{Ts} = Matrix{Ts}(0, 0),
-                       compinfof2c::Matrix{Tl} = Matrix{Tl}(0, 0),
+                       tag::Matrix{Ts} = Matrix{Ts}(undef, 0, 0),
+                       compinfo::Matrix{Tl} = Matrix{Tl}(undef, 0, 0),
+                       rsf2c::Matrix{Tl} = Matrix{Tl}(undef, 0, 0),
+                       tagf2c::Matrix{Ts} = Matrix{Ts}(undef, 0, 0),
+                       compinfof2c::Matrix{Tl} = Matrix{Tl}(undef, 0, 0),
                        method::Symbol = :unspecified) where{Tl, Ts}
 
         # Sanity checks
         if Base.size(rs, 1) != Base.length(ind) + 1
-            warn("size(rs,1) must be length(ind) + 1")
-            warn("both rs and ind now become null arrays!")
+            @warn("size(rs,1) must be length(ind) + 1")
+            @warn("both rs and ind now become null arrays!")
             ind = Matrix{Tl}()
             rs = Matrix{Tl}()
         end
         if Base.length(tag) != 0 && (Base.size(rs, 1) != Base.size(tag, 1) + 1
             || Base.size(rs, 2) != Base.size(tag, 2))
-            warn("tag size is inconsistent with rs size.")
-            warn("tag now becomes a null array!")
+            @warn("tag size is inconsistent with rs size.")
+            @warn("tag now becomes a null array!")
             tag = Matrix{Ts}()
         end
         if Base.length(compinfo) != 0 &&
             ( Base.size(rs, 1) != Base.size(compinfo, 1) + 1
              || Base.size(rs, 2) != Base.size(compinfo, 2) )
-            warn("compinfo size is inconsistent with rs size.")
-            warn("compinfo now becomes a null array!")
+            @warn("compinfo size is inconsistent with rs size.")
+            @warn("compinfo now becomes a null array!")
             compinfo = Matrix{Tl}()
         end
         if Base.length(rsf2c) != 0 && Base.length(rsf2c) != Base.length(rs)
-            warn("length(rsf2c) must be length(rs)")
-            warn("rsf2c now becomes a null array!")
+            @warn("length(rsf2c) must be length(rs)")
+            @warn("rsf2c now becomes a null array!")
             rsf2c = Matrix{Tl}()
         end
         if Base.length(tagf2c) != 0 && Base.length(tagf2c) != Base.length(tag)
-            warn("length(tagf2c) must be length(tag)")
-            warn("tagf2c now becomes a null array!")
+            @warn("length(tagf2c) must be length(tag)")
+            @warn("tagf2c now becomes a null array!")
             tagf2c = Matrix{Ts}()
         end
         if Base.length(compinfof2c) != 0 &&
             Base.length(compinfof2c) != Base.length(compinfo)
-            warn("length(compinfof2c) must be length(compinfo)")
-            warn("compf2c now becomes a null array!")
+            @warn("length(compinfof2c) must be length(compinfo)")
+            @warn("compf2c now becomes a null array!")
             compf2c = Matrix{Tl}()
         end
         new(ind, rs, tag, compinfo, rsf2c, tagf2c, compinfof2c, method)
@@ -129,7 +129,7 @@ function partition_tree_fiedler(G::GraphSignal.GraphSig, method::Symbol = :Lrw)
     # `rs` stands for regionstarts, meaning that the index in `ind` of the first
     # point in region number `i` is `rs[i]`
     rs = zeros(Tl, N + 1, jmax)
-    rs[1, :] = 1
+    rs[1, :] .= 1
     rs[2, 1] = N + 1
 
     #
@@ -140,7 +140,8 @@ function partition_tree_fiedler(G::GraphSignal.GraphSig, method::Symbol = :Lrw)
     rs0 = 0                     # define here for the whole loops,
                                 # which differs from MATLAB.
     while regioncount < N
-        regioncount = countnz(rs[:, j]) - 1 # the number of regions on level j
+        #regioncount = countnz(rs[:,j]) - 1
+        regioncount = count(!iszero,rs[:, j]) - 1 # the number of regions on level j
         if j == jmax  # add a column to rs for level j+1, if necessary
             rs = hcat(rs, vcat(1, zeros(N)))
             jmax = jmax + 1
