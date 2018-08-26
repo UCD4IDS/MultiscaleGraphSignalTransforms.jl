@@ -113,7 +113,6 @@ end # of function replace_data!
 * `sigma`: the standard deviation of the noise (if stdp == true)
 """
 function snr(G1::GraphSig, G2::GraphSig, stdp=false)
-# In julia, the Frobenius norm of a matrix can be computed via `vecnorm`.
   tmp = norm(G2.f - G1.f)
   if tmp < 10 * eps()
     @warn("Two signals are the same, hence SNR = Inf")
@@ -193,9 +192,11 @@ function ggrid(Nx::Int, Ny::Int, connect::Symbol = :c4)
     if connect == :c4         # this is the default, i.e., l; r; u; d.
         # make 1-D weight matrices
         ex = ones(Nx - 1)
-        Wx = spdiagm((ex, ex), (-1, 1))
+        Wx  = spdiagm(-1 => ex, 1 => ex)
+        #Wx = spdiagm((ex, ex), (-1, 1))
         ey = ones(Ny - 1)
-        Wy = spdiagm((ey, ey), (-1, 1))
+        Wy  = spdiagm(-1 => ey, 1 => ey)
+        #Wy = spdiagm((ey, ey), (-1, 1))
         # form the 2-D weight matrix
         W = kron(speye(Nx), Wy) + kron(Wx, speye(Ny)) # this keeps a sparse form
     else                # now for 8-connected or fully-connected cases

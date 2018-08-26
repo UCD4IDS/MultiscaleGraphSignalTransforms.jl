@@ -36,7 +36,7 @@ function tf_init(dmatrix::Matrix{Float64},GP::GraphPart)
     (m,n) = size(dmatrix)
 
     # Initialize coeffdict
-    coeffdict = Array{Dict{Tuple{Int64,Int64},Float64}}(n)
+    coeffdict = Array{Dict{Tuple{Int64,Int64},Float64}}(undef, n)
 
     # Fill in the values with the rule that `coeffdict[j][(k,l)]` represents
     # the coefficient of basis-vector on level j with region k and tag l.

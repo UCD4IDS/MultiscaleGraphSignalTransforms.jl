@@ -102,7 +102,7 @@ function PartitionTreeMatrix_unbalanced_haar_subblock(matrix::Matrix{Float64};me
                 if method == :Totalvar
                     Entropy_temp = total_var(matrix[1:i,1:j])/(i*j)^p + total_var(matrix[i+1:m,1:j])/((m-i)*j)^p + total_var(matrix[1:i,j+1:n])/(i*(n-j))^p + total_var(matrix[i+1:m,j+1:n])/((m-i)*(n-j))^p;
                 else
-                    Entropy_temp = -( vecnorm(matrix[i,:]-matrix[i+1,:],1) + vecnorm(matrix[:,j] - matrix[:,j+1],1) )/((i*j)^(-p) + ((m-i)*j)^(-p) + (i*(n-j))^(-p) + ((m-i)*(n-j))^(-p));
+                    Entropy_temp = -( norm(matrix[i,:]-matrix[i+1,:],1) + norm(matrix[:,j] - matrix[:,j+1],1) )/((i*j)^(-p) + ((m-i)*j)^(-p) + (i*(n-j))^(-p) + ((m-i)*(n-j))^(-p));
                 end
                 if Entropy_temp < Entropy
                     Entropy = Entropy_temp
