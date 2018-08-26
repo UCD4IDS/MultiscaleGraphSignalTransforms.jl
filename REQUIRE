@@ -6,3 +6,5 @@ MAT
 Plots
 Reexport
 Arpack
+LinearAlgebra
+SparseArrays
