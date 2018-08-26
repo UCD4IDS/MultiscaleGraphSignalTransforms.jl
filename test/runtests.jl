@@ -1,5 +1,5 @@
 # This is a very preliminary test function; just a copy of bbtest.jl of small scale P6 with 10 random signals. More coming!
-using Main.MTSG, MAT, LinearAlgebra, SparseArrays
+using MTSG, MAT, LinearAlgebra, SparseArrays
 ###########################################################################################
 # Testing basic GHWT functions #
 ###########################################################################################
