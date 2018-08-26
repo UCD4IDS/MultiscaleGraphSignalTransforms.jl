@@ -171,11 +171,11 @@ D1[D1 .== 0] = maximum([0.01, minimum(D1[D1 .> 0])/10])
 D2 = sum(A,1)
 D2[D2 .== 0] = maximum([0.01, minimum(D2[D2 .> 0])/10])
 
-u,_,v = svd(diagm(D1[:].^(-0.5))*A*diagm(D2[:].^(-0.5)))
+u,_,v = svd(diagm(0 => D1[:].^(-0.5))*A*diagm(0 => D2[:].^(-0.5)))
 
 # extract the 2nd singular vectors and multiply by D_i^-0.5
-u = diagm(D1[:].^-0.5)*u[:,2]
-v = diagm(D2[:].^-0.5)*v[:,2]
+u = diagm(0 => D1[:].^-0.5)*u[:,2]
+v = diagm(0 => D2[:].^-0.5)*v[:,2]
 return u,v
 end
 
@@ -208,7 +208,7 @@ Implemented by Yiqun Shao (Adviser: Dr. Naoki Saito)
 
 function GHWT_Matrix2D_Analysis_BestBasis(matrix::Matrix{Float64},ind::Matrix{Int64} ,rse::Vector{Array{Int64,1}})
     # cost functional
-    costfun = function(x) vecnorm(x[:],1) end
+    costfun = function(x) norm(x[:],1) end
 
     # constants
     rows,cols = size(matrix);
@@ -420,7 +420,7 @@ Copyright 2018 The Regents of the University of California
 Implemented by Yiqun Shao (Adviser: Dr. Naoki Saito)
 """
 function GHWT_Matrix2D_Analysis_Synthesis(BBmatrix::Matrix{Float64},BBmatrix_ind::Matrix{Int64},tag::Array{Int64,3} ,rse::Vector{Array{Int64,1}})
-    costfun = function(x) vecnorm(x[:],1) end
+    costfun = function(x) norm(x[:],1) end
     # constants
     rows,cols = size(BBmatrix);
     #tol = 10^4*eps()
