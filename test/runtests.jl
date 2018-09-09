@@ -1,13 +1,13 @@
 # This is a very preliminary test function; just a copy of bbtest.jl of small scale P6 with 10 random signals. More coming!
-using MTSG, MAT, LinearAlgebra, SparseArrays
+using MTSG, LinearAlgebra, SparseArrays, JLD2
 ###########################################################################################
 # Testing basic GHWT functions #
 ###########################################################################################
 
 println("1. Testing basic GHWT functions")
-tmp=matread("path6randn10.mat")
-G=gpath(6, tmp["tmp"])
-GP=partition_tree_fiedler(G)
+@load "test\\path6randn10.jld2" G
+G = gpath(6, G["tmp"])
+GP = partition_tree_fiedler(G)
 dc2f = ghwt_analysis!(G, GP=GP)
 # Check the Haar basis
 BH=bs_haar(GP)
@@ -23,7 +23,7 @@ println("The comp BB levlist: ", (bbc2f[2].levlist)')
 levlengths = Vector{Int}([1, 1, 1, 2, 1])
 println("The true BB levlengths: ", levlengths')
 println("The comp BB levlengths: ", (bbc2f[2].levlengths)')
-tmp2=matread("bbcoef.mat")
+@load "test\\bbcoef.jld2" tmp2
 println("The relative L2 error of the BB coefs: ", norm(tmp2["bbcoef"][:]-bbc2f[1][:])/norm(tmp2["bbcoef"]))
 println("\n")
 
@@ -120,7 +120,7 @@ println("\n")
 # Testing HGLET functions and hybrid methods related functions #
 ###########################################################################################
 println("4. Testing HGLET functions and hybrid methods related functions")
-G = matread("Dendrite.mat")
+@load "test\\Dendrite.jld2" G
 G = G["G"]
 G = GraphSig(G["W"], xy = G["xy"], f = G["f"], name = G["name"])
 GP = partition_tree_fiedler(G)

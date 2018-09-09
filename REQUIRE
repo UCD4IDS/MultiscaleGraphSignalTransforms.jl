@@ -2,7 +2,6 @@ julia 0.7
 
 Distances
 Distributions
-MAT
 Plots
 Reexport
 Arpack
