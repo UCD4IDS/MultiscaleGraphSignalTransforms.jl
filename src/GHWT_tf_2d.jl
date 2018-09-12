@@ -35,7 +35,7 @@ end
 
 
 """
-    dmatrix_new,tag2ind_new,ind2tag_new,tag_tf = tf_core_2d_col(dmatrix::Matrix{Float64},tag2ind::Dict{Tuple{Int64,Int64,Int64},Int64},ind2tag::Dict{Int64,Tuple{Int64,Int64,Int64}},jmax::Int64)
+    dmatrix_new,tag2ind_new,ind2tag_new,tag_tf = tf_core_2d_col(dmatrix::Matrix{Float64},tag2ind::Dict{Tuple{Int64,Int64,Int64},Int64},ind2tag::Dict{Int64,Tuple{Int64,Int64,Int64}},jmax::Integer)
 
 One forward iteration of 2-d time-frequency adapted ghwt on the column direction
 
@@ -57,7 +57,7 @@ Copyright 2018 The Regents of the University of California
 
 Implemented by Yiqun Shao (Adviser: Dr. Naoki Saito)
 """
-function tf_core_2d_col(dmatrix::Matrix{Float64},tag2ind::Dict{Tuple{Int64,Int64,Int64},Int64},ind2tag::Dict{Int64,Tuple{Int64,Int64,Int64}},jmax::Int64)
+function tf_core_2d_col(dmatrix::Matrix{Float64},tag2ind::Dict{Tuple{Int64,Int64,Int64},Int64},ind2tag::Dict{Int64,Tuple{Int64,Int64,Int64}},jmax::Integer)
     # power of the cost-functional
     costp = 1
     p,q = size(dmatrix)
@@ -105,7 +105,7 @@ end
 
 
 """
-    dmatrix_new,tag2ind_new,ind2tag_new,tag_tf = tf_core_2d_row(dmatrix::Matrix{Float64},tag2ind::Dict{Tuple{Int64,Int64,Int64},Int64},ind2tag::Dict{Int64,Tuple{Int64,Int64,Int64}},jmax::Int64)
+    dmatrix_new,tag2ind_new,ind2tag_new,tag_tf = tf_core_2d_row(dmatrix::Matrix{Float64},tag2ind::Dict{Tuple{Int64,Int64,Int64},Int64},ind2tag::Dict{Int64,Tuple{Int64,Int64,Int64}},jmax::Integer)
 
 Almost the same as tf_core_2d_col. But all the operations on matrix are row-wise.
 Due to the column-based matrix feature of Julia language. We are currently only using the tf_core_2d_col here.
@@ -128,7 +128,7 @@ Copyright 2018 The Regents of the University of California
 
 Implemented by Yiqun Shao (Adviser: Dr. Naoki Saito)
 """
-function tf_core_2d_row(dmatrix::Matrix{Float64},tag2ind::Dict{Tuple{Int64,Int64,Int64},Int64},ind2tag::Dict{Int64,Tuple{Int64,Int64,Int64}},jmax::Int64)
+function tf_core_2d_row(dmatrix::Matrix{Float64},tag2ind::Dict{Tuple{Int64,Int64,Int64},Int64},ind2tag::Dict{Int64,Tuple{Int64,Int64,Int64}},jmax::Integer)
     costp = 1
     p,q = size(dmatrix)
     dmatrix_new = zeros(p,q)

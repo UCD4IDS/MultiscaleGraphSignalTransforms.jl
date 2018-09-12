@@ -1,4 +1,5 @@
 # This is a very preliminary test function; just a copy of bbtest.jl of small scale P6 with 10 random signals. More coming!
+using Pkg
 Pkg.add("JLD2")
 using MTSG, LinearAlgebra, SparseArrays, JLD2
 ###########################################################################################
@@ -123,7 +124,10 @@ println("\n")
 println("4. Testing HGLET functions and hybrid methods related functions")
 @load "Dendrite.jld2" G
 G = G["G"]
-G = GraphSig(G["W"], xy = G["xy"], f = G["f"], name = G["name"])
+# convert to SparseMatrixCSC{Float64,Int} where Int is machine dependent.
+A = Array(G["W"])
+B = sparse(A)
+G = GraphSig(B, xy = G["xy"], f = G["f"], name = G["name"])
 GP = partition_tree_fiedler(G)
 
 dmatrixH, dmatrixHrw, dmatrixHsym = HGLET_Analysis_All(G, GP) # expansion coefficients of 3-way HGLET bases
