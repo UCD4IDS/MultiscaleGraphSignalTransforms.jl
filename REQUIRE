@@ -5,6 +5,3 @@ Distributions
 Plots
 Reexport
 Arpack
-LinearAlgebra
-SparseArrays
-JLD2
