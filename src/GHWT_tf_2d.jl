@@ -501,3 +501,58 @@ function ghwt_tf_init_2d(matrix::Matrix{Float64})
 
   return dmatrix, GProws, GPcols
 end
+
+
+
+function ghwt_tf_init_2d_Linderberg(matrix::Matrix{Float64})
+  #Partition matrix recuisively using Dhillon's method
+  m,n = size(matrix)
+  GProws = regularhaar(m)
+  GPcols = regularhaar(n)
+  ghwt_core!(GProws)
+  ghwt_core!(GPcols)
+
+
+  matrix_re = matrix[GProws.ind, GPcols.ind]
+
+  (N, jmax_row) = size(GProws.rs)
+  N = N-1
+
+  # expand on the row direction
+  (frows, fcols) = size(matrix_re)
+  dmatrix = zeros((N,jmax_row,fcols))
+  dmatrix[:,jmax_row,:] = matrix_re
+
+  ghwt_core!(GProws, dmatrix)
+
+  dmatrix = reshape(dmatrix, (frows*jmax_row, fcols))'
+
+  # expand on the column direction
+  (N, jmax_col) = size(GPcols.rs)
+  N = N - 1
+  dmatrix2 = zeros(N,jmax_col,size(dmatrix,2))
+  dmatrix2[:, jmax_col, :] = dmatrix
+  ghwt_core!(GPcols, dmatrix2)
+
+  dmatrix = reshape(dmatrix2, (fcols*jmax_col, frows*jmax_row))'
+
+  return dmatrix, GProws, GPcols
+end
+
+
+function regularhaar(n::Int64)
+    if log2(n)%1 != 0
+        error("Input number should be some power of 2")
+    else
+        ind = Array{UInt64}(1:n)
+        l = UInt64(log2(n))
+        rs = zeros(UInt64,n+1,l+1)
+        for j = 1:l+1
+            gap = UInt64(n/(2^(j-1)))
+            for i = 1:(2^(j-1) + 1)
+                rs[i,j] = UInt64((i-1)*gap + 1)
+            end
+        end
+    end
+    return GraphPart{UInt64,UInt64}(ind, rs)
+end
