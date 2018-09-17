@@ -68,7 +68,7 @@ function partition_fiedler(W::SparseMatrixCSC{Float64,Int};
             v0 = ones(N) / sqrt(N)
             try
                 # MATLAB, [v,val,eigs_flag] = eigs(diag(sum(W))-W,2,sigma,opts);
-                val, vtmp = eigs(diagm(0 => vec(sum(W, 1))) - W,
+                val, vtmp = eigs(sparse(diagm(0 => vec(sum(W, dims = 1)))) - W,
                                  nev = 2, sigma = sigma, v0 = v0)
             catch emsg
                 @warn("Exception in eigs(L) occurred: ", emsg)
@@ -104,7 +104,8 @@ function partition_fiedler(W::SparseMatrixCSC{Float64,Int};
                 # MATLAB: [v,val,eigs_flag] = ...
                 #           eigs(diag(sum(W))-W,diag(sum(W)),2,sigma,opts);
                 # This is L*v = \lambda*D*v case.
-                val, vtmp = eigs(diagm(0 => vec(sum(W, dims = 1))) - W, diagm(0 => vec(sum(W, dims = 1))),
+                temp = sparse(diagm(0 => vec(sum(W, dims = 1))))
+                val, vtmp = eigs(temp - W, temp,
                                  nev = 2, sigma = sigma, v0 = v0)
             catch emsg
                 @warn("Exception in eigs(Lrw) occurred: ", emsg)

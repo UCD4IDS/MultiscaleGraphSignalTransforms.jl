@@ -1,8 +1,8 @@
 ## COPYRIGHT
 
-Copyright 2015-2017 The Regents of the University of California
+Copyright 2015-2018 The Regents of the University of California
 
-Implemented by Jeff Irion and Naoki Saito
+Implemented by Jeff Irion, Naoki Saito, and Yiqun Shao
 
 
 ## SETUP
@@ -10,7 +10,7 @@ Implemented by Jeff Irion and Naoki Saito
 To install the MTSG.jl (Multiscale Transforms for Signals on Graphs), run
 ```julia
 ]
-v0.7 pkg> add https://gitlab.com/BoundaryValueProblems/MTSG.jl.git
+(v1.0) pkg> add https://gitlab.com/BoundaryValueProblems/MTSG.jl.git
 using MTSG
 ```
 
