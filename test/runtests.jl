@@ -1,6 +1,4 @@
 # This is a very preliminary test function; just a copy of bbtest.jl of small scale P6 with 10 random signals. More coming!
-using Pkg
-Pkg.add("JLD2")
 using MTSG, LinearAlgebra, SparseArrays, JLD2
 ###########################################################################################
 # Testing basic GHWT functions #
