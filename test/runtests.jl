@@ -13,7 +13,7 @@ dc2f = ghwt_analysis!(G, GP=GP)
 BH=bs_haar(GP)
 dvec=dmatrix2dvec(dc2f, GP, BH)
 frecon=ghwt_synthesis(dvec,GP,BH)
-println("Relative L2 error of the Haar transform: ", norm(G.f[:]-frecon[:])/norm(G.f[:]))
+println("Relative L2 error of the Haar transform: ", norm(G.f-frecon)/norm(G.f))
 
 # Check the Best Basis
 bbc2f = ghwt_c2f_bestbasis(dc2f, GP)
@@ -24,7 +24,7 @@ levlengths = Vector{Int}([1, 1, 1, 2, 1])
 println("The true BB levlengths: ", levlengths')
 println("The comp BB levlengths: ", (bbc2f[2].levlengths)')
 @load "bbcoef.jld2" tmp2
-println("The relative L2 error of the BB coefs: ", norm(tmp2["bbcoef"][:]-bbc2f[1][:])/norm(tmp2["bbcoef"]))
+println("The relative L2 error of the BB coefs: ", norm(tmp2["bbcoef"]-bbc2f[1])/norm(tmp2["bbcoef"]))
 println("\n")
 
 
@@ -67,14 +67,14 @@ println("The original signal has L1 norm: ", norm(f,1))
 dvec,BS = ghwt_bestbasis(dmatrix, GP,cfspec=1)
 (f, GS) = ghwt_synthesis(reshape(dvec,(size(dvec)[1],1)), GP, BS, G)
 println("The coefficient vectors of GHWT best basis has L1 norm: ", norm(dvec,1))
-println("Relative L2 error of the synthesized signal: ", norm(G.f[:]-f[:])/norm(G.f[:]))
+println("Relative L2 error of the synthesized signal: ", norm(G.f-f)/norm(G.f))
 
 
 # through the time-frequency analysis
 bestbasis, bestbasis_tag = ghwt_tf_bestbasis(dmatrix[:,:,1], GP)
 (f_tf, GS_tf) = tf_synthesis(bestbasis, bestbasis_tag, GP, G)
 println("The coefficient vectors of time-frequency adapted GHWT best basis has L1 norm: ", norm(bestbasis,1))
-println("Relative L2 error of the synthesized signal: ", norm(G.f[:]-f_tf[:])/norm(G.f[:]))
+println("Relative L2 error of the synthesized signal: ", norm(G.f-f_tf)/norm(G.f))
 
 println("\n")
 
@@ -110,9 +110,9 @@ matrix_r_temp = ghwt_synthesis_2d(BBmatrix, GProws, GPcols)
 matrix_r = zeros(size(matrix))
 matrix_r[GProws.ind,GPcols.ind] = matrix_r_temp
 
-println("The toy matrix [1, 2, 3; 4, 5, 6] has 1-vecnorm as ", norm(matrix,1))
-println("The bestbasis of toy matrix [1, 2, 3; 4, 5, 6] has 1-vecnorm as ", norm(Bbasis,1))
-println("Relative L2 error of the synthesized matrix: ", norm(matrix[:] - matrix_r[:], 2)/norm(matrix[:],2))
+println("The toy matrix [1 2 3; 4 5 6] has 1-vecnorm as ", norm(matrix,1))
+println("The bestbasis of toy matrix [1 2 3; 4 5 6] has 1-vecnorm as ", norm(Bbasis,1))
+println("Relative L2 error of the synthesized matrix: ", norm(matrix - matrix_r, 2)/norm(matrix,2))
 
 println("\n")
 
@@ -138,6 +138,6 @@ fS5, GS5 = HGLET_GHWT_Synthesis(reshape(dvec5,(size(dvec5)[1],1)),GP,BS5,trans5,
 
 println("The original signal has L1 norm: ", norm(G.f,1))
 println("The coefficients of best-basis selected from hybrid method has L1 norm: ", norm(dvec5,1))
-println("Relative L2 error of the synthesized signal: ", norm(G.f[:]-fS5[:])/norm(G.f[:]))
+println("Relative L2 error of the synthesized signal: ", norm(G.f-fS5)/norm(G.f))
 
 println("\n")
