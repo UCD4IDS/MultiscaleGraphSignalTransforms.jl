@@ -55,6 +55,9 @@ For 3D rotation, use `plotlyjs()` backend
 Revised by Naoki Saito, Feb. 17, 2017
 Revised by Naoki Saito, Oct. 13, 2017
 Revised by Haotian Li, Jul. 25, 2018
+Revised by Haotian Li and Naoki Saito for Julia v0.7/1.0, Sep. 21, 2018
+Instead of plot(...), we decided to use Plots.plot(...) in order to avoid
+    the function name ambiguity; this is a safer approach.
 """
 function gplot(A::SparseMatrixCSC{Float64,Int}, xyz::Matrix{Float64}; plotp::Bool = true,
                 style::Symbol = :auto, width::Int = 2, color::Symbol = :blue,
@@ -63,7 +66,9 @@ function gplot(A::SparseMatrixCSC{Float64,Int}, xyz::Matrix{Float64}; plotp::Boo
                 grid::Bool = false, label::String = "")
 
     # Extract the node indices
-    (i,j)=ind2sub(size(A), find(A .!= 0.0));
+    ij = findall(A .!= 0.0); # Output of findall is an array of CartesianIndex.
+    i = [ij[k][1] for k=1:length(ij)]
+    j = [ij[k][2] for k=1:length(ij)]
     p = sortperm(max.(i,j))
     i = i[p]
     j = j[p]
@@ -89,10 +94,10 @@ function gplot(A::SparseMatrixCSC{Float64,Int}, xyz::Matrix{Float64}; plotp::Boo
     if plotp                    # plot the line-segments
         if nspacedim < 3        # 2D
             if shape == :none   # no markers
-                plot(X, Y,
+                Plots.plot(X, Y,
                     linestyle=style, linewidth=width, linecolor=color, grid=grid, label=label)
             else                # marker attributes are set.
-                plot(X, Y,
+                Plots.plot(X, Y,
                     linestyle=style, linewidth=width, linecolor=color,
                     markershape=shape, markersize=mwidth, markercolor=mcolor, markeralpha=malpha,
                     markerstrokecolor=mscolor, markerstrokewidth=mswidth, markerstrokealpha=msalpha,
@@ -100,10 +105,10 @@ function gplot(A::SparseMatrixCSC{Float64,Int}, xyz::Matrix{Float64}; plotp::Boo
             end
         else                    #3D
             if shape == :none   # no markers
-                plot(X, Y, Z,
+                Plots.plot(X, Y, Z,
                     linestyle=style, linewidth=width, linecolor=color, grid=grid, label=label)
             else                # marker attributes are set.
-                plot(X, Y, Z,
+                Plots.plot(X, Y, Z,
                     linestyle=style, linewidth=width, linecolor=color,
                     markershape=shape, markersize=mwidth, markercolor=mcolor, markeralpha=malpha,
                     markerstrokecolor=mscolor, markerstrokewidth=mswidth, markerstrokealpha=msalpha,
@@ -152,10 +157,10 @@ function gplot!(A::SparseMatrixCSC{Float64,Int}, xyz::Matrix{Float64}; plotp::Bo
     if plotp                    # plot the line-segments
         if nspacedim < 3        # 2D
             if shape == :none   # no markers
-                plot!(X, Y,
+                Plots.plot!(X, Y,
                     linestyle=style, linewidth=width, linecolor=color, grid=grid, label=label)
             else                # marker attributes are set.
-                plot!(X, Y,
+                Plots.plot!(X, Y,
                     linestyle=style, linewidth=width, linecolor=color,
                     markershape=shape, markersize=mwidth, markercolor=mcolor, markeralpha=malpha,
                     markerstrokecolor=mscolor, markerstrokewidth=mswidth, markerstrokealpha=msalpha,
@@ -163,10 +168,10 @@ function gplot!(A::SparseMatrixCSC{Float64,Int}, xyz::Matrix{Float64}; plotp::Bo
             end
         else                    #3D
             if shape == :none   # no markers
-                plot!(X, Y, Z,
+                Plots.plot!(X, Y, Z,
                     linestyle=style, linewidth=width, linecolor=color, grid=grid, label=label)
             else                # marker attributes are set.
-                plot!(X, Y, Z,
+                Plots.plot!(X, Y, Z,
                     linestyle=style, linewidth=width, linecolor=color,
                     markershape=shape, markersize=mwidth, markercolor=mcolor, markeralpha=malpha,
                     markerstrokecolor=mscolor, markerstrokewidth=mswidth, markerstrokealpha=msalpha,
