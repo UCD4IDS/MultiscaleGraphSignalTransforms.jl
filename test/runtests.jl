@@ -141,3 +141,11 @@ println("The coefficients of best-basis selected from hybrid method has L1 norm:
 println("Relative L2 error of the synthesized signal: ", norm(G.f-fS5)/norm(G.f))
 
 println("\n")
+
+
+##################################################################
+@load "MN_MutGauss.jld2" G
+tmp1 = G["G"]
+G=GraphSig(tmp1["W"],xy=tmp1["xy"],f=tmp1["f"],name =tmp1["name"],plotspecs = tmp1["plotspecs"])
+G = Adj2InvEuc(G)
+GraphSig_Plot(G)
