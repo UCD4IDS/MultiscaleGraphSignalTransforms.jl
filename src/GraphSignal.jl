@@ -237,7 +237,7 @@ function Adj2InvEuc(G::GraphSig)
     f = deepcopy(G.f)
 
     #find the edges
-    (rows,cols) = Base.findnz(W)
+    (rows,cols) = findnz(W)
 
     #remove duplicate points
     for j = length(rows):-1:1
@@ -246,7 +246,7 @@ function Adj2InvEuc(G::GraphSig)
         W = W[:, setdiff(1:end, rows[j])]
         xy = xy[setdiff(1:end, rows[j]), :]
         f = f[setdiff(1:end, rows[j]),:]
-        (rows,cols) = Base.findnz(W)
+        (rows,cols) = findnz(W)
       end
     end
 
