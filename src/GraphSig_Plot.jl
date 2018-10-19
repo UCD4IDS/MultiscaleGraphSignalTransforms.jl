@@ -150,17 +150,17 @@ function GraphSig_Plot(G::GraphSig)
             # plot the nodes for a 2-D graph
             if G.dim == 2
                 if isa(marker, Symbol)#ischar(marker)
-                    scatter!(G.xy[:,1], G.xy[:,2], markersize = ptsize[1], markercolor = marker, markerstrokestyle = :dot);
+                    scatter!(G.xy[:,1], G.xy[:,2], markersize = ptsize[1], markercolor = marker);
                 else
-                    scatter!(G.xy[:,1], G.xy[:,2], markersize = ptsize[1], zcolor = G.f, markercolor = colorm, markerstrokestyle = :dot);
+                    scatter!(G.xy[:,1], G.xy[:,2], markersize = ptsize[1], zcolor = G.f, markercolor = colorm);
                 end
 
                 # plot the nodes for a 3-D graph
             else
                 if isa(marker, Symbol)
-                    scatter!(G.xy(:,1), G.xy(:,2), G.xy(:,3), markersize = ptsize[1], markercolor = marker, markerstrokestyle = :dot);
+                    scatter!(G.xy(:,1), G.xy(:,2), G.xy(:,3), markersize = ptsize[1], markercolor = marker);
                 else
-                    scatter!(G.xy(:,1), G.xy(:,2), G.xy(:,3), markersize = ptsize[1], zcolor = G.f, markercolor = colorm, markerstrokestyle = :dot);
+                    scatter!(G.xy(:,1), G.xy(:,2), G.xy(:,3), markersize = ptsize[1], zcolor = G.f, markercolor = colorm);
                 end
             end
 
