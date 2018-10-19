@@ -1,6 +1,6 @@
 using Plots
 """
-    plot(G::GraphSig)
+    GraphSig_Plot(G::GraphSig)
 
 Display a plot of the data in a GraphSig object
 
