@@ -1,3 +1,4 @@
+using Plots
 """
     plot(G::GraphSig)
 
