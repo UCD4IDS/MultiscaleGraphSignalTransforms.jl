@@ -135,8 +135,15 @@ function gplot!(A::SparseMatrixCSC{Float64,Int}, xyz::Matrix{Float64}; plotp::Bo
                 mscolor::Symbol = color, mswidth::Int = 1, msalpha::Float64 = 1.0,
                 grid::Bool = false, label::String = "")
 
+    # If A is symmetric, then use only the upper triangular part for efficiency.
+    if issymmetric(A)
+        A = UpperTriangular(A)
+    end
+
     # Extract the node indices
-    (i,j)=ind2sub(size(A), find(A .!= 0.0));
+    ij = findall(A .!= 0.0); # Output of findall is an array of CartesianIndex.
+    i = [ij[k][1] for k=1:length(ij)]
+    j = [ij[k][2] for k=1:length(ij)]
     p = sortperm(max.(i,j))
     i = i[p]
     j = j[p]
