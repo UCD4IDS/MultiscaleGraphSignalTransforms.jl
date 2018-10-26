@@ -16,16 +16,16 @@ GPLOT!(A,xyz,...) adds a plot to `current` one.
  with the position for node i in the i-th row, xyz[i,:] = [x[i] y[i]] or xyz[i,:] = [x[i] y[i] z[i]].
 * `plotp::Bool`: if the plot is made (default) or return the X, Y, Z arrays
 * `style::Symbol`: of line; choose from Symbol[:auto,:solid,:dash,:dot,:dashdot] (default: :auto)
-* `width::Int`: of line in pixels (default: 2)
+* `width::Number`: of line in pixels (default: 2; fraction, e.g., 0.5 is allowed)
 * `color::Symbol`: of line; choose from Symbol[:white,:blue,:red,:green,...] (default: :blue)
 * `shape::Symbol`: choose from Symbol[:none,:auto,:circle,:rect,:star5,:diamond,
                                       :hexagon,:cross,:xcross,:utriangle,
                                       :dtriangle,:pentagon,:heptagon,:octagon,
                                       :star4,:star6,:star7,:star8,:vline,:hline] (default: :none)
-* `mwidth::Int`: marker size (or radius) in pixels (default: 2)
+* `mwidth::Number`: marker size (or radius) in pixels (default: 2)
 * `mcolor::Symbol`: of marker (default: the same as line color)
 * `malpha::Float64`: opacity of marker interior; choose from [0,1] (default: 1.0)
-* `mswidth::Int`: marker stroke size (width) in pixels (default: 1)
+* `mswidth::Number`: marker stroke size (width) in pixels (default: 1)
 * `mscolor::Symbol`: of marker stroke (default: the same as line color)
 * `msalpha::Float64`: opacity of marker stroke; choose from [0,1] (default: 1.0)
 * `grid::Bool`: a flag to show grid lines (default: false)
@@ -58,11 +58,12 @@ Revised by Haotian Li, Jul. 25, 2018
 Revised by Haotian Li and Naoki Saito for Julia v0.7/1.0, Sep. 21, 2018
 Instead of plot(...), we decided to use Plots.plot(...) in order to avoid
     the function name ambiguity; this is a safer approach.
+Revised by Naoki Saito, Oct. 22, 2018
 """
 function gplot(A::SparseMatrixCSC{Float64,Int}, xyz::Matrix{Float64}; plotp::Bool = true,
-                style::Symbol = :auto, width::Int = 2, color::Symbol = :blue,
-                shape::Symbol = :none, mwidth::Int = 1, mcolor::Symbol = color, malpha::Float64 = 1.0,
-                mscolor::Symbol = color, mswidth::Int = 1, msalpha::Float64 = 1.0,
+                style::Symbol = :auto, width::Number = 2, color::Symbol = :blue,
+                shape::Symbol = :none, mwidth::Number = 1, mcolor::Symbol = color, malpha::Float64 = 1.0,
+                mscolor::Symbol = color, mswidth::Number = 1, msalpha::Float64 = 1.0,
                 grid::Bool = false, label::String = "")
 
     # If A is symmetric, then use only the upper triangular part for efficiency.
@@ -130,13 +131,20 @@ function gplot(A::SparseMatrixCSC{Float64,Int}, xyz::Matrix{Float64}; plotp::Boo
 end
 
 function gplot!(A::SparseMatrixCSC{Float64,Int}, xyz::Matrix{Float64}; plotp::Bool = true,
-                style::Symbol = :auto, width::Int = 2, color::Symbol = :blue,
-                shape::Symbol = :none, mwidth::Int = 1, mcolor::Symbol = color, malpha::Float64 = 1.0,
-                mscolor::Symbol = color, mswidth::Int = 1, msalpha::Float64 = 1.0,
+                style::Symbol = :auto, width::Number = 2, color::Symbol = :blue,
+                shape::Symbol = :none, mwidth::Number = 1, mcolor::Symbol = color, malpha::Float64 = 1.0,
+                mscolor::Symbol = color, mswidth::Number = 1, msalpha::Float64 = 1.0,
                 grid::Bool = false, label::String = "")
 
+    # If A is symmetric, then use only the upper triangular part for efficiency.
+    if issymmetric(A)
+        A = UpperTriangular(A)
+    end
+
     # Extract the node indices
-    (i,j)=ind2sub(size(A), find(A .!= 0.0));
+    ij = findall(A .!= 0.0); # Output of findall is an array of CartesianIndex.
+    i = [ij[k][1] for k=1:length(ij)]
+    j = [ij[k][2] for k=1:length(ij)]
     p = sortperm(max.(i,j))
     i = i[p]
     j = j[p]
