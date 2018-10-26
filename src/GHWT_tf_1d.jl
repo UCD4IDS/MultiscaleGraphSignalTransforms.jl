@@ -337,6 +337,7 @@ function tf_synthesis(bestbasis::Matrix{Float64},bestbasis_tag::Matrix{<:Any},GP
   tag = GP.tag
   rs = GP.rs
   bestbasis_new = deepcopy(bestbasis)
+  bestbasis_tag = deepcopy(bestbasis_tag)
   jmax = size(rs,2)
   for j = 1:(jmax-1)
     regioncount = count(!iszero, rs[:,j]) - 1
