@@ -298,18 +298,18 @@ function tf_threshold(bestbasis::Matrix{Float64}, GP::GraphPart, keep::Float64, 
   dvec_S = sort(abs.(bestbasis[:]), rev = true)
   T = dvec_S[kept + 1]
   bestbasis_new = deepcopy(bestbasis[:])
-  indp = bestbasis_new.> T           #index for coefficients > T
-  indn = bestbasis_new.< -1*T        #index for coefficients < -T
+  indp = bestbasis_new .> T           #index for coefficients > T
+  indn = bestbasis_new .< -1*T        #index for coefficients < -T
 
   # hard thresholding
   if SORH == "h" || SORH == "hard"
-    bestbasis_new[.~(indp .| indn)] = 0
+    bestbasis_new[.~(indp .| indn)] .= 0
 
   # soft thresholding
   elseif SORH == "s" || SORH == "soft"
-    bestbasis_new[(.~indp) .& (.~indn) .& (tag[:].!=0)] = 0
-    bestbasis_new[indp .& (tag[:].!=0)] = bestbasis[indp .& (tag[:].!=0)] - T
-    bestbasis_new[indn .& (tag[:].!=0)] = bestbasis[indn .& (tag[:].!=0)] + T
+    bestbasis_new[(.~indp) .& (.~indn) .& (tag[:].!=0)] .= 0
+    bestbasis_new[indp .& (tag[:].!=0)] = bestbasis[indp .& (tag[:].!=0)] .- T
+    bestbasis_new[indn .& (tag[:].!=0)] = bestbasis[indn .& (tag[:].!=0)] .+ T
   end
 
   bestbasis_new = reshape(bestbasis_new,size(bestbasis))
