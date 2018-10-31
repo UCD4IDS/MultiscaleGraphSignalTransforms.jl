@@ -228,7 +228,7 @@ function partition_fiedler_troubleshooting(pm::Vector{Int},v::Vector{Float64},
             pm = 2 .* (abs.(v) .> tol) .- 1
             while sum(pm .< 0) == 0 || sum(pm .> 0) == 0
                 tol = 10 * tol    # relax the tolerance
-                pm = 2 * (abs.(v) .> tol) .- 1
+                pm = 2 .* (abs.(v) .> tol) .- 1
                 if tol > 1
                     pm[1:Int64(ceil(N / 2))] .= 1
                     pm[(Int64(ceil(N / 2)) + 1):N] .= -1
@@ -243,13 +243,13 @@ function partition_fiedler_troubleshooting(pm::Vector{Int},v::Vector{Float64},
                 pm0 = find(pm .== 0)
                 pm[pm0] = (W[pm0, :] * v .> tol) - (W[pm0, :] * v .< -tol)
                 # assign any remaining zeros to the group with fewer members
-                pm[find(pm .== 0)] = (sum(pm .> 0) - sum(pm .< 0)) >= 0
+                pm[find(pm .== 0)] = (sum(pm .> 0) - sum(pm .< 0)) .>= 0
             end
         end
         # if one region has no points after all the above processing
         if sum(pm .< 0) == 0 || sum(pm .> 0) == 0
-            pm[1:Int64(ceil(N / 2))] = 1
-            pm[Int64(ceil(N / 2) + 1):N] = -1
+            pm[1:Int64(ceil(N / 2))] .= 1
+            pm[Int64(ceil(N / 2) + 1):N] .= -1
         end
     end
 
