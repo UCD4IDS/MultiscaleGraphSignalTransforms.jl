@@ -378,8 +378,8 @@ function ghwt_tf_synthesis_2d_core!(dmatrix::Array{Float64,3},tag::Array{Int64,2
                         n2 = rs3 - rs2
 
                         ### SCALING COEFFICIENTS
-                        dmatrix[rs1,j+1,:] = ( sqrt(n1)*dmatrix[rs1,j,:] + sqrt(n2)*dmatrix[rs1+1,j,:] )/sqrt(n) + dmatrix[rs1,j+1,:]
-                        dmatrix[rs2,j+1,:] = ( sqrt(n2)*dmatrix[rs1,j,:] - sqrt(n1)*dmatrix[rs1+1,j,:] )/sqrt(n) + dmatrix[rs2,j+1,:]
+                        dmatrix[rs1,j+1,:] = ( sqrt(n1).*dmatrix[rs1,j,:] + sqrt(n2).*dmatrix[rs1+1,j,:] )./sqrt(n) + dmatrix[rs1,j+1,:]
+                        dmatrix[rs2,j+1,:] = ( sqrt(n2).*dmatrix[rs1,j,:] - sqrt(n1).*dmatrix[rs1+1,j,:] )./sqrt(n) + dmatrix[rs2,j+1,:]
 
                         # HAAR-LIKE & WALSH-LIKE COEFFICIENTS
 
