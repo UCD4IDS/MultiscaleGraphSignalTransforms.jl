@@ -218,7 +218,7 @@ Given a BasisSpec object, return the full-length, redundant levlist, levlengths,
 * `transfull::Matrix{Bool}`: the full-length, redundant trans description
 """
 function bsfull(GP::GraphPart, BS::BasisSpec;
-                trans::Vector{Bool} = Vector{Bool}(0),
+                trans::Vector{Bool} = Vector{Bool}(undef, 0),
                 levlengthsp::Bool = false, transp::Bool = false)
 
     ## 0. Preliminaries
@@ -250,20 +250,20 @@ function bsfull(GP::GraphPart, BS::BasisSpec;
     end
 
     ## 1. Fill out the redundant descriptions
-    idx = 0
+    global idx = 0
     for row = 1:length(levlist)
-        levlistfull[(idx + 1):(idx + levlengths[row])] = levlist[row]
+        levlistfull[(idx + 1):(idx + levlengths[row])] .= levlist[row]
         if levlengthsp
-            levlengthsfull[(idx + 1):(idx + levlengths[row])] = levlengths[row]
+            levlengthsfull[(idx + 1):(idx + levlengths[row])] .= levlengths[row]
         end
         if !isempty(transfull)
             transfull[(idx + 1):(idx + levlengths[row]), :] = repmat(trans[row, :], levlengths[row], 1)
         end
-        idx += levlengths[row]
+        global idx += levlengths[row]
     end
 
     ## 2. Prepare the returns
-    if levlegthsp
+    if levlengthsp
         if transp
             return levlistfull, levlengthsfull, transfull
         else

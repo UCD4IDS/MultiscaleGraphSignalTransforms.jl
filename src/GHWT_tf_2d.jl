@@ -1,6 +1,18 @@
+module GHWT_tf_2d
+
+
+
+using ..GraphSignal, ..GraphPartition, ..BasisSpecification, ..GHWT,  LinearAlgebra
+
+include("common.jl")
+
 include("PartitionTreeMatrixDhillon.jl")
 include("partition_fiedler.jl")
-using LinearAlgebra
+
+export ghwt_tf_init_2d, ghwt_tf_bestbasis_2d, ghwt_synthesis_2d, ghwt_tf_init_2d_Linderberg, BS2loc
+
+
+
 """
     tf2d_init(tag::Matrix{Int64},tag_r::Matrix{Int64})
 
@@ -313,7 +325,7 @@ function ghwt_tf_bestbasis_2d(dmatrix::Matrix{Float64},GProws::GraphPart,GPcols:
         infovec = newinfovec[:,newinfovec[1,:].!=-1]
     end
 #return Array{Float64,2}(dmatrix[sub2ind(size(dmatrix),infovec[3,:],infovec[4,:])]'),infovec[3:4,:]
-return Array{Float64,2}(dmatrix[(LinearIndices(size(dmatrix)))[CartesianIndex.(infovec[3,:],infovec[4,:])]]'),infovec[3:4,:]
+return dmatrix[(LinearIndices(size(dmatrix)))[CartesianIndex.(infovec[3,:],infovec[4,:])]],infovec[3:4,:]
 end
 
 
@@ -534,7 +546,7 @@ function ghwt_tf_init_2d_Linderberg(matrix::Matrix{Float64})
   dmatrix2[:, jmax_col, :] = dmatrix
   ghwt_core!(GPcols, dmatrix2)
 
-  dmatrix = reshape(dmatrix2, (fcols*jmax_col, frows*jmax_row))'
+  dmatrix = Array{Float64,2}(reshape(dmatrix2, (fcols*jmax_col, frows*jmax_row))')
 
   return dmatrix, GProws, GPcols
 end
@@ -555,4 +567,107 @@ function regularhaar(n::Int64)
         end
     end
     return GraphPart{UInt64,UInt64}(ind, rs)
+end
+
+
+
+"""
+    dmatrix = ghwt_tf_init_2d(matrix::Matrix{Float64}, GProws::GraphPart, GPcols::GraphPart)
+
+    Partition matrix first to get GProws and GPcols. Then expand matrix
+    in two directions to get dmatrix
+
+### Input Arguments
+* `matrix::Matrix{Float64}`: an input matrix
+* `GProws::GraphPart`: partitioning using rows as samples
+* `GPcols::GraphPart`: partitioning using cols as samples
+
+### Output Argument
+
+* `dmatrix::matrix{Float64}`: expansion coefficients of matrix
+"""
+function ghwt_tf_init_2d(matrix::Matrix{Float64}, GProws::GraphPart, GPcols::GraphPart)
+
+  ghwt_core!(GProws)
+  ghwt_core!(GPcols)
+  matrix_re = matrix[GProws.ind, GPcols.ind]
+
+  (N, jmax_row) = size(GProws.rs)
+  N = N-1
+
+  # expand on the row direction
+  (frows, fcols) = size(matrix_re)
+  dmatrix = zeros((N,jmax_row,fcols))
+  dmatrix[:,jmax_row,:] = matrix_re
+
+  ghwt_core!(GProws, dmatrix)
+
+  dmatrix = reshape(dmatrix, (frows*jmax_row, fcols))'
+
+  # expand on the column direction
+  (N, jmax_col) = size(GPcols.rs)
+  N = N - 1
+  dmatrix2 = zeros(N,jmax_col,size(dmatrix,2))
+  dmatrix2[:, jmax_col, :] = dmatrix
+  ghwt_core!(GPcols, dmatrix2)
+
+  dmatrix = Array{Float64,2}(reshape(dmatrix2, (fcols*jmax_col, frows*jmax_row))')
+
+  return dmatrix
+end
+
+
+
+function BS2ind(GP::GraphPart, BS::BasisSpec)
+    dvecfull = bsfull(GP, BS)
+    tag = GP.tag
+    N = size(tag,1)
+    jmax = size(tag,2)
+
+    tag_r = rs_to_region(GP.rs, tag)
+    tag2ind, ind2tag = tf2d_init(Array{Int64,2}(tag),tag_r)
+
+    ind = fill(0, N)
+    if BS.c2f
+        for i = 1:N
+            j = dvecfull[i]
+            k = tag_r[i,j]
+            l = tag[i,j]
+            ind[i] = tag2ind[(j,k,l)]
+        end
+    else
+        tag_r_f2c = Array{Int64,2}(fine2coarse!(GP, dmatrix = Array{Float64,3}(reshape(tag_r,(size(tag_r,1),size(tag_r,2),1))), coefp = true)[:,:,1])
+        tag_f2c = GP.tagf2c
+        for i = 1:N
+            j = dvecfull[i]
+            k = tag_r_f2c[i,j]
+            l = tag_f2c[i,j]
+            ind[i] = tag2ind[(jmax + 1 - j, k, l)]
+        end
+    end
+    return ind
+end
+
+
+function BS2loc(dmatrix::Matrix{Float64}, GProws::GraphPart, GPcols::GraphPart, BSrows::BasisSpec, BScols::BasisSpec)
+    indrows = BS2ind(GProws, BSrows)
+    indcols = BS2ind(GPcols, BScols)
+
+    m = length(indrows)
+    n = length(indcols)
+
+    loc = fill(0, (2,m*n))
+    dvec = fill(0., m*n)
+    global idx = 1
+    for i = 1:n
+        for j = 1:m
+            loc[1,idx] = indrows[j]
+            loc[2,idx] = indcols[i]
+            dvec[idx] = dmatrix[indrows[j], indcols[i]]
+            global idx += 1
+        end
+    end
+    return dvec, loc
+end
+
 end

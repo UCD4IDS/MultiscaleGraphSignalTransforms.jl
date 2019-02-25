@@ -224,7 +224,7 @@ function ghwt_tf_bestbasis(dmatrix::Matrix{Float64},GP::GraphPart)
     # Initialization. Store the expanding coeffcients from matrix into a list of dictionary (inbuilt hashmap in Julia)
     # The entry `coeffdict[j][(k,l)]` corresponds to the coefficient of basis-vector on level j with region k and tag l.
     tag = convert(Array{Int64,2},GP.tag)
-    tag_r = convert(Array{Int64,2},rs_to_region(GP.rs, GP.tag))
+    tag_r = rs_to_region(GP.rs, GP.tag)
     (m,n) = size(dmatrix)
     coeffdict = Array{Dict{Tuple{Int64,Int64},Float64}}(undef, n)
     for i = 1:n
