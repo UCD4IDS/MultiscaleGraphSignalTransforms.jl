@@ -1,6 +1,5 @@
 include("utils.jl")
 
-
 """
     GProws, GPcols = PartitionTreeMatrixDhillon(matrix::Matrix{Float64})
 
@@ -283,8 +282,8 @@ function partition_vector(v:: Vector{Float64})
   pm[v.<=m] .= -1
   if size(unique(pm),1) == 1
     f = UInt(floor(l/2))
-    pm[1:f] = 1
-    pm[f+1:end] = -1
+    pm[1:f] .= 1
+    pm[f+1:end] .= -1
   end
   return pm
 end

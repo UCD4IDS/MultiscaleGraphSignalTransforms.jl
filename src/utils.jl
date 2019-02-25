@@ -201,7 +201,7 @@ coefficient in the expansion tree.
 * `tag::Matrix{Any}`: tag from GP, indicating coefficients tag
 
 ### Output Arguments
-* `tag_r::Matrix{UInt32}`: showing information of the partition tree, same size as dmatrix
+* `tag_r::Matrix{UInt64}`: showing information of the partition tree, same size as dmatrix
 """
 function rs_to_region(rs::Matrix{<:Any}, tag::Matrix{<:Any})
   (m,n) = size(tag)
@@ -233,7 +233,7 @@ function rs_to_region(rs::Matrix{<:Any}, tag::Matrix{<:Any})
       end
     end
   end
-return Matrix{UInt32}(tag_r)
+return Matrix{Int64}(tag_r)
 end
 
 
