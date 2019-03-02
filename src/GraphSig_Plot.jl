@@ -34,7 +34,7 @@ function GraphSig_Plot(G::GraphSig)
     ## Case 2: the graph does have spatial coordinates (G.dim = 1, 2, or 3).
 
     # extract the plot specifications
-    symmetric,graybar,gray255bar,copperbar,notitle,nocolorbar,stemplot,cLim,cmin,cmax,ptsize,linewide,linecolor,marker,verbatim,verbtext,sortnodes = ExtractPlotSpecs(G);
+    symmetric,markercolor,markerstrokealpha,markervaluevaries,notitle,nocolorbar,stemplot,cLim,cmin,cmax,ptsize,linewide,linecolor,verbatim,verbtext,sortnodes = ExtractPlotSpecs(G);
     # set(0, 'DefaultFigureVisible', 'on');
 
     #################################
@@ -125,18 +125,6 @@ function GraphSig_Plot(G::GraphSig)
         #hold on
 
         # plot the nodes
-        if gray255bar || graybar
-            colorm = :grays
-            #set(gca, 'cLim', [0, 255]);
-
-            # copper?
-        elseif copperbar
-            colorm = :turbid
-
-            # default?
-        else
-            colorm = :balance
-        end
 
         if ptsize[1] != 0
             # if we're using various point sizes, determine the vector of sizes
@@ -150,18 +138,18 @@ function GraphSig_Plot(G::GraphSig)
 
             # plot the nodes for a 2-D graph
             if G.dim == 2
-                if isa(marker, Symbol)#ischar(marker)
-                    scatter!(G.xy[:,1], G.xy[:,2], markersize = ptsize[1], markercolor = marker);
+                if ~markervaluevaries
+                    scatter!(G.xy[:,1], G.xy[:,2], markersize = ptsize[1], markercolor = markercolor,markerstrokealpha = markerstrokealpha);
                 else
-                    scatter!(G.xy[:,1], G.xy[:,2], markersize = ptsize[1], zcolor = G.f, markercolor = colorm);
+                    scatter!(G.xy[:,1], G.xy[:,2], markersize = ptsize[1], zcolor = G.f, markercolor = markercolor,markerstrokealpha = markerstrokealpha);
                 end
 
                 # plot the nodes for a 3-D graph
             else
-                if isa(marker, Symbol)
-                    scatter!(G.xy(:,1), G.xy(:,2), G.xy(:,3), markersize = ptsize[1], markercolor = marker);
+                if ~markervaluevaries
+                    scatter!(G.xy[:,1], G.xy[:,2], G.xy[:,3], markersize = ptsize[1], markercolor = markercolor,markerstrokealpha = markerstrokealpha);
                 else
-                    scatter!(G.xy(:,1), G.xy(:,2), G.xy(:,3), markersize = ptsize[1], zcolor = G.f, markercolor = colorm);
+                    scatter!(G.xy[:,1], G.xy[:,2], G.xy[:,3], markersize = ptsize[1], zcolor = G.f, markercolor = markercolor,markerstrokealpha = markerstrokealpha);
                 end
             end
 
@@ -191,13 +179,6 @@ function GraphSig_Plot(G::GraphSig)
                 end
                 #set(gca, 'cLim', [-cmax, cmax]);
                 plot!(cLims = (cmin, cmax))
-            end
-
-            # gray255?
-            if gray255bar
-                #colormap('gray');
-                #set(gca, 'cLim', [0, 255]);
-                plot!(cLims = (0, 255))
             end
         end
 
@@ -229,9 +210,9 @@ Extract the important information contained in the 'plotspecs' of a GraphSig obj
 * `G::GraphSig`: an input GraphSig object
 ### Output Argument
 *   symmetric       symmetrize the colorbar
-*   graybar         plot a grayscale image
-*   gray255bar      plot a grayscale [0,255] image
-*   copperbar       plot a copper image
+*   markercolor     markercolor scheme
+*   markerstrokealpha   capacity of marker stroke
+*   markervaluevaries   if the marker color depends on the signal value
 *   notitle         display a title
 *   nocolorbar      display a colorbar
 *   stemplot        use a stem plot
@@ -241,7 +222,6 @@ Extract the important information contained in the 'plotspecs' of a GraphSig obj
 *   ptsize          the size of the nodes
 *   linewide        the width of the lines in gplot
 *   linecolor       the color of the lines (1D) / graph edges (2D & 3D)
-*   marker          the color of the line (1D) / nodes (2D & 3D)
 *   verbatim        use other special instructions
 *   verbtext        the specified special instructions
 *   sortnodes       plot the signal values from smallest to largest in magnitude
@@ -253,14 +233,8 @@ function ExtractPlotSpecs(G::GraphSig)
     # symmetrize the colorbar?
     symmetric = occursin("symm", plotspecs)
 
-    # plot a grayscale image?
-    graybar = occursin("gray", plotspecs)
-
-    # plot a grayscale [0, 255] image?
-    gray255bar = occursin("gray255", plotspecs)
-
-    # plot a copper image?
-    copperbar = occursin("copper", plotspecs)
+    # marker color depends on the signal value?
+    markervaluevaries = ~occursin("constant", plotspecs)
 
     # display a title?
     notitle  = occursin("notitle", plotspecs)
@@ -325,16 +299,6 @@ function ExtractPlotSpecs(G::GraphSig)
         linecolor = temp
     end
 
-    # what color should the nodes be
-    if occursin("red",plotspecs)
-        marker = :red
-    elseif occursin("black",plotspecs)
-        marker = :black
-    elseif occursin("blue", plotspecs)
-        marker = :blue
-    else
-        marker = nothing
-    end
 
     # other plot instructions ?
     verbtext, verbatim = find_between(plotspecs, "verbatime{{","}}")
@@ -345,7 +309,24 @@ function ExtractPlotSpecs(G::GraphSig)
         sortnodes = true
     end
 
-    return symmetric,graybar,gray255bar,copperbar,notitle,nocolorbar,stemplot,cLim,cmin,cmax,ptsize,linewide,linecolor,marker,verbatim,verbtext,sortnodes
+    #
+    temp, TF = find_between(plotspecs,"markerstrokealpha[","]")
+    if TF
+        markerstrokealpha = parse(Float64,temp)
+    else
+        markerstrokealpha = 1.0
+    end
+
+    #
+    temp, TF = find_between(plotspecs,"colorm[","]")
+    if TF
+        markercolor = Symbol(temp)
+    else
+        markercolor = :balance
+    end
+
+
+    return symmetric,markercolor,markerstrokealpha,markervaluevaries,notitle,nocolorbar,stemplot,cLim,cmin,cmax,ptsize,linewide,linecolor,verbatim,verbtext,sortnodes
 end
 
 function find_between(plotspecs::String,left::String,right::String)
