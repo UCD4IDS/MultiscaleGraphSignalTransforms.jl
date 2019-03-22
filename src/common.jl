@@ -20,12 +20,12 @@ function dvec2dmatrix(dvec::Matrix{Float64}, GP::GraphPart, BS::BasisSpec)
     #
     # extract data
     # MATLAB: [levlist,levlengths] = ExtractData(BS,GP);
-    if isempty(BS.levlengths) && GP != nothing
-        levlist2levlengths!(GP, BS)
-    end
+    #if isempty(BS.levlengths) && GP != nothing
+    #    levlist2levlengths!(GP, BS)
+    #end
 
     levlist = BS.levlist
-    levlengths = BS.levlengths
+    #levlengths = BS.levlengths
 
     # constants
     (N, jmax) = Base.size(GP.rs)
@@ -38,13 +38,15 @@ function dvec2dmatrix(dvec::Matrix{Float64}, GP::GraphPart, BS::BasisSpec)
     #
     # 1. Put the entries in the vector into the correct places in the matrix
     #
-    n = 1
-    for row = 1:length(levlist)
-        dmatrix[n:(n + levlengths[row] - 1), levlist[row], :] =
-            dvec[n:(n + levlengths[row] - 1), :]
-        n += levlengths[row]
+    # n = 1
+    # for row = 1:length(levlist)
+    #     dmatrix[n:(n + levlengths[row] - 1), levlist[row], :] =
+    #         dvec[n:(n + levlengths[row] - 1), :]
+    #     n += levlengths[row]
+    # end
+    for i = 1:length(levlist)
+        dmatrix[levlist[i][1], levlist[i][2], :] = dvec[i,:]
     end
-
     #
     # 2. Return the `dmatrix` array
     #
@@ -84,15 +86,14 @@ function dmatrix2dvec(dmatrix::Array{Float64,3}, GP::GraphPart)
             indr = GP.rs[r, j]:(GP.rs[r + 1, j] - 1)
             if countnz(dmatrix[indr, j, :]) > 0
                 dvec[indr, :] = dmatrix[indr, j, :]
-                levlist[GP.rs[r, j]] = j
-                levlist[(GP.rs[r, j] + 1):(GP.rs[r + 1, j] - 1)] = 0
+                levlist[GP.rs[r, j]:(GP.rs[r + 1, j] - 1)] .= j
             end
         end
     end
     ## 2. Specify the corresponding basis and return things
-    levlist = levlist[ levlist .!=0 ]
+    levlist = collect(enumerate(levlist))
     BS = BasisSpec(levlist)
-    levlist2levlengths!(GP, BS)
+    #levlist2levlengths!(GP, BS)
     return dvec, BS
 end # of function dmatrix2dvec (with no BS input)
 
@@ -120,13 +121,13 @@ function dmatrix2dvec(dmatrix::Array{Float64,3}, GP::GraphPart, BS::BasisSpec)
     ## 0. Preliminaries
     # allocate space
     dvec = zeros(N, fcols)
-    if isempty(BS.levlengths)
-        levlist2levlengths!(GP, BS)
-    else
-        @warn("We assume that levlengths of the input BS were already computed properly prior to dmatrix2dvec.")
-    end
+    # if isempty(BS.levlengths)
+    #     levlist2levlengths!(GP, BS)
+    # else
+    #     @warn("We assume that levlengths of the input BS were already computed properly prior to dmatrix2dvec.")
+    # end
     levlist = BS.levlist
-    levlengths = BS.levlengths
+    #levlengths = BS.levlengths
     BSc2f = BS.c2f
     # put dmatrix in the fine-to-coarse arrangement, if necessary
     if !BSc2f # This assumes that dmatrix has not yet been arranged in f2c
@@ -135,11 +136,15 @@ function dmatrix2dvec(dmatrix::Array{Float64,3}, GP::GraphPart, BS::BasisSpec)
     end
 
     ## 1. Make a vector of the matrix entries specified by the BS object
-    n = 1
-    for row = 1:length(levlist)
-        dvec[n:(n + levlengths[row] - 1), :] =
-            dmatrix[n:(n + levlengths[row] - 1), levlist[row], :]
-        n += levlengths[row]
+    # n = 1
+    # for row = 1:length(levlist)
+    #     dvec[n:(n + levlengths[row] - 1), :] =
+    #         dmatrix[n:(n + levlengths[row] - 1), levlist[row], :]
+    #     n += levlengths[row]
+    # end
+
+    for i = 1:length(levlist)
+        dvec[i,:] = dmatrix[levlist[i][1], levlist[i][2], :]
     end
 
     ## 2. Return the dvec
@@ -289,24 +294,43 @@ Specify the Haar basis for a given graph partitioning
 ### Output Argument
 * `BS::BasisSpec`: a BasisSpec object corresponding to the Haar basis
 """
-function bs_haar(GP::GraphPart)
+# function bs_haar(GP::GraphPart)
+#
+#     # determine jmax
+#     jmax = Base.size(GP.rs, 2)
+#
+#     # allocate space for levlist
+#     levlist = zeros(Int, jmax)
+#
+#     # fill in levlist for the Haar basis
+#     levlist[1] = jmax
+#     for row = 2:jmax
+#         levlist[row] = jmax + 2 - row
+#     end
+#
+#     # make a BasisSpec object
+#     BS = BasisSpec(levlist, c2f = false, description = "Haar basis")
+#     # fill in the levlengths field of the BasisSpec object
+#     levlist2levlengths!(GP, BS)
+#     # return it
+#     return BS
+# end # of function bs_haar
 
+function bs_haar(GP::GraphPart)
+    if isempty(GP.tagf2c)
+        fine2coarse!(GP)
+    end
     # determine jmax
     jmax = Base.size(GP.rs, 2)
 
     # allocate space for levlist
-    levlist = zeros(Int, jmax)
-
-    # fill in levlist for the Haar basis
-    levlist[1] = jmax
-    for row = 2:jmax
-        levlist[row] = jmax + 2 - row
-    end
+    levlist = Vector{Tuple{Int,Int}}((findall(x->x==1, GP.tagf2c)))
+    pushfirst!(levlist, (1, jmax))
 
     # make a BasisSpec object
     BS = BasisSpec(levlist, c2f = false, description = "Haar basis")
     # fill in the levlengths field of the BasisSpec object
-    levlist2levlengths!(GP, BS)
+    #levlist2levlengths!(GP, BS)
     # return it
     return BS
 end # of function bs_haar
@@ -328,7 +352,7 @@ function bs_level(GP::GraphPart, j::Int, c2f::Bool = true)
 
     # coarse-to-fine dictionary
     if c2f
-        rspointer = GP.rs[:, j + 1]
+        #rspointer = GP.rs[:, j + 1]
         bspec = "coarse-to-fine level $(j)"
     # fine-to-coarse dictionary
     else
@@ -338,17 +362,18 @@ function bs_level(GP::GraphPart, j::Int, c2f::Bool = true)
             # end
             fine2coarse!(GP)
         end
-        rspointer = GP.rsf2c[:, j + 1]
+        #rspointer = GP.rsf2c[:, j + 1]
         bspec = "fine-to-coarse level $(j)"
     end
 
     # specify the level j basis
-    Nj = countnz(rspointer) - 1
-    levlist = (j + 1) * ones(Int, Nj)
+    #Nj = countnz(rspointer) - 1
+    N = size(GP.tag, 1)
+    levlist = collect(enumerate((j + 1) * ones(Int,N)))
     BS = BasisSpec(levlist, c2f = c2f, description = bspec)
 
     # fill in the levlengths field of the BasisSpec object
-    levlist2levlengths!(GP, BS)
+    #levlist2levlengths!(GP, BS)
 
     # return it
     return BS

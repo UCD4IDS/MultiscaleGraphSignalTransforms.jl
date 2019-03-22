@@ -28,10 +28,8 @@ function ghwt_core!(GP::GraphPart)
     # tag -- when expressed in binary, tag indicates the sequence of
     # average (0's) and difference (1's) operations used to obtain the given
     # basis vector
-    Tl = ind_class(N)
-    Ts = tag_class(jmax)
     if isempty(GP.tag)
-        GP.tag = zeros(Ts, N, jmax)
+        GP.tag = zeros(Int, N, jmax)
     end
     tag = GP.tag                # for simple notation!
 
@@ -42,7 +40,7 @@ function ghwt_core!(GP::GraphPart)
     # if tag >= 2 && coeff is formed from 2 coeffs: compinfo = 1
     # if tag >= 2 && coeff is formed from 1 coeff:  compinfo = 0
     if isempty(GP.compinfo)
-        GP.compinfo = zeros(Tl, N, jmax)
+        GP.compinfo = zeros(Int, N, jmax)
     end
     compinfo = GP.compinfo      # for simple notation!
 
@@ -122,10 +120,8 @@ function ghwt_core!(GP::GraphPart, dmatrix::Array{Float64,3})
     # tag -- when expressed in binary, tag indicates the sequence of
     # average (0's) and difference (1's) operations used to obtain the given
     # basis vector
-    Tl = ind_class(N)
-    Ts = tag_class(jmax)
     if isempty(GP.tag)
-        GP.tag = zeros(Ts, N, jmax)
+        GP.tag = zeros(Int, N, jmax)
     end
     tag = GP.tag                # for simple notation!
 
@@ -136,7 +132,7 @@ function ghwt_core!(GP::GraphPart, dmatrix::Array{Float64,3})
     # if tag >= 2 && coeff is formed from 2 coeffs: compinfo = 1
     # if tag >= 2 && coeff is formed from 1 coeff:  compinfo = 0
     if isempty(GP.compinfo)
-        GP.compinfo = zeros(Tl, N, jmax)
+        GP.compinfo = zeros(Int, N, jmax)
     end
     compinfo = GP.compinfo      # for simple notation!
 
@@ -295,23 +291,21 @@ function fine2coarse!(GP::GraphPart;
 
     # get constants
     (N, jmax) = Base.size(GP.rs)
-    Tl = ind_class(N)
-    Ts = tag_class(jmax)
     N = N - 1
 
     # allocate spaces
     if isempty(GP.rsf2c)
-        GP.rsf2c = zeros(Tl, N + 1, jmax)
+        GP.rsf2c = zeros(Int, N + 1, jmax)
     end
     GP.rsf2c[1, :] .= 1
     GP.rsf2c[2, 1] = N + 1
     if isempty(GP.tagf2c)
-        GP.tagf2c = zeros(Ts, N, jmax)
+        GP.tagf2c = zeros(Int, N, jmax)
     end
     if isempty(GP.compinfof2c)
-        GP.compinfof2c = zeros(Tl, N, jmax)
+        GP.compinfof2c = zeros(Int, N, jmax)
     end
-    IX = zeros(Tl, N, jmax)
+    IX = zeros(Int, N, jmax)
     if coefp
         dmatrixf2c = zeros(Base.size(dmatrix))
     end
@@ -410,6 +404,11 @@ function ghwt_synthesis(dvec::Matrix{Float64}, GP::GraphPart, BS::BasisSpec)
     #
     if BS.c2f                   # for coarse-to-fine case
         # for simpler notation!
+        dvec_loc = zeros(Int, size(GP.tag))
+        for i = 1:length(BS.levlist)
+            dvec_loc[BS.levlist[i][1], BS.levlist[i][2]] = 1
+        end
+
         rs = GP.rs
         tag = GP.tag
         for j = 1:(jmax - 1)    # from top to bottom-1
@@ -419,32 +418,43 @@ function ghwt_synthesis(dvec::Matrix{Float64}, GP::GraphPart, BS::BasisSpec)
                 rs3 = rs[r + 1, j]  # 1 + the end of the 2nd subregion
                 n = rs3 - rs1       # # of points in the current region
                 # only proceed forward if coefficients do not exist
-                if count(!iszero, dmatrix[rs1:(rs3 - 1), j + 1, :]) == 0 &&
-                    count(!iszero, dmatrix[rs1:(rs3 - 1), j, :]) > 0
+                #if count(!iszero, dmatrix[rs1:(rs3 - 1), j + 1, :]) == 0 &&
+                #    count(!iszero, dmatrix[rs1:(rs3 - 1), j, :]) > 0
+                if count(!iszero, dvec_loc[rs1:(rs3-1),j]) > 0
                     if n == 1   # single node region
                         # SCALING COEFFICIENT (n == 1)
-                        dmatrix[rs1, j + 1, :] = dmatrix[rs1, j, :]
+                        if dvec_loc[rs1,j] == 1
+                            dmatrix[rs1, j + 1, :] = dmatrix[rs1, j, :]
+                            dvec_loc[rs1,j+1] = 1
+                        end
                     elseif n > 1
                         rs2 = rs1 + 1 # the start of the 2nd subregion
                         while rs2 < rs3 && tag[rs2, j + 1] != 0 ### && rs2 < N+1
                             rs2 += 1
                         end
                         if rs2 == rs3 # the parent is a copy of the subregion
-                            dmatrix[rs1:(rs3 - 1), j + 1, :] =
-                                dmatrix[rs1:(rs3 - 1), j, :]
+                            if dvec_loc[rs1:rs3-1,j] == 1
+                                dmatrix[rs1:(rs3 - 1), j + 1, :] = dmatrix[rs1:(rs3 - 1), j, :]
+                                dvec_loc[rs1:rs3-1,j+1] = 1
+                            end
                         else   # the parent region has 2 child regions
                             n1 = rs2 - rs1 # # of pts in the 1st subregion
                             n2 = rs3 - rs2 # # of pts in the 2nd subregion
 
                             # SCALING COEFFICIENTS (n > 1)
-                            dmatrix[rs1, j + 1, :] =
-                                ( sqrt(n1) * dmatrix[rs1, j, :] +
-                                  sqrt(n2) * dmatrix[rs1 + 1, j, :] ) / sqrt(n)
+                            if dvec_loc[rs1,j] == 1 && dvec_loc[rs1+1,j] == 1
+                                dmatrix[rs1, j + 1, :] =
+                                    ( sqrt(n1) * dmatrix[rs1, j, :] +
+                                      sqrt(n2) * dmatrix[rs1 + 1, j, :] ) / sqrt(n)
 
                             # HAAR COEFFICIENTS
-                            dmatrix[rs2, j + 1, :] =
-                                ( sqrt(n2) * dmatrix[rs1, j, :] -
-                                  sqrt(n1) * dmatrix[rs1 + 1, j, :] ) / sqrt(n)
+                                dmatrix[rs2, j + 1, :] =
+                                    ( sqrt(n2) * dmatrix[rs1, j, :] -
+                                      sqrt(n1) * dmatrix[rs1 + 1, j, :] ) / sqrt(n)
+
+                                dvec_loc[rs1,j+1] = 1
+                                dvec_loc[rs2,j+1] = 1
+                            end
 
                             # WALSH COEFFICIENTS
                             # search through the remaining coefs in each subregion
@@ -456,26 +466,38 @@ function ghwt_synthesis(dvec::Matrix{Float64}, GP::GraphPart, BS::BasisSpec)
                                 if child2 == rs3 ||
                                     (tag[child1, j + 1] < tag[child2, j + 1] &&
                                      child1 < rs2)
-                                    dmatrix[child1, j + 1, :] =
-                                        dmatrix[parent, j, :]
+
+                                    if dvec_loc[parent,j]==1
+                                        dmatrix[child1, j + 1, :] =
+                                            dmatrix[parent, j, :]
+                                        dvec_loc[child1, j+1] =1
+                                    end
                                     child1 += 1; parent += 1
 
                                 # subregion 2 has the smaller tag
                                 elseif child1 == rs2 ||
                                     (tag[child2, j + 1] < tag[child1, j + 1] &&
                                      child2 < rs3)
-                                    dmatrix[child2, j + 1, :] =
-                                        dmatrix[parent, j, :]
+
+                                    if dvec_loc[parent, j] == 1
+                                        dmatrix[child2, j + 1, :] =
+                                            dmatrix[parent, j, :]
+                                        dvec_loc[child2, j+1] = 1
+                                    end
                                     child2 += 1; parent += 1
 
                                 # both subregions have the same tag
                                 else
-                                    dmatrix[child1, j + 1, :] =
-                                        ( dmatrix[parent, j, :] +
-                                          dmatrix[parent + 1, j, :] ) / sqrt(2)
-                                    dmatrix[child2, j + 1, :] =
-                                        ( dmatrix[parent, j, :] -
-                                          dmatrix[parent + 1, j, :] ) / sqrt(2)
+                                    if dvec_loc[parent,j] == 1 && dvec_loc[parent+1, j] == 1
+                                        dmatrix[child1, j + 1, :] =
+                                            ( dmatrix[parent, j, :] +
+                                              dmatrix[parent + 1, j, :] ) / sqrt(2)
+                                        dmatrix[child2, j + 1, :] =
+                                            ( dmatrix[parent, j, :] -
+                                              dmatrix[parent + 1, j, :] ) / sqrt(2)
+                                        dvec_loc[child1,j+1]=1
+                                        dvec_loc[child2,j+1]=1
+                                    end
                                     child1 += 1; child2 += 1; parent += 2
                                 end # of if child2 == r3 ...
                             end # of while child1 < rs2 ...
@@ -670,18 +692,22 @@ function ghwt_c2f_bestbasis(dmatrix::Array{Float64,3}, GP::GraphPart;
             costBB = costfun(dvecc2f[indr])
             costNEW = costfun(dmatrix[indr, j, 1])
             if costBB >= costNEW - tol
-                (dvecc2f[indr], levlistc2f[indr]) = bbchange(dmatrix[indr, j, 1], j)
+                #(dvecc2f[indr], levlistc2f[indr]) = bbchange(dmatrix[indr, j, 1], j)
+                dvecc2f[indr] = dmatrix[indr, j, 1]
+                levlistc2f[indr] .= j
             end
         end
     end
-    levlistc2f = Array{Int}(levlistc2f[ levlistc2f .!= 0 ])
+    #levlistc2f = Array{Int}(levlistc2f[ levlistc2f .!= 0 ])
+    levlistc2f = collect(enumerate(levlistc2f))
     BSc2f = BasisSpec(levlistc2f, c2f = true, description = "GHWT c2f Best Basis")
-    levlist2levlengths!(GP, BSc2f)
-    # costc2f = costfun(dvecc2f)
+    #levlist2levlengths!(GP, BSc2f)
 
     # if we flattened dmatrix, then "unflatten" the expansion coefficients
     if fcols > 1
         dvecc2f = dmatrix2dvec(dmatrix0, GP, BSc2f)
+    else
+        dvecc2f = reshape(dvecc2f,(length(dvecc2f),1))
     end
 
     # Return things
@@ -742,20 +768,24 @@ function ghwt_f2c_bestbasis(dmatrix::Array{Float64,3}, GP::GraphPart;
             costBB = costfun(dvecf2c[indr])
             costNEW = costfun(dmatrixf2c[indr, j, 1])
             if costBB >= costNEW - tol
-                (dvecf2c[indr], levlistf2c[indr]) = bbchange(dmatrixf2c[indr, j, 1], j)
+                #(dvecf2c[indr], levlistf2c[indr]) = bbchange(dmatrixf2c[indr, j, 1], j)
+                dvecf2c[indr] = dmatrixf2c[indr, j, 1]
+                levlistf2c[indr] .= j
             end
         end
     end
 
-    levlistf2c = levlistf2c[ levlistf2c .!=0 ]
-    levlistf2c = Array{Int}(levlistf2c[ levlistf2c .!= 0 ])
+    #levlistf2c = Array{Int}(levlistf2c[ levlistf2c .!= 0 ])
+    levlistf2c = collect(enumerate(levlistf2c))
     BSf2c = BasisSpec(levlistf2c, c2f = false, description = "GHWT f2c Best Basis")
-    levlist2levlengths!(GP, BSf2c)
+    #levlist2levlengths!(GP, BSf2c)
     # costf2c = costfun(dvecf2c)
 
     # if we flattened dmatrix, then "unflatten" the expansion coefficients
     if fcols > 1
         dvecf2c = dmatrix2dvec(dmatrix0, GP, BSf2c)
+    else
+        dvecf2c = reshape(dvecf2c,(length(dvecf2c),1))
     end
 
     # Return things

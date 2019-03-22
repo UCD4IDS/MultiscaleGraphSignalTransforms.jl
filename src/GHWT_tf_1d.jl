@@ -28,20 +28,20 @@ Implemented by Yiqun Shao (Adviser: Dr. Naoki Saito)
 """
 function tf_init(dmatrix::Matrix{Float64},GP::GraphPart)
     # Obtain the tag information
-    tag = convert(Array{Int64,2},GP.tag)
+    tag = convert(Array{Int,2},GP.tag)
 
     # Obtain the region information
-    tag_r = convert(Array{Int64,2},rs_to_region(GP.rs, GP.tag))
+    tag_r = convert(Array{Int,2},rs_to_region(GP.rs, GP.tag))
 
     (m,n) = size(dmatrix)
 
     # Initialize coeffdict
-    coeffdict = Array{Dict{Tuple{Int64,Int64},Float64}}(undef, n)
+    coeffdict = Array{Dict{Tuple{Int,Int},Float64}}(undef, n)
 
     # Fill in the values with the rule that `coeffdict[j][(k,l)]` represents
     # the coefficient of basis-vector on level j with region k and tag l.
     for i = 1:n
-        coeffdict[i]= Dict{Tuple{Int64,Int64},Float64}((tag_r[j,i],tag[j,i]) => dmatrix[j,i] for j=1:m)
+        coeffdict[i]= Dict{Tuple{Int,Int},Float64}((tag_r[j,i],tag[j,i]) => dmatrix[j,i] for j=1:m)
     end
     return coeffdict
 end
@@ -51,7 +51,7 @@ end
 
 
 """
-    coeffdict_new,tag_tf = tf_core_new(coeffdict::Array{Dict{Tuple{Int64,Int64},Float64},1})
+    coeffdict_new,tag_tf = tf_core_new(coeffdict::Array{Dict{Tuple{Int,Int},Float64},1})
 
 
 One forward iteration of time-frequency adapted GHWT method. For each entry in `coeffdict_new`, we compare
@@ -72,22 +72,22 @@ Copyright 2018 The Regents of the University of California
 
 Implemented by Yiqun Shao (Adviser: Dr. Naoki Saito)
 """
-function tf_core_new(coeffdict::Array{Dict{Tuple{Int64,Int64},Float64},1})
+function tf_core_new(coeffdict::Array{Dict{Tuple{Int,Int},Float64},1})
     # We choose '1-norm' as the optional cost functional
     costfun = cost_functional(1)
     jmax = length(coeffdict)
 
     # Initialization
-    coeffdict_new = Array{Dict{Tuple{Int64,Int64},Float64}}(undef, jmax-1)
-    tag_tf = Array{Dict{Tuple{Int64,Int64},Bool}}(undef, jmax-1)
+    coeffdict_new = Array{Dict{Tuple{Int,Int},Float64}}(undef, jmax-1)
+    tag_tf = Array{Dict{Tuple{Int,Int},Bool}}(undef, jmax-1)
 
     # Iterate through levels
     for j = 1:(jmax-1)
         # the temporary dictionary, which will be the j-th level of `coeffdict_new`
-        temp_coeff = Dict{Tuple{Int64,Int64},Float64}()
+        temp_coeff = Dict{Tuple{Int,Int},Float64}()
 
         # the temporary dictionary, which will be the j-th level of 'tag_tf'
-        temp_tf = Dict{Tuple{Int64,Int64},Bool}()
+        temp_tf = Dict{Tuple{Int,Int},Bool}()
 
         # iterate through the entries in coeffdict on level j
         for key in keys(coeffdict[j])
@@ -139,7 +139,7 @@ end
 
 
 """
-    tag_tf_b_new = tf_basisrecover_new(tag_tf_b::Array{Dict{Tuple{Int64,Int64},Bool}},tag_tf_f::Array{Dict{Tuple{Int64,Int64},Bool}})
+    tag_tf_b_new = tf_basisrecover_new(tag_tf_b::Array{Dict{Tuple{Int,Int},Bool}},tag_tf_f::Array{Dict{Tuple{Int,Int},Bool}})
 
 
 One backward iteration of time-frequency adapted GHWT method to recover the best-basis from the `tag_tf`s recorded.
@@ -157,13 +157,13 @@ Copyright 2018 The Regents of the University of California
 
 Implemented by Yiqun Shao (Adviser: Dr. Naoki Saito)
 """
-function tf_basisrecover_new(tag_tf_b::Array{Dict{Tuple{Int64,Int64},Bool}},tag_tf_f::Array{Dict{Tuple{Int64,Int64},Bool}})
+function tf_basisrecover_new(tag_tf_b::Array{Dict{Tuple{Int,Int},Bool}},tag_tf_f::Array{Dict{Tuple{Int,Int},Bool}})
     # Initialization
     jmax = length(tag_tf_b)
-    #tag_tf_b_new = Array{Dict{Tuple{Int64,Int64},Bool}}(jmax)
-    tag_tf_b_new = Array{Dict{Tuple{Int64,Int64},Bool}}(undef, jmax)
+    #tag_tf_b_new = Array{Dict{Tuple{Int,Int},Bool}}(jmax)
+    tag_tf_b_new = Array{Dict{Tuple{Int,Int},Bool}}(undef, jmax)
     for j = 1:jmax
-        tag_tf_b_new[j] = Dict{Tuple{Int64,Int64},Bool}()
+        tag_tf_b_new[j] = Dict{Tuple{Int,Int},Bool}()
     end
 
     # Iterate on the levels
@@ -200,7 +200,7 @@ end
 
 
 """
-bestbasis_tag_matrix, bestbasis = ghwt_tf_bestbasis_new(dmatrix::Matrix{Float64},GP::GraphPart)
+bestbasis_tag_matrix, bestbasis = ghwt_tf_bestbasis(dmatrix::Matrix{Float64},GP::GraphPart)
 
 Implementation of time-frequency adapted GHWT method.
 Modified from the algorithm in paper 'A Fast Algorithm for Adapted Time Frequency Tilings' by Christoph M Thiele and Lars F Villemoes.
@@ -218,17 +218,33 @@ Copyright 2018 The Regents of the University of California
 
 Implemented by Yiqun Shao (Adviser: Dr. Naoki Saito)
 """
-function ghwt_tf_bestbasis(dmatrix::Matrix{Float64},GP::GraphPart)
-    (m,n) = size(dmatrix)
+function ghwt_tf_bestbasis(dmatrix::Array{Float64,3}, GP::GraphPart; cfspec::Float64 = 1.0, flatten::Any = 1.0)
+
+
+    # determine the cost functional to be used
+    costfun = cost_functional(cfspec)
+
+    # constants and dmatrix cleanup
+    fcols = Base.size(dmatrix,3)
+    dmatrix[ abs.(dmatrix) .< 10^2 * eps() ] .= 0
+
+    dmatrix0 = deepcopy(dmatrix)      # keep the original dmatrix as dmatrix0
+    # "flatten" dmatrix
+    if fcols > 1
+        if flatten != nothing
+            dmatrix = dmatrix_flatten(dmatrix, flatten)[:,:,1]
+        end
+    end
+    dmatrix = dmatrix.^cfspec
 
     # Initialization. Store the expanding coeffcients from matrix into a list of dictionary (inbuilt hashmap in Julia)
     # The entry `coeffdict[j][(k,l)]` corresponds to the coefficient of basis-vector on level j with region k and tag l.
-    tag = convert(Array{Int64,2},GP.tag)
+    tag = convert(Array{Int,2},GP.tag)
     tag_r = rs_to_region(GP.rs, GP.tag)
     (m,n) = size(dmatrix)
-    coeffdict = Array{Dict{Tuple{Int64,Int64},Float64}}(undef, n)
+    coeffdict = Array{Dict{Tuple{Int,Int},Float64}}(undef, n)
     for i = 1:n
-        coeffdict[i]= Dict{Tuple{Int64,Int64},Float64}((tag_r[j,i],tag[j,i]) => dmatrix[j,i] for j=1:m)
+        coeffdict[i]= Dict{Tuple{Int,Int},Float64}((tag_r[j,i],tag[j,i]) => dmatrix[j,i] for j=1:m)
     end
 
     # TAG_tf stores the time-or-frequency information on every iteration
@@ -238,7 +254,7 @@ function ghwt_tf_bestbasis(dmatrix::Matrix{Float64},GP::GraphPart)
 
     # Initialization of the first iteration
     COEFFDICT[1] = coeffdict
-    TAG_tf_init = Array{Dict{Tuple{Int64,Int64},Bool}}(undef, n)
+    TAG_tf_init = Array{Dict{Tuple{Int,Int},Bool}}(undef, n)
     for j = 1:n
         TAG_tf_init[j] = Dict(key => true for key in keys(coeffdict[j]))
     end
@@ -258,19 +274,26 @@ function ghwt_tf_bestbasis(dmatrix::Matrix{Float64},GP::GraphPart)
     end
 
     # Change the data structure from dictionary to matrix
-    bestbasis = zeros(m,n)
-    bestbasis_tag_matrix = zeros(m,n)
+    #bestbasis = zeros(m,n)
+    #bestbasis_tag_matrix = zeros(Int,m,n)
+    levlist = Vector{Tuple{Int,Int}}(undef, 0)
+    dvec = Vector{Float64}(undef, 0)
     for j = 1:n
         for i = 1:m
             k = tag_r[i,j]
             l = tag[i,j]
             if haskey(bestbasis_tag[j],(k,l))
-                bestbasis_tag_matrix[i,j] = 1
-                bestbasis[i,j] = dmatrix[i,j]
+                #bestbasis_tag_matrix[i,j] = 1
+                push!(levlist, (i,j))
+                #bestbasis[i,j] = dmatrix[i,j]
+                push!(dvec, dmatrix[i,j])
             end
         end
     end
-    return bestbasis, bestbasis_tag_matrix
+
+    BS = BasisSpec(levlist, c2f = true, description = "eGHWT Best Basis")
+    dvec = dmatrix2dvec(dmatrix0, GP, BS)
+    return dvec, BS
 end
 
 
@@ -318,14 +341,14 @@ end
 
 
 """
-    (f, GS) = tf_synthesis(bestbasis::Matrix{Float64},bestbasis_tag::Matrix{<:Any},GP::GraphPart,G::GraphSig)
+    (f, GS) = tf_synthesis(bestbasis::Matrix{Float64},bestbasis_tag::Matrix{Int},GP::GraphPart,G::GraphSig)
 
 Given a vector of GHWT expansion coefficients and info about the graph
 partitioning and the choice of basis, reconstruct the signal
 
 ### Input Arguments
 * `bestbasis::Matrix{Float64}`: the expansion coefficients corresponding to the chosen basis
-* 'bestbasis_tag::Matrix{<:Any}': the location of the best basis coefficients in bestbasis matrix
+* 'bestbasis_tag::Matrix{Int}': the location of the best basis coefficients in bestbasis matrix
 * `GP::GraphPart`: an input GraphPart object
 * `G::GraphSig`: an input GraphSig object
 
@@ -333,7 +356,7 @@ partitioning and the choice of basis, reconstruct the signal
 * `f::Matrix{Float64}`: the reconstructed signal(s)
 * `GS::GraphSig`: the reconstructed GraphSig object
 """
-function tf_synthesis(bestbasis::Matrix{Float64},bestbasis_tag::Matrix{<:Any},GP::GraphPart,G::GraphSig)
+function tf_synthesis(bestbasis::Matrix{Float64},bestbasis_tag::Matrix{Int},GP::GraphPart,G::GraphSig)
   tag = GP.tag
   rs = GP.rs
   bestbasis_new = deepcopy(bestbasis)

@@ -360,7 +360,9 @@ function HGLET_Analysis_All(G::GraphSig, GP::GraphPart)
                     useLrw = false
 
                     ### eigenvectors of L ==> svd(L)
-                    vec,_,_ = svd(full(D_temp-W_temp))
+                    W_temp = W[indrs,indrs]
+                    D_temp = sparse(Diagonal(dropdims(sum(W_temp,dims = 1), dims = 1)))
+                    vec,_,_ = svd(Matrix(D_temp-W_temp))
                     vec = vec[:,end:-1:1]
                 end
 
@@ -542,11 +544,11 @@ function HGLET_GHWT_BestBasis(GP::GraphPart; dmatrixH::Array{Float64,3} = Array{
     end
 
     transfull = deepcopy(trans)
-    trans = trans[levlist.!=0,:]
-    levlist = levlist[levlist.!=0]
+    #trans = trans[levlist.!=0,:]
+    levlist = collect(enumerate(levlist))
 
     BS = BasisSpec(levlist,c2f = true, description = "HGLET-GHWT Best Basis")
-    levlist2levlengths!(GP,BS)
+    #levlist2levlengths!(GP,BS)
 
     # if we flattened dmatrix, then "unflatten" the expansion coefficients
     if fcols > 1
@@ -578,7 +580,7 @@ function HGLET_GHWT_BestBasis(GP::GraphPart; dmatrixH::Array{Float64,3} = Array{
         + dvecH.*((.~transfull[:,1]).*(.~transfull[:,2]))
     end
 
-    return dvec,BS, trans
+    return dvec,BS, transfull
 
 end
 
@@ -589,8 +591,7 @@ function BBchange(costNew::Float64, dvec::Vector{Float64}, j::Int, trans::Array{
 
     n = length(dvec)
 
-    levlist = zeros(Int,n,1)
-    levlist[1] = j
+    levlist = fill(j, n)
 
     trans = repeat(trans,n,1)
 
@@ -598,49 +599,49 @@ function BBchange(costNew::Float64, dvec::Vector{Float64}, j::Int, trans::Array{
 end
 
 
-
-"""
-    function BSfull(GP, BS, trans)
-    Given a BasisSpec object, return the full-length, redundant levlist, levlengths, and trans description
-
-### Input Arguments
-    * `GP`:         A GraphPart object
-    * `BS`:         A BasisSpec object
-    * `trans`:      A specification of the transforms used for the HGLET-GHWT hybrid transform
-
-### Output Argument
-    * `levlistfull`:    the full-length, redundant levels list description
-    * `levlengthsfull`: the full-length, redundant levels lengths description
-    * `transfull`:      the full-length, redundant trans description
-"""
-function BSfull(GP::GraphPart, BS::BasisSpec, trans::Array{Bool,2})
-    ## 0. Preliminaries
-
-    # extract data
-    levlist = BS.levlist
-    levlengths = BS.levlengths
-
-    # allocate space
-    N = length(GP.ind)
-    levlistfull = zeros(Int,N,1)
-    levlengthsfull = zeros(Int,N,1)
-    cols = size(trans,2)
-    transfull = falses(N,cols)
-
-
-    ## 1. Fill out the redundant descriptions
-    ind = 0
-    for row  = 1:length(levlist)
-        levlistfull[ind+1:ind+levlengths[row]] .= levlist[row]
-
-        levlengthsfull[ind+1:ind+levlengths[row]] .= levlengths[row]
-
-        transfull[ind+1:ind+levlengths[row],:] = repeat(trans[[row],:],levlengths[row],1)
-
-        ind = ind + levlengths[row]
-    end
-    return levlistfull, levlengthsfull, transfull
-end
+#
+# """
+#     function BSfull(GP, BS, trans)
+#     Given a BasisSpec object, return the full-length, redundant levlist, levlengths, and trans description
+#
+# ### Input Arguments
+#     * `GP`:         A GraphPart object
+#     * `BS`:         A BasisSpec object
+#     * `trans`:      A specification of the transforms used for the HGLET-GHWT hybrid transform
+#
+# ### Output Argument
+#     * `levlistfull`:    the full-length, redundant levels list description
+#     * `levlengthsfull`: the full-length, redundant levels lengths description
+#     * `transfull`:      the full-length, redundant trans description
+# """
+# function BSfull(GP::GraphPart, BS::BasisSpec, trans::Array{Bool,2})
+#     ## 0. Preliminaries
+#
+#     # extract data
+#     levlist = BS.levlist
+#     levlengths = BS.levlengths
+#
+#     # allocate space
+#     N = length(GP.ind)
+#     levlistfull = zeros(Int,N,1)
+#     levlengthsfull = zeros(Int,N,1)
+#     cols = size(trans,2)
+#     transfull = falses(N,cols)
+#
+#
+#     ## 1. Fill out the redundant descriptions
+#     ind = 0
+#     for row  = 1:length(levlist)
+#         levlistfull[ind+1:ind+levlengths[row]] .= levlist[row]
+#
+#         levlengthsfull[ind+1:ind+levlengths[row]] .= levlengths[row]
+#
+#         transfull[ind+1:ind+levlengths[row],:] = repeat(trans[[row],:],levlengths[row],1)
+#
+#         ind = ind + levlengths[row]
+#     end
+#     return levlistfull, levlengthsfull, transfull
+# end
 
 
 
@@ -667,8 +668,8 @@ end
 """
 function HGLET_GHWT_Synthesis(dvec::Matrix{Float64},GP::GraphPart,BS::BasisSpec,trans::Array{Bool,2},G::GraphSig)
 # fill out trans
-_,_,transfull = BSfull(GP,BS,trans)
-
+#_,_,transfull = BSfull(GP,BS,trans)
+transfull = trans
 # decompose dvec into GHWT and HGLET components
 dvecHsym= dvec.*(transfull[:,1].*(.~transfull[:,2]))
 dvecG   = dvec.*(transfull[:,1].*transfull[:,2])
@@ -727,7 +728,7 @@ function HGLET_GHWT_BestBasis_minrelerror(GP::GraphPart,G::GraphSig;dmatrixH::Ar
         # we are only considering the GHWT
         if isempty(dmatrixH) && isempty(dmatrixHrw) && isempty(dmatrixHsym) && !isempty(dmatrixG)
             dvec_temp, BS_temp = ghwt_bestbasis(dmatrixG, GP, cfspec = tau_temp)
-            trans_temp = trues(length(BS_temp.levlist,2))
+            trans_temp = trues(length(BS_temp.levlist),2)
             orthbasis = true
         else
             dvec_temp, BS_temp, trans_temp = HGLET_GHWT_BestBasis(GP, dmatrixH = dmatrixH, dmatrixG = dmatrixG,
@@ -746,17 +747,17 @@ function HGLET_GHWT_BestBasis_minrelerror(GP::GraphPart,G::GraphSig;dmatrixH::Ar
 
         # compute the relative errors
         if orthbasis
-            relerror_temp = orth2relerror(dvec_temp)
+            relerror_temp = orth2relerror(dvec_temp[:])
         else
             B = HGLET_GHWT_Synthesis(eye(length(dvec_temp)),GP,BS_temp,trans_temp,G)
-            relerror_temp = nonorth2relerror(dvec_temp,B)
+            relerror_temp = nonorth2relerror(dvec_temp[:],B)
         end
         sumrelerror_temp = sum(relerror_temp)
 
         # consider the GHWT fine-to-coarse best basis
         if compare == true && !isempty(dmatrixG)
             dvec_f2c, BS_f2c = ghwt_f2c_bestbasis(dmatrixG, GP, cfspec = tau_temp)
-            sumrelerror_f2c = sum(orth2relerror(dvec_f2c))
+            sumrelerror_f2c = sum(orth2relerror(dvec_f2c[:]))
             if sumrelerror_f2c < sumrelerror_temp
                 sumrelerror_temp = sumrelerror_f2c
                 dvec_temp = copy(dvec_f2c)
