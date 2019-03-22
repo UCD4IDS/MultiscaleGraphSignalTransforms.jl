@@ -168,25 +168,25 @@ function cost_functional(cfspec::Any)
     end
 end # of function cost_functional
 
-"""
-    (dvec, levlist) = bbchange(dvec::Vector{Float64}, j::Int)
-
-Change to the new best basis
-
-### Input Arguments
-* `dvec::Vector{Float64}`: an input coefficient matrix
-* `j::Int`: a level index
-
-### Output Arguments
-* `dvec::Vector{Float64}`: an output coefficient matrix
-* `levlist::Vector{Int}`: an output levlist
-"""
-function bbchange(dvec::Vector{Float64}, j::Int)
-    n = Base.size(dvec, 1) # assume each column corresponding to one signal
-    levlist = zeros(Int, n)
-    levlist[1] = j
-    return dvec, levlist        # might need deepcopy here.
-end
+# """
+#     (dvec, levlist) = bbchange(dvec::Vector{Float64}, j::Int)
+#
+# Change to the new best basis
+#
+# ### Input Arguments
+# * `dvec::Vector{Float64}`: an input coefficient matrix
+# * `j::Int`: a level index
+#
+# ### Output Arguments
+# * `dvec::Vector{Float64}`: an output coefficient matrix
+# * `levlist::Vector{Int}`: an output levlist
+# """
+# function bbchange(dvec::Vector{Float64}, j::Int)
+#     n = Base.size(dvec, 1) # assume each column corresponding to one signal
+#     levlist = zeros(Int, n)
+#     levlist[1] = j
+#     return dvec, levlist        # might need deepcopy here.
+# end
 
 
 """
@@ -203,7 +203,7 @@ coefficient in the expansion tree.
 ### Output Arguments
 * `tag_r::Matrix{UInt64}`: showing information of the partition tree, same size as dmatrix
 """
-function rs_to_region(rs::Matrix{<:Any}, tag::Matrix{<:Any})
+function rs_to_region(rs::Matrix{Int}, tag::Matrix{Int})
   (m,n) = size(tag)
   tag_r = zeros(m,n)
   for j = 1:(n-1)
@@ -233,7 +233,7 @@ function rs_to_region(rs::Matrix{<:Any}, tag::Matrix{<:Any})
       end
     end
   end
-return Matrix{Int64}(tag_r)
+return Matrix{Int}(tag_r)
 end
 
 

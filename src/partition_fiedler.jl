@@ -230,8 +230,8 @@ function partition_fiedler_troubleshooting(pm::Vector{Int},v::Vector{Float64},
                 tol = 10 * tol    # relax the tolerance
                 pm = 2 .* (abs.(v) .> tol) .- 1
                 if tol > 1
-                    pm[1:Int64(ceil(N / 2))] .= 1
-                    pm[(Int64(ceil(N / 2)) + 1):N] .= -1
+                    pm[1:Int(ceil(N / 2))] .= 1
+                    pm[(Int(ceil(N / 2)) + 1):N] .= -1
                 end
             end
         # Case 2: it is connected, but something funny happened
@@ -248,8 +248,8 @@ function partition_fiedler_troubleshooting(pm::Vector{Int},v::Vector{Float64},
         end
         # if one region has no points after all the above processing
         if sum(pm .< 0) == 0 || sum(pm .> 0) == 0
-            pm[1:Int64(ceil(N / 2))] .= 1
-            pm[Int64(ceil(N / 2) + 1):N] .= -1
+            pm[1:Int(ceil(N / 2))] .= 1
+            pm[Int(ceil(N / 2) + 1):N] .= -1
         end
     end
 

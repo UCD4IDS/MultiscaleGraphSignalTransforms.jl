@@ -1,5 +1,5 @@
 """
-    rse = PartitionTreeMatrix_unbalanced_haar(matrix::Matrix{Float64},jmax::Int64;method::Symbol = :Totalvar, p::Float64 = 2.)
+    rse = PartitionTreeMatrix_unbalanced_haar(matrix::Matrix{Float64},jmax::Int;method::Symbol = :Totalvar, p::Float64 = 2.)
 
 
 Perform the quadtree partition of image matrix depending on total-variation or changes on the boundary.
@@ -18,10 +18,10 @@ Copyright 2018 The Regents of the University of California
 Implemented by Yiqun Shao (Adviser: Dr. Naoki Saito)
 """
 
-function PartitionTreeMatrix_unbalanced_haar(matrix::Matrix{Float64},jmax::Int64;method::Symbol = :Totalvar, p::Float64 = 2.)
+function PartitionTreeMatrix_unbalanced_haar(matrix::Matrix{Float64},jmax::Int;method::Symbol = :Totalvar, p::Float64 = 2.)
     rows,cols = size(matrix)
     N = rows*cols
-    rse = Vector{Vector{Int64}}(jmax)
+    rse = Vector{Vector{Int}}(jmax)
     rse[1] = [1,N];
 
     j = 1

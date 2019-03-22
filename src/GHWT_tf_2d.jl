@@ -1,20 +1,19 @@
 module GHWT_tf_2d
 
+include("utils.jl")
 
-
-using ..GraphSignal, ..GraphPartition, ..BasisSpecification, ..GHWT,  LinearAlgebra
+using ..GraphSignal, ..GraphPartition, ..BasisSpecification, ..GHWT,  ..GHWT_2d, LinearAlgebra
 
 include("common.jl")
 
-include("PartitionTreeMatrixDhillon.jl")
 include("partition_fiedler.jl")
 
-export ghwt_tf_init_2d, ghwt_tf_bestbasis_2d, ghwt_synthesis_2d, ghwt_tf_init_2d_Linderberg, BS2loc
+export ghwt_tf_init_2d, ghwt_tf_bestbasis_2d, ghwt_tf_synthesis_2d, ghwt_tf_init_2d_Linderberg, BS2loc
 
 
 
 """
-    tf2d_init(tag::Matrix{Int64},tag_r::Matrix{Int64})
+    tf2d_init(tag::Matrix{Int},tag_r::Matrix{Int})
 
 Storing the relation between the coefficient location in the 2D coefficients matrix of all levels with the (level, tag, region) information
 
@@ -30,10 +29,10 @@ Copyright 2018 The Regents of the University of California
 
 Implemented by Yiqun Shao (Adviser: Dr. Naoki Saito)
 """
-function tf2d_init(tag::Matrix{Int64},tag_r::Matrix{Int64})
+function tf2d_init(tag::Matrix{Int},tag_r::Matrix{Int})
     (m,n) = size(tag)
-    tag2ind = Dict{Tuple{Int64,Int64,Int64},Int64}()
-    ind2tag = Dict{Int64,Tuple{Int64,Int64,Int64}}()
+    tag2ind = Dict{Tuple{Int,Int,Int},Int}()
+    ind2tag = Dict{Int,Tuple{Int,Int,Int}}()
     for j = 1:n
         for i = 1:m
             tag2ind[(j,tag_r[i,j],tag[i,j])] = i + (j-1)*m
@@ -47,7 +46,7 @@ end
 
 
 """
-    dmatrix_new,tag2ind_new,ind2tag_new,tag_tf = tf_core_2d_col(dmatrix::Matrix{Float64},tag2ind::Dict{Tuple{Int64,Int64,Int64},Int64},ind2tag::Dict{Int64,Tuple{Int64,Int64,Int64}},jmax::Integer)
+    dmatrix_new,tag2ind_new,ind2tag_new,tag_tf = tf_core_2d_col(dmatrix::Matrix{Float64},tag2ind::Dict{Tuple{Int,Int,Int},Int},ind2tag::Dict{Int,Tuple{Int,Int,Int}},jmax::Integer)
 
 One forward iteration of 2-d time-frequency adapted ghwt on the column direction
 
@@ -69,7 +68,7 @@ Copyright 2018 The Regents of the University of California
 
 Implemented by Yiqun Shao (Adviser: Dr. Naoki Saito)
 """
-function tf_core_2d_col(dmatrix::Matrix{Float64},tag2ind::Dict{Tuple{Int64,Int64,Int64},Int64},ind2tag::Dict{Int64,Tuple{Int64,Int64,Int64}},jmax::Integer)
+function tf_core_2d_col(dmatrix::Matrix{Float64},tag2ind::Dict{Tuple{Int,Int,Int},Int},ind2tag::Dict{Int,Tuple{Int,Int,Int}},jmax::Integer)
     # power of the cost-functional
     costp = 1
     p,q = size(dmatrix)
@@ -77,8 +76,8 @@ function tf_core_2d_col(dmatrix::Matrix{Float64},tag2ind::Dict{Tuple{Int64,Int64
 
     # Initialization
     tag_tf = zeros(Bool,(p,q))
-    tag2ind_new = Dict{Tuple{Int64,Int64,Int64},Int64}()
-    ind2tag_new = Dict{Int64,Tuple{Int64,Int64,Int64}}()
+    tag2ind_new = Dict{Tuple{Int,Int,Int},Int}()
+    ind2tag_new = Dict{Int,Tuple{Int,Int,Int}}()
 
     s = 1
     # Iterate through columns
@@ -117,7 +116,7 @@ end
 
 
 """
-    dmatrix_new,tag2ind_new,ind2tag_new,tag_tf = tf_core_2d_row(dmatrix::Matrix{Float64},tag2ind::Dict{Tuple{Int64,Int64,Int64},Int64},ind2tag::Dict{Int64,Tuple{Int64,Int64,Int64}},jmax::Integer)
+    dmatrix_new,tag2ind_new,ind2tag_new,tag_tf = tf_core_2d_row(dmatrix::Matrix{Float64},tag2ind::Dict{Tuple{Int,Int,Int},Int},ind2tag::Dict{Int,Tuple{Int,Int,Int}},jmax::Integer)
 
 Almost the same as tf_core_2d_col. But all the operations on matrix are row-wise.
 Due to the column-based matrix feature of Julia language. We are currently only using the tf_core_2d_col here.
@@ -140,13 +139,13 @@ Copyright 2018 The Regents of the University of California
 
 Implemented by Yiqun Shao (Adviser: Dr. Naoki Saito)
 """
-function tf_core_2d_row(dmatrix::Matrix{Float64},tag2ind::Dict{Tuple{Int64,Int64,Int64},Int64},ind2tag::Dict{Int64,Tuple{Int64,Int64,Int64}},jmax::Integer)
+function tf_core_2d_row(dmatrix::Matrix{Float64},tag2ind::Dict{Tuple{Int,Int,Int},Int},ind2tag::Dict{Int,Tuple{Int,Int,Int}},jmax::Integer)
     costp = 1
     p,q = size(dmatrix)
     dmatrix_new = zeros(p,q)
     tag_tf = zeros(Bool,(p,q))
-    tag2ind_new = Dict{Tuple{Int64,Int64,Int64},Int64}()
-    ind2tag_new = Dict{Int64,Tuple{Int64,Int64,Int64}}()
+    tag2ind_new = Dict{Tuple{Int,Int,Int},Int}()
+    ind2tag_new = Dict{Int,Tuple{Int,Int,Int}}()
 
     s = 1
     for i = 1:p
@@ -179,7 +178,7 @@ end
 
 
 """
-    Bbasis, infovec = ghwt_tf_bestbasis_2d_new(dmatrix::Matrix{Float64},GProws::GraphPart,GPcols::GraphPart)
+    Bbasis, infovec = ghwt_tf_bestbasis_2d(dmatrix::Matrix{Float64},GProws::GraphPart,GPcols::GraphPart)
 
 Implementation of 2d time-frequency adapted GHWT method.
 Modified from the idea in paper "Image compression with adaptive Haar-Walsh tilings" by Maj Lindberg and Lars F. Villemoes.
@@ -199,12 +198,13 @@ Copyright 2018 The Regents of the University of California
 
 Implemented by Yiqun Shao (Adviser: Dr. Naoki Saito)
 """
-function ghwt_tf_bestbasis_2d(dmatrix::Matrix{Float64},GProws::GraphPart,GPcols::GraphPart)
+function ghwt_tf_bestbasis_2d(matrix::Matrix{Float64},GProws::GraphPart,GPcols::GraphPart)
+    dmatrix = ghwt_analysis_2d(matrix, GProws, GPcols)
     # Initialization
     tag_r_row = rs_to_region(GProws.rs, GProws.tag)
     tag_r_col = rs_to_region(GPcols.rs, GPcols.tag)
-    tag2ind_row,ind2tag_row = tf2d_init(Matrix{Int64}(GProws.tag),Matrix{Int64}(tag_r_row))
-    tag2ind_col,ind2tag_col = tf2d_init(Matrix{Int64}(GPcols.tag),Matrix{Int64}(tag_r_col))
+    tag2ind_row,ind2tag_row = tf2d_init(Matrix{Int}(GProws.tag),Matrix{Int}(tag_r_row))
+    tag2ind_col,ind2tag_col = tf2d_init(Matrix{Int}(GPcols.tag),Matrix{Int}(tag_r_col))
 
     jmax_col = size(GPcols.tag,2)
     jmax_row = size(GProws.tag,2)
@@ -265,7 +265,7 @@ function ghwt_tf_bestbasis_2d(dmatrix::Matrix{Float64},GProws::GraphPart,GPcols:
     #recover the bestbasis
     infovec = Array{Int}([jmax_row; jmax_col; 1; 1])
     for iter = 1:(jmax_row + jmax_col - 2)
-        newinfovec = -1*ones(Int64,(4,2*size(infovec,2)))
+        newinfovec = -1*ones(Int,(4,2*size(infovec,2)))
         for h = 1:size(infovec,2)
             m = infovec[1,h]
             n = infovec[2,h]
@@ -332,7 +332,7 @@ end
 
 
 """
-    ghwt_tf_synthesis_2d_core!(dmatrix::Array{Float64,3},tag::Array{Int64,2},rs::Array{Int64,2})
+    ghwt_tf_synthesis_2d_core!(dmatrix::Array{Float64,3},tag::Array{Int,2},rs::Array{Int,2})
 
 Core function of ghwt_tf_synthesis_2d. Synthesize on column direction
 
@@ -350,7 +350,7 @@ Copyright 2018 The Regents of the University of California
 
 Implemented by Yiqun Shao (Adviser: Dr. Naoki Saito)
 """
-function ghwt_tf_synthesis_2d_core!(dmatrix::Array{Float64,3},tag::Array{Int64,2},rs::Array{Int64,2})
+function ghwt_tf_synthesis_2d_core!(dmatrix::Array{Float64,3},tag::Array{Int,2},rs::Array{Int,2})
     jmax = size(tag,2)
     for j = 1:jmax-1
         regioncount = count(!iszero, rs[:,j]) - 1
@@ -430,7 +430,7 @@ end
 
 
 """
-    matrix_r = ghwt_synthesis_2d(dmatrix::Matrix{Float64}, GProws::GraphPart, GPcols::GraphPart)
+    matrix = ghwt_tf_synthesis_2d(dmatrix::Matrix{Float64}, GProws::GraphPart, GPcols::GraphPart)
 
 Synthesis the matrix from the coefficients of selected basis vectors.
 
@@ -441,28 +441,36 @@ Synthesis the matrix from the coefficients of selected basis vectors.
 
 
 ### Output Arguments
-* `matrix_r`: Synthesized matrix
+* `matrix`: Synthesized matrix
 
 
 Copyright 2018 The Regents of the University of California
 
 Implemented by Yiqun Shao (Adviser: Dr. Naoki Saito)
 """
-function ghwt_synthesis_2d(dmatrix::Matrix{Float64}, GProws::GraphPart, GPcols::GraphPart)
+function ghwt_tf_synthesis_2d(dvec::Vector{Float64}, infovec::Matrix{Int}, GProws::GraphPart, GPcols::GraphPart)
     tag_col, rs_col = GPcols.tag, GPcols.rs
     tag_row, rs_row = GProws.tag, GProws.rs
     fcols, jmax_col = size(tag_col);
     frows, jmax_row = size(tag_row);
+
+    dmatrix = zeros(frows*jmax_row, fcols*jmax_col)
+    for i in 1:size(infovec,2)
+        dmatrix[infovec[1,i],infovec[2,i]] = dvec[i]
+    end
+
     matrix_r = Array{Float64,2}(dmatrix');
     matrix_r = reshape(matrix_r, fcols, jmax_col, frows*jmax_row);
-    ghwt_tf_synthesis_2d_core!(matrix_r, Matrix{Int64}(tag_col), Matrix{Int64}(rs_col));
+    ghwt_tf_synthesis_2d_core!(matrix_r, Matrix{Int}(tag_col), Matrix{Int}(rs_col));
     matrix_r = matrix_r[:,end,:];
     #matrix_r = reshape(matrix_r, fcols, frows*jmax_row);
     matrix_r = reshape(Array{Float64,2}(matrix_r'),frows,jmax_row, fcols);
-    ghwt_tf_synthesis_2d_core!(matrix_r, Matrix{Int64}(tag_row), Matrix{Int64}(rs_row));
+    ghwt_tf_synthesis_2d_core!(matrix_r, Matrix{Int}(tag_row), Matrix{Int}(rs_row));
     matrix_r = matrix_r[:,end,:];
     #matrix_r = reshape(matrix_r,frows, fcols);
-    return matrix_r
+    matrix = zeros(frows, fcols)
+    matrix[GProws.ind,GPcols.ind] = matrix_r
+    return matrix
 end
 
 
@@ -511,7 +519,7 @@ function ghwt_tf_init_2d(matrix::Matrix{Float64})
 
   dmatrix = reshape(dmatrix2, (fcols*jmax_col, frows*jmax_row))'
 
-  return dmatrix, GProws, GPcols
+  return Array{Float64,2}(dmatrix), GProws, GPcols
 end
 
 
@@ -552,7 +560,7 @@ function ghwt_tf_init_2d_Linderberg(matrix::Matrix{Float64})
 end
 
 
-function regularhaar(n::Int64)
+function regularhaar(n::Int)
     if log2(n)%1 != 0
         error("Input number should be some power of 2")
     else
@@ -566,7 +574,7 @@ function regularhaar(n::Int64)
             end
         end
     end
-    return GraphPart{UInt64,UInt64}(ind, rs)
+    return GraphPart(ind, rs)
 end
 
 
@@ -625,7 +633,7 @@ function BS2ind(GP::GraphPart, BS::BasisSpec)
     jmax = size(tag,2)
 
     tag_r = rs_to_region(GP.rs, tag)
-    tag2ind, ind2tag = tf2d_init(Array{Int64,2}(tag),tag_r)
+    tag2ind, ind2tag = tf2d_init(Array{Int,2}(tag),tag_r)
 
     ind = fill(0, N)
     if BS.c2f
@@ -636,7 +644,7 @@ function BS2ind(GP::GraphPart, BS::BasisSpec)
             ind[i] = tag2ind[(j,k,l)]
         end
     else
-        tag_r_f2c = Array{Int64,2}(fine2coarse!(GP, dmatrix = Array{Float64,3}(reshape(tag_r,(size(tag_r,1),size(tag_r,2),1))), coefp = true)[:,:,1])
+        tag_r_f2c = Array{Int,2}(fine2coarse!(GP, dmatrix = Array{Float64,3}(reshape(tag_r,(size(tag_r,1),size(tag_r,2),1))), coefp = true)[:,:,1])
         tag_f2c = GP.tagf2c
         for i = 1:N
             j = dvecfull[i]
