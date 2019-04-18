@@ -658,13 +658,16 @@ Select the coarse-to-fine best basis from the matrix of GHWT expansion coefficie
 * `BSc2f::BasisSpec`: a BasisSpec object which specifies the coarse-to-fine best basis
 """
 function ghwt_c2f_bestbasis(dmatrix::Array{Float64,3}, GP::GraphPart;
-                            cfspec::Any = 1.0, flatten::Any = 1.0)
+                            cfspec::Any = 1.0, flatten::Any = 1.0, j_start::Int = 1, j_end::Int = size(dmatrix,2))
 
     # determine the cost functional to be used
     costfun = cost_functional(cfspec)
 
     # constants and dmatrix cleanup
     (N, jmax, fcols) = Base.size(dmatrix)
+    if ~(1 <= j_start <= j_end <= jmax)
+        error("j_start and j_end should satisfy the inequality 1 <= j_start <= j_end <= "*string(jmax))
+    end
     dmatrix[ abs.(dmatrix) .< 10^2 * eps() ] .= 0
 
     # "flatten" dmatrix
@@ -677,14 +680,14 @@ function ghwt_c2f_bestbasis(dmatrix::Array{Float64,3}, GP::GraphPart;
 
     ## Find the best-basis from the GHWT coarse-to-fine dictionary
     # allocate/initialize
-    dvecc2f = dmatrix[:, jmax, 1]
-    levlistc2f = jmax * ones(Int, N)
+    dvecc2f = dmatrix[:, j_end, 1]
+    levlistc2f = j_end * ones(Int, N)
 
     # set the tolerance
     tol = 10^4 * eps()
 
     # perform the basis search
-    for j = (jmax - 1):-1:1
+    for j = (j_end - 1):-1:j_start
         regioncount = count(!iszero, GP.rs[:, j]) - 1
         for r = 1:regioncount
             indr = GP.rs[r, j]:(GP.rs[r + 1, j]-1)
@@ -730,13 +733,17 @@ Select the fine-to-coarse best basis from the matrix of GHWT expansion coefficie
 *  `BSf2c::BasisSpec`: a BasisSpec object which specifies the fine-to-coarse best basis
 """
 function ghwt_f2c_bestbasis(dmatrix::Array{Float64,3}, GP::GraphPart;
-                            cfspec::Any = 1.0, flatten::Any = 1.0)
+                            cfspec::Any = 1.0, flatten::Any = 1.0, j_start::Int = 1, j_end::Int = size(dmatrix,2))
 
     # determine the cost functional to be used
     costfun = cost_functional(cfspec)
 
     # constants and dmatrix cleanup
     (N, jmax, fcols) = Base.size(dmatrix)
+    if ~(1 <= j_start <= j_end <= jmax)
+        error("j_start and j_end should satisfy the inequality 1 <= j_start <= j_end <= "*string(jmax))
+    end
+
     dmatrix[ abs.(dmatrix) .< 10^2 * eps() ] .= 0
 
     # "flatten" dmatrix
@@ -753,14 +760,14 @@ function ghwt_f2c_bestbasis(dmatrix::Array{Float64,3}, GP::GraphPart;
     dmatrixf2c = fine2coarse!(GP, dmatrix = dmatrix, coefp = true)
 
     # allocate/initialize
-    dvecf2c = dmatrixf2c[:, jmax, 1]
-    levlistf2c = jmax * ones(Int, N)
+    dvecf2c = dmatrixf2c[:, j_end, 1]
+    levlistf2c = j_end * ones(Int, N)
 
     # set the tolerance
     tol = 10^4 * eps()
 
     # perform the basis search
-    for j = (jmax - 1):-1:1
+    for j = (j_end - 1):-1:j_start
         regioncount = count(!iszero, GP.rsf2c[:, j]) - 1
         for r = 1:regioncount
             indr = GP.rsf2c[r, j]:(GP.rsf2c[r + 1, j] - 1)
@@ -808,16 +815,20 @@ Select the overall best basis among the c2f and f2c best bases
 * `BS::BasisSpec`: a BasisSpec object which specifies the best basis
 """
 function ghwt_bestbasis(dmatrix::Array{Float64,3}, GP::GraphPart;
-                        cfspec::Any = 1.0, flatten::Any = 1.0)
+                        cfspec::Any = 1.0, flatten::Any = 1.0, j_start::Int = 1, j_end::Int = size(dmatrix,2))
 
     costfun = cost_functional(cfspec)
+    jmax = size(dmatrix,2)
+    if ~(1 <= j_start <= j_end <= jmax)
+        error("j_start and j_end should satisfy the inequality 1 <= j_start <= j_end <= "*string(jmax))
+    end
 
     # Select the c2f best basis
-    (dvecc2f, BSc2f) = ghwt_c2f_bestbasis(dmatrix, GP, cfspec = cfspec, flatten = flatten)
+    (dvecc2f, BSc2f) = ghwt_c2f_bestbasis(dmatrix, GP, cfspec = cfspec, flatten = flatten, j_start = j_start, j_end = j_end)
     costc2f = costfun(dvecc2f)
 
     # Select the f2c best basis
-    (dvecf2c, BSf2c) = ghwt_f2c_bestbasis(dmatrix, GP, cfspec = cfspec, flatten = flatten)
+    (dvecf2c, BSf2c) = ghwt_f2c_bestbasis(dmatrix, GP, cfspec = cfspec, flatten = flatten, j_start = jmax + 1 - j_end, j_end = jmax + 1 - j_start)
     costf2c = costfun(dvecf2c)
 
     # Compare the coarse-to-fine and fine-to-coarse best-bases

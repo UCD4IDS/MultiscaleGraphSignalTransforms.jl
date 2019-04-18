@@ -348,7 +348,7 @@ Specify the basis corresponding to level j for a given graph partitioning
 ### Output Argument
 * `BS::BasisSpec`: a BasisSpec object corresponding to the level `j` basis
 """
-function bs_level(GP::GraphPart, j::Int, c2f::Bool = true)
+function bs_level(GP::GraphPart, j::Int; c2f::Bool = true)
 
     # coarse-to-fine dictionary
     if c2f
@@ -376,6 +376,25 @@ function bs_level(GP::GraphPart, j::Int, c2f::Bool = true)
     #levlist2levlengths!(GP, BS)
 
     # return it
+    return BS
+end # of bs_level
+
+
+
+"""
+    BS = bs_walsh(GP::GraphPart)
+
+Specify the walsh basis corresponding to for a given graph partitioning
+
+### Input Arguments
+* `GP::GraphPart`: an input GraphPart object
+
+### Output Argument
+* `BS::BasisSpec`: a BasisSpec object corresponding to the walsh basis
+"""
+function bs_walsh(GP::GraphPart)
+    BS = bs_level(GP, 0, c2f = true)
+    BS.description = "Walsh basis"
     return BS
 end # of bs_level
 
