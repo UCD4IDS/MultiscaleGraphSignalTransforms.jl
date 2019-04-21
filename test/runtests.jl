@@ -74,6 +74,14 @@ dvec,BS = ghwt_bestbasis(dmatrix, GP, cfspec=1.)
 println("The coefficient vectors of GHWT best basis has L1 norm: ", norm(dvec,1))
 println("Relative L2 error of the synthesized signal: ", norm(G.f-f)/norm(G.f))
 
+# through the old way but restricted to level j_start to level j_end in c2f dictionary
+j_start = 3
+j_end = 4
+dvec_restricted,BS_restricted = ghwt_bestbasis(dmatrix, GP, cfspec=1., j_start = j_start, j_end = j_end)
+(f_restricted, GS_restricted) = ghwt_synthesis(dvec_restricted, GP, BS_restricted, G)
+println("The coefficient vectors of GHWT best basis restricted from level $(j_start) to level $(j_end) in c2f dictionary has L1 norm: ", norm(dvec_restricted,1))
+println("Relative L2 error of the synthesized signal: ", norm(G.f-f_restricted)/norm(G.f))
+
 # through the time-frequency adapted analysis
 dvec_tf, BS_tf = ghwt_tf_bestbasis(dmatrix, GP, cfspec=1.)
 (f_tf, GS_tf) = ghwt_synthesis(dvec_tf, GP, BS_tf, G)
