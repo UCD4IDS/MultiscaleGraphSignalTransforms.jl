@@ -400,13 +400,13 @@ end # of bs_level
 
 
 """
-function dvec_Threshold(dvec::Vector{Float64}, SORH::String, keep::Float64,
+function dvec_Threshold(dvec::Array{Float64}, SORH::String, keep::Float64,
                 GP::GraphPart, BS::BasisSpec)
 
  Threshold HGLET / GHWT coefficients
 
 ### Input Arguments
-*   `dvec::Vector{Float64}`        the vector of expansion coefficients
+*   `dvec::Array{Float64,2}`        the vector of expansion coefficients
 *   `SORH::String`        use soft ('s') or hard ('h') thresholding
 *   `keep::Float64`        a fraction between 0 and 1 which says how many coefficients should be kept
 *   `GP::GraphPart`          a GraphPart object, used to identify scaling coefficients
@@ -416,7 +416,7 @@ function dvec_Threshold(dvec::Vector{Float64}, SORH::String, keep::Float64,
 *   `dvec_new::Vector{Float64}`        the thresholded expansion coefficients
 *   `kept::Float64`        the number of coefficients kept
 """
-function dvec_Threshold(dvec::Vector{Float64}, SORH::String, keep::Float64,
+function dvec_Threshold(dvec::Array{Float64,2}, SORH::String, keep::Float64,
                 GP::GraphPart, BS::BasisSpec)
 #
 # Apply to 1-D only for now. Need to modify in the future
@@ -430,7 +430,7 @@ function dvec_Threshold(dvec::Vector{Float64}, SORH::String, keep::Float64,
     end
 
     if SORH == "s" || SORH == "soft"
-      ind = sortperm(abs.(dvec), rev = true)
+      ind = sortperm(abs.(dvec[:]), rev = true)
       T = abs(dvec[ind[kept+1]])
 
       if BS != nothing
@@ -440,24 +440,24 @@ function dvec_Threshold(dvec::Vector{Float64}, SORH::String, keep::Float64,
         #soft-threshold the non-scaling coefficients
         ind = 1:size(dvec,1)
         ind = ind[(tag .> 0)[:]]
-        dvec_new[ind] = sign.(dvec[ind]).*(abs.(dvec[ind])-T).*(abs.(dvec[ind])-T .>0)
+        dvec_new[ind] = sign.(dvec[ind]).*(abs.(dvec[ind]).-T).*(abs.(dvec[ind]).-T .>0)
 
       # if BS is not given, soft-threshold all coefficients
       else
-        dvec_new = sign.(dvec).*(abs.(dvec)-T).*(abs.(dvec)-T.>0)
+        dvec_new = sign.(dvec).*(abs.(dvec).-T).*(abs.(dvec).-T.>0)
       end
 
-      kept = countnz(dvec_new)
+      kept = count(dvec_new.!=0)
 
     elseif SORH == "h" || SORH == "hard"
-      ind = sortperm(abs.(dvec), rev = true)
-      dvec_new[ind[kept+1:end]] = 0
+      ind = sortperm(abs.(dvec[:]), rev = true)
+      dvec_new[ind[kept+1:end]] .= 0
 
-      kept = countnz(dvec_new)
+      kept = count(dvec_new.!=0)
 
     else
 
-      kept = countnz(dvec_new)
+      kept = count(dvec_new.!=0)
 
     end
     return dvec_new, kept
