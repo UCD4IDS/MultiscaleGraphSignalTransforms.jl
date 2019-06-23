@@ -34,8 +34,8 @@ println("\n")
 #   roadmap signal (Temporarily skipped)                                      #
 ###############################################################################
 # println("2. Testing time-frequency adapted GHWT functions on smoothing the minnesota roadmap signal")
-# tmp = matread("MN_MutGauss.mat")
-# tmp1 = tmp["G"]
+# JLD2.@load "MN_MutGauss.jld2" G
+# tmp1 = G["G"]
 # G=GraphSig(tmp1["W"],xy=tmp1["xy"],f=tmp1["f"],name =tmp1["name"],plotspecs = tmp1["plotspecs"])
 #
 # G = Adj2InvEuc(G)
@@ -51,9 +51,9 @@ println("\n")
 # println("The GHWT smoothed signal has SNR ", snr(G,GS)," dB")
 #
 # # through time-frequency analysis
-# bestbasis, bestbasis_tag = ghwt_tf_bestbasis(dmatrix[:,:,1], GP)
-# bestbasis_T = tf_threshold(bestbasis, GP, 0.11, "s")
-# (f_tf, GS_tf) = tf_synthesis(bestbasis_T, bestbasis_tag, GP, GN)
+# dvec_tf, BS_tf = ghwt_tf_bestbasis(dmatrix, GP)
+# (dvecT_tf,kept) = dvec_Threshold(dvec_tf,"s",0.11,GP,BS_tf)
+# (f_tf, GS_tf) = ghwt_synthesis(reshape(dvecT_tf,(size(dvecT_tf)[1],1)), GP, BS_tf, GN)
 # println("The tf-analysis GHWT smoothed signal has SNR ", snr(G,GS_tf)," dB")
 #############################
 

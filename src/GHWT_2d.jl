@@ -119,9 +119,60 @@ function ghwt_bestbasis_2d(matrix::Array{Float64,2},GProws::GraphPart,GPcols::Gr
     dvec = Matrix{Float64}(dmatrix2dvec(dmatrix, GPcols, BScols)')
 
     return dvec, BSrows, BScols
-
 end
 
+
+"""
+    dvec = ghwt_2d_dmatrix2dvec(matrix::Array{Float64,2},BSrows::BasisSpec,BScols::BasisSpec)
+For a matrix, equipped with row and column weight recursive partitionings
+and weight matrices, generate the (non-redundant) matrix of GHWT
+expansion coefficients, using the best basis algorithm to select best bases for the rows and columns
+
+### Input Argument
+*   `matrix`              the matrix to be analyzed
+*   `GProws`              the recursive partitioning on the rows
+*   `GPcols`              the recursive partitioning on the columns
+
+### Output Argument
+*   `dvec`                the GHWT expansion coefficients (not redundant)
+
+
+
+Copyright 2019 The Regents of the University of California
+
+Implemented by Yiqun Shao (Adviser: Dr. Naoki Saito)
+"""
+function ghwt_2d_haar(matrix::Array{Float64,2},GProws::GraphPart,GPcols::GraphPart)
+
+    # generate GraphSig objects for the matrix
+    rows,cols = size(matrix)
+    Grows = GraphSig(spzeros(rows,rows),f = matrix)
+    Gcols = GraphSig(spzeros(cols,cols),f = Matrix{Float64}(matrix'))
+
+    # analyze the data matrix using the rows
+    dmatrix = ghwt_analysis!(Grows, GP = GProws)
+
+    # analyze the data matrix using the columns
+    #dmatrix2 = ghwt_analysis!(Gcols, GP = GPcols)
+
+    # find the row and column best bases
+    #BH=bs_haar(GP)
+    #dvec=dmatrix2dvec(dc2f, GP, BH)
+    BSrows = bs_haar(GProws)
+    dvec = dmatrix2dvec(dmatrix, GProws, BSrows)
+    BScols = bs_haar(GPcols)
+    #dvec,BSrows = ghwt_bestbasis(dmatrix,GProws,cfspec = costfun_rows,flatten = flatten_rows)
+    #~,BScols = ghwt_bestbasis(dmatrix2,GPcols,cfspec = costfun_cols,flatten = flatten_cols)
+
+    # analyze the row best-basis coefficient matrix using the columns
+    Gcols.f = Matrix{Float64}(dvec')
+    dmatrix = ghwt_analysis!(Gcols, GP = GPcols)
+
+    # extract the col best-basis coefficients
+    dvec = Matrix{Float64}(dmatrix2dvec(dmatrix, GPcols, BScols)')
+
+    return dvec, BSrows, BScols
+end
 
 
 """
