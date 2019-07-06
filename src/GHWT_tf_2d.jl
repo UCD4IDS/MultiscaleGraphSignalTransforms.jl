@@ -564,13 +564,13 @@ function regularhaar(n::Int)
     if log2(n)%1 != 0
         error("Input number should be some power of 2")
     else
-        ind = Array{UInt64}(1:n)
-        l = UInt64(log2(n))
-        rs = zeros(UInt64,n+1,l+1)
+        ind = Array{Int64}(1:n)
+        l = Int64(log2(n))
+        rs = zeros(Int64,n+1,l+1)
         for j = 1:l+1
-            gap = UInt64(n/(2^(j-1)))
+            gap = Int64(n/(2^(j-1)))
             for i = 1:(2^(j-1) + 1)
-                rs[i,j] = UInt64((i-1)*gap + 1)
+                rs[i,j] = Int64((i-1)*gap + 1)
             end
         end
     end
@@ -627,7 +627,6 @@ end
 
 
 function BS2ind(GP::GraphPart, BS::BasisSpec)
-    dvecfull = bsfull(GP, BS)
     tag = GP.tag
     N = size(tag,1)
     jmax = size(tag,2)
@@ -638,18 +637,18 @@ function BS2ind(GP::GraphPart, BS::BasisSpec)
     ind = fill(0, N)
     if BS.c2f
         for i = 1:N
-            j = dvecfull[i]
-            k = tag_r[i,j]
-            l = tag[i,j]
+            j2, j = BS.levlist[i]
+            k = tag_r[j2,j]
+            l = tag[j2,j]
             ind[i] = tag2ind[(j,k,l)]
         end
     else
         tag_r_f2c = Array{Int,2}(fine2coarse!(GP, dmatrix = Array{Float64,3}(reshape(tag_r,(size(tag_r,1),size(tag_r,2),1))), coefp = true)[:,:,1])
         tag_f2c = GP.tagf2c
         for i = 1:N
-            j = dvecfull[i]
-            k = tag_r_f2c[i,j]
-            l = tag_f2c[i,j]
+            j2, j = BS.levlist[i]
+            k = tag_r_f2c[j2,j]
+            l = tag_f2c[j2,j]
             ind[i] = tag2ind[(jmax + 1 - j, k, l)]
         end
     end
