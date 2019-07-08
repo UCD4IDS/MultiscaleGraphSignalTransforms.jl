@@ -3,7 +3,7 @@ using Plots
     GraphSig_Plot(G::GraphSig; symmetric::Bool = false,
       markersize::Float64 = 2.,
       markercolor::Symbol = :balance,
-      markershape::Symbol = :circle
+      markershape::Symbol = :circle,
       markerstrokewidth::Float64 = 1.0,
       markerstrokealpha::Float64 = 1.0,
       markervaluevaries::Bool = true,
@@ -38,7 +38,7 @@ Display a plot of the data in a GraphSig object
 function GraphSig_Plot(G::GraphSig; symmetric::Bool = false,
       markersize::Float64 = 2.,
       markercolor::Symbol = :balance,
-      markershape::Symbol = :circle
+      markershape::Symbol = :circle,
       markerstrokewidth::Float64 = 1.0,
       markerstrokealpha::Float64 = 1.0,
       markervaluevaries::Bool = true,
