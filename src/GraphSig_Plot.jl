@@ -3,6 +3,7 @@ using Plots
     GraphSig_Plot(G::GraphSig; symmetric::Bool = false,
       markersize::Float64 = 2.,
       markercolor::Symbol = :balance,
+      markershape::Symbol = :circle
       markerstrokewidth::Float64 = 1.0,
       markerstrokealpha::Float64 = 1.0,
       markervaluevaries::Bool = true,
@@ -20,10 +21,10 @@ Display a plot of the data in a GraphSig object
 *   `symmetric`           symmetrize the colorbar
 *   `markersize`          the size of the nodes
 *   `markercolor`         markercolor scheme
+*   `markershape`         shape of marker
 *   `markerstrokewidth`   width of marker stroke
 *   `markerstrokealpha`   capacity of marker stroke
 *   `markervaluevaries`   if the marker color depends on the signal value
-*   `markershape`         shape of marker
 *   `linewidth`           the width of the lines in gplot
 *   `linecolor`           the color of the lines (1D) / graph edges (2D & 3D)
 *   `linestyle`:          the style of line
@@ -37,6 +38,7 @@ Display a plot of the data in a GraphSig object
 function GraphSig_Plot(G::GraphSig; symmetric::Bool = false,
       markersize::Float64 = 2.,
       markercolor::Symbol = :balance,
+      markershape::Symbol = :circle
       markerstrokewidth::Float64 = 1.0,
       markerstrokealpha::Float64 = 1.0,
       markervaluevaries::Bool = true,
