@@ -1,31 +1,51 @@
 using Plots
 """
-    GraphSig_Plot(G::GraphSig; symmetric::Bool = false, markercolor::Symbol = :balance, markerstrokealpha::Float64 = 1.0, markervaluevaries::Book = true,
-    notitle::Bool = false, nocolorbar::Bool = false, stemplot::Bool = false, clim::Vector{Float64} = Vector{Float64}(undef, 0), markersize::Float64 = 2., linewidth::Float64 = 1.,
-    linecolor::Symbol = :blue, sortnodes::Bool = false, nolegend::Bool = true)
+    GraphSig_Plot(G::GraphSig; symmetric::Bool = false,
+      markersize::Float64 = 2.,
+      markercolor::Symbol = :balance,
+      markerstrokewidth::Float64 = 1.0,
+      markerstrokealpha::Float64 = 1.0,
+      markervaluevaries::Bool = true,
+      linewidth::Float64 = 1.,
+      linecolor::Symbol = :blue,
+      linestyle::Symbol = :solid,
+      clim::Vector{Float64} = Vector{Float64}(undef, 0),
+      notitle::Bool = false, nocolorbar::Bool = false, nolegend::Bool = true,
+      stemplot::Bool = false, sortnodes::Bool = false)
 
 Display a plot of the data in a GraphSig object
 
 ### Input Argument
-*   `G::GraphSig`:    an input GraphSig object
-*   `symmetric`       symmetrize the colorbar
-*   `markersize`      the size of the nodes
-*   `markercolor`     markercolor scheme
+*   `G::GraphSig`:        an input GraphSig object
+*   `symmetric`           symmetrize the colorbar
+*   `markersize`          the size of the nodes
+*   `markercolor`         markercolor scheme
+*   `markerstrokewidth`   width of marker stroke
 *   `markerstrokealpha`   capacity of marker stroke
 *   `markervaluevaries`   if the marker color depends on the signal value
-*   `markershape`     shape of marker
-*   `notitle`         display a title
-*   `nocolorbar`      display a colorbar
-*   `stemplot`        use a stem plot
-*   `clim`            specify the dynamic display range
-*   `linewidth`        the width of the lines in gplot
-*   `linecolor`       the color of the lines (1D) / graph edges (2D & 3D)
-*   `style`:          the style of line
-*   `sortnodes`       plot the signal values from smallest to largest in magnitude
+*   `markershape`         shape of marker
+*   `linewidth`           the width of the lines in gplot
+*   `linecolor`           the color of the lines (1D) / graph edges (2D & 3D)
+*   `linestyle`:          the style of line
+*   `notitle`             display a title
+*   `nocolorbar`          display a colorbar
+*   `nolegend`            display a legend
+*   `stemplot`            use a stem plot
+*   `clim`                specify the dynamic display range
+*   `sortnodes`           plot the signal values from smallest to largest in magnitude
 """
-function GraphSig_Plot(G::GraphSig; symmetric::Bool = false, markercolor::Symbol = :balance, markerstrokealpha::Float64 = 1.0, markervaluevaries::Bool = true, markershape::Symbol = :circle,
-    notitle::Bool = false, nocolorbar::Bool = false, stemplot::Bool = false, clim::Tuple{Float64, Float64} = (0., 0.), markersize::Float64 = 2., linewidth::Float64 = 1.,
-    linecolor::Symbol = :blue, linestyle::Symbol = :solid, sortnodes::Bool = false, nolegend::Bool = true)
+function GraphSig_Plot(G::GraphSig; symmetric::Bool = false,
+      markersize::Float64 = 2.,
+      markercolor::Symbol = :balance,
+      markerstrokewidth::Float64 = 1.0,
+      markerstrokealpha::Float64 = 1.0,
+      markervaluevaries::Bool = true,
+      linewidth::Float64 = 1.,
+      linecolor::Symbol = :blue,
+      linestyle::Symbol = :solid,
+      clim::Vector{Float64} = Vector{Float64}(undef, 0),
+      notitle::Bool = false, nocolorbar::Bool = false, nolegend::Bool = true,
+      stemplot::Bool = false, sortnodes::Bool = false)
 
     # only run this for 1D signals
     fcols = Base.size(G.f, 2)
@@ -141,17 +161,39 @@ function GraphSig_Plot(G::GraphSig; symmetric::Bool = false, markercolor::Symbol
             # plot the nodes for a 2-D graph
             if G.dim == 2
                 if ~markervaluevaries
-                    scatter!(G.xy[:,1], G.xy[:,2], markersize = markersize, markercolor = markercolor,markerstrokealpha = markerstrokealpha, markershape = markershape);
+                    scatter!(G.xy[:,1], G.xy[:,2],
+                             markersize = markersize,
+                             markercolor = markercolor,
+                             markerstrokewidth = markerstrokewidth,
+                             markerstrokealpha = markerstrokealpha,
+                             markershape = markershape);
                 else
-                    scatter!(G.xy[:,1], G.xy[:,2], markersize = markersize, zcolor = G.f, markercolor = markercolor,markerstrokealpha = markerstrokealpha, markershape = markershape);
+                    scatter!(G.xy[:,1], G.xy[:,2],
+                             zcolor = G.f,
+                             markersize = markersize,
+                             markercolor = markercolor,
+                             markerstrokewidth = markerstrokewidth,
+                             markerstrokealpha = markerstrokealpha,
+                             markershape = markershape);
                 end
 
                 # plot the nodes for a 3-D graph
             else
                 if ~markervaluevaries
-                    scatter!(G.xy[:,1], G.xy[:,2], G.xy[:,3], markersize = markersize, markercolor = markercolor,markerstrokealpha = markerstrokealpha, markershape = markershape);
+                    scatter!(G.xy[:,1], G.xy[:,2], G.xy[:,3],
+                             markersize = markersize,
+                             markercolor = markercolor,
+                             markerstrokewidth = markerstrokewidth,
+                             markerstrokealpha = markerstrokealpha,
+                             markershape = markershape);
                 else
-                    scatter!(G.xy[:,1], G.xy[:,2], G.xy[:,3], markersize = markersize, zcolor = G.f, markercolor = markercolor,markerstrokealpha = markerstrokealpha, markershape = markershape);
+                    scatter!(G.xy[:,1], G.xy[:,2], G.xy[:,3],
+                             zcolor = G.f,
+                             markersize = markersize,
+                             markercolor = markercolor,
+                             markerstrokewidth = markerstrokewidth,
+                             markerstrokealpha = markerstrokealpha,
+                             markershape = markershape);
                 end
             end
 
