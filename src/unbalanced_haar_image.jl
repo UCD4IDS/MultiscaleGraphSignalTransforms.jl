@@ -160,3 +160,51 @@ function total_var(matrix::Matrix{Float64})
     v = norm(vcat(row_val[:],col_val[:]),1)
     return v
 end
+
+
+
+
+function PartitionTreeMatrix_unbalanced_haar_binarytree(matrix::Matrix{Float64}, jmax::Int64, p::Float64)
+    N = size(matrix,2)
+    rs = fill(0, N+1, jmax)
+    rs[1,:] .= 1
+    rs[2,1] = N+1
+
+    for j = 1:jmax - 1
+        rr = 1
+        regioncount = sum(rs[:,j].!=0) - 1
+
+        for r = 1:regioncount
+            rs1 = rs[r,j]
+            rs2 = rs[r+1,j]
+            n = rs2 - rs1
+            if n > 1
+                n1 = PartiitonTreeMatrix_unbalanced_haar_col_partition(matrix[:,rs1:rs2-1],p)
+                rs[rr+1,j+1] = rs1+n1
+                rs[rr+2,j+1] = rs2
+                rr = rr+2
+
+            elseif n == 1
+                rs[rr+1,j+1] = rs2
+                rr = rr+1
+            end
+        end
+    end
+
+    GP = GraphPart(Vector{Int}(1:N), rs)
+    return GP
+end
+
+function PartiitonTreeMatrix_unbalanced_haar_col_partition(matrix::Matrix{Float64},p::Float64)
+    n = size(matrix,2)
+    entropy = Inf
+    col_cut = 1
+    for j = 1:n-1
+        entropy_temp = total_var(matrix[:, 1:j])/(j^p) + total_var(matrix[:,j+1:n])/(n-j)^p
+        if entropy_temp < entropy
+            entropy = entropy_temp
+            col_cut = j
+        end
+    end
+    return col_cut
+end

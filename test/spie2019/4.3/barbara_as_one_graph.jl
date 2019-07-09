@@ -1,4 +1,4 @@
-using Plots, SparseArrays, JLD2, LinearAlgebra, MTSG
+using Plots, SparseArrays, JLD2, LinearAlgebra, Wavelets, MTSG
 
 #img = load("test\\8.jpg")
 #heatmap(img,ratio=1, yaxis =:flip, axis = false, color = :gray)
@@ -142,3 +142,34 @@ end
 current()
 
 savefig("barbara_top4.pdf")
+
+
+#########################
+function approx_error(DVEC::Array{Array{Float64,1},1})
+    plot(xaxis = "Fraction of Coefficients Retained", yaxis = "Relative Approximation Error")
+    frac = 0:0.01:0.3
+    T = ["Classical Haar transform", "eGHWT Haar basis", "eGHWT best basis"]
+    L = [(:dashdot,:orange),(:dashdot,:blue),(:solid, :black)]
+    for i = 1:3
+        dvec = DVEC[i]
+        N = length(dvec)
+        dvec_norm = norm(dvec,2)
+        dvec_sort = sort(dvec.^2, rev = true)
+
+        er = fill(0., length(frac))
+
+        for j = 1:length(frac)
+            p = Int64(floor(frac[j]*N))
+            er[j] = sqrt(dvec_norm^2 - sum(dvec_sort[1:p]))/dvec_norm
+        end
+
+        plot!(frac, er, yaxis=:log, xlims = (0.,0.3), label = T[i], line = L[i])
+        print(er[26])
+    end
+end
+
+dvec_classichaar = dwt(matrix, wavelet(WT.haar))
+
+### Figure 8(a)
+approx_error([dvec_classichaar[:], dvec_haar[:], dvec_eghwt[:]])
+current()
