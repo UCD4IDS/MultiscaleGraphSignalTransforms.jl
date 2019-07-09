@@ -168,8 +168,26 @@ function approx_error(DVEC::Array{Array{Float64,1},1})
     end
 end
 
+#########################
+function approx_error2(DVEC::Array{Array{Float64,1},1})
+    plot(xaxis = "Fraction of Coefficients Retained", yaxis = "Relative Approximation Error")
+    frac = 0.3
+    T = ["Classical Haar transform", "eGHWT Haar basis", "eGHWT best basis"]
+    L = [(:dashdot,:orange),(:dashdot,:blue),(:solid, :black)]
+    for i = 1:3
+        dvec = DVEC[i]
+        N = length(dvec)
+        dvec_norm = norm(dvec,2)
+        dvec_sort = sort(dvec.^2) # the smallest first
+        er = sqrt.(reverse(cumsum(dvec_sort)))/dvec_norm # this is the relative L^2 error of the whole thing, i.e., its length is N
+        p = Int64(floor(frac*N)) + 1 # upper limit
+        plot!(frac*(0:(p-1))/(p-1), er[1:p], yaxis=:log, xlims = (0.,frac), label = T[i], line = L[i])
+    end
+end
+
 dvec_classichaar = dwt(matrix, wavelet(WT.haar))
 
 ### Figure 8(a)
-approx_error([dvec_classichaar[:], dvec_haar[:], dvec_eghwt[:]])
+#approx_error([dvec_classichaar[:], dvec_haar[:], dvec_eghwt[:]])
+approx_error2([dvec_classichaar[:], dvec_haar[:], dvec_eghwt[:]])
 current()
