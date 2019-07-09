@@ -90,6 +90,6 @@ function approx_error(DVEC::Array{Array{Float64,1},1})
 end
 
 ### Figure 7
-approx_error([dvec_classichaar[:], dvec_haar[:], dvec_eghwt[:]])
+approx_error([dvec_classichaar[:], dvec_haar[:], dvec_tf[:]])
 current()
 savefig("figure7.pdf")
