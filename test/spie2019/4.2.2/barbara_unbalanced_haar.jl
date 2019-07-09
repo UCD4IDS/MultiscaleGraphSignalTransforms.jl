@@ -1,4 +1,4 @@
-using Plots, SparseArrays, JLD2, LinearAlgebra, MTSG
+using Plots, SparseArrays, JLD2, LinearAlgebra, Wavelets, MTSG
 
 @load "presentation.jld2"
 matrix = vars["barbara"]

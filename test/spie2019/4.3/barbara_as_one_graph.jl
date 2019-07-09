@@ -1,4 +1,4 @@
-using Plots, SparseArrays, JLD2, LinearAlgebra, MTSG
+using Plots, SparseArrays, JLD2, LinearAlgebra, Wavelets, MTSG
 
 #img = load("test\\8.jpg")
 #heatmap(img,ratio=1, yaxis =:flip, axis = false, color = :gray)
