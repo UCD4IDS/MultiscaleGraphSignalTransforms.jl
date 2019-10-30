@@ -1,6 +1,6 @@
 # This is a very preliminary test function;
 # Just small scale examples, e.g., P6 with 10 random signals. More coming!
-using Main.MTSG, LinearAlgebra, SparseArrays, JLD2
+using MTSG, LinearAlgebra, SparseArrays, JLD2
 ##############################################################
 # 1. Testing basic GHWT functions on 10 random signals on P6 #
 ##############################################################
