@@ -1,6 +1,6 @@
 using Plots, SparseArrays, JLD2, LinearAlgebra, Wavelets, MTSG
 
-@load "presentation.jld2"
+@load "../spie_data.jld2"
 matrix = vars["barbara"]
 
 #face

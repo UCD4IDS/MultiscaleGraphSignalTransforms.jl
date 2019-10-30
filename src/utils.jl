@@ -259,7 +259,7 @@ function nonorth2relerror(nonorth::Array{Float64,1},B::Array{Float64,2})
     IX = sortperm(nonorth, by = abs, rev = true)
 
     # generate a matrix where column j contains the j largest coefficients
-    matrix0 = full(UpperTriangular(repmat(nonorth[IX],1,length(IX))))
+    matrix0 = Matrix(UpperTriangular(repeat(nonorth[IX],1,length(IX))))
     matrix = deepcopy(matrix0)
     matrix[IX,:] = matrix0
 
@@ -268,7 +268,7 @@ function nonorth2relerror(nonorth::Array{Float64,1},B::Array{Float64,2})
     recons = B*matrix
 
     # the relative errors
-    relerror = sum((repmat(f,1,length(IX)) - recons).^2,1)'.^(1/2)./norm(f,2)
+    relerror = sum((repeat(f,1,length(IX)) - recons).^2, dims = 1)'.^(1/2)./norm(f,2)
     return relerror
 end
 

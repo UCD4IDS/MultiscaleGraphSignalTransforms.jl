@@ -116,14 +116,14 @@ function HGLET_Synthesis(dvec::Matrix{Float64}, GP::GraphPart, BS::BasisSpec, G:
                             W_temp = W[indrs,indrs]
                             D_temp = sparse(Diagonal(dropdims(sum(W_temp, dims = 1),dims = 1)))
                             D_temp_p = sparse(Diagonal(dropdims(sum(W_temp,dims = 1), dims = 1).^(-1/2)))
-                            vec,_,_ = svd(full(D_temp_p*(D_temp - W_temp)*D_temp_p))
+                            vec,_,_ = svd(Matrix(D_temp_p*(D_temp - W_temp)*D_temp_p))
                             vec = vec[:,end:-1:1]
 
                         else
                             useLrw = false
 
                             ### eigenvectors of L ==> svd(L)
-                            vec,_,_ = svd(full(D_temp-W_temp))
+                            vec,_,_ = svd(Matrix(D_temp-W_temp))
                             vec = vec[:,end:-1:1]
                         end
 
@@ -181,14 +181,14 @@ function HGLET_Synthesis(dvec::Matrix{Float64}, GP::GraphPart, BS::BasisSpec, G:
                             W_temp = W[indrs,indrs]
                             D_temp = sparse(Diagonal(dropdims(sum(W_temp,dims = 1),dims = 1)))
                             D_temp_p = sparse(Diagonal(dropdims(sum(W_temp,dims = 1),dims = 1).^(-1/2)))
-                            vec,_,_ = svd(full(D_temp_p*(D_temp - W_temp)*D_temp_p))
+                            vec,_,_ = svd(Matrix(D_temp_p*(D_temp - W_temp)*D_temp_p))
                             vec = vec[:,end:-1:1]
 
                         else
                             useLrw = false
 
                             ### eigenvectors of L ==> svd(L)
-                            vec,_,_ = svd(full(D_temp-W_temp))
+                            vec,_,_ = svd(Matrix(D_temp-W_temp))
                             vec = vec[:,end:-1:1]
                         end
 
@@ -749,7 +749,7 @@ function HGLET_GHWT_BestBasis_minrelerror(GP::GraphPart,G::GraphSig;dmatrixH::Ar
         if orthbasis
             relerror_temp = orth2relerror(dvec_temp[:])
         else
-            B = HGLET_GHWT_Synthesis(eye(length(dvec_temp)),GP,BS_temp,trans_temp,G)
+            B,_ = HGLET_GHWT_Synthesis(Matrix{Float64}(I,length(dvec_temp),length(dvec_temp)),GP,BS_temp,trans_temp,G)
             relerror_temp = nonorth2relerror(dvec_temp[:],B)
         end
         sumrelerror_temp = sum(relerror_temp)

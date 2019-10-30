@@ -3,7 +3,7 @@ using Plots, SparseArrays, JLD2, LinearAlgebra, Wavelets, MTSG
 #img = load("test\\8.jpg")
 #heatmap(img,ratio=1, yaxis =:flip, axis = false, color = :gray)
 
-JLD2.@load "presentation.jld2"
+JLD2.@load "../spie_data.jld2"
 matrix = vars["barbara"][1:4:512,1:4:512]
 
 heatmap(matrix,ratio=1, yaxis =:flip, axis = false, color = :grays, clim = (0,1))
