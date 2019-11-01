@@ -5,7 +5,7 @@ using MTSG, LinearAlgebra, SparseArrays, JLD2
 # 1. Testing basic GHWT functions on 10 random signals on P6 #
 ##############################################################
 println("1. Testing basic GHWT functions")
-JLD2.@load "path6randn10.jld2" G
+JLD2.@load "runtests_data/path6randn10.jld2" G
 G = gpath(6, G["tmp"])
 GP = partition_tree_fiedler(G)
 dc2f = ghwt_analysis!(G, GP=GP)
@@ -24,7 +24,7 @@ println("They are equal: ", levlist == bbc2f[2].levlist)
 # levlengths = collect(enumerate([1; 1; 1; 2; 1]))
 # println("The true BB levlengths: ", levlengths)
 # println("The comp BB levlengths: ", bbc2f[2].levlengths)
-JLD2.@load "bbcoef.jld2" tmp2
+JLD2.@load "runtests_data/bbcoef.jld2" tmp2
 println("The relative L2 error of the BB coefs: ", norm(tmp2["bbcoef"]-bbc2f[1])/norm(tmp2["bbcoef"]))
 println("\n")
 
@@ -34,7 +34,7 @@ println("\n")
 #   roadmap signal (Temporarily skipped)                                      #
 ###############################################################################
 # println("2. Testing time-frequency adapted GHWT functions on smoothing the minnesota roadmap signal")
-# JLD2.@load "MN_MutGauss.jld2" G
+# JLD2.@load "runtests_data/MN_MutGauss.jld2" G
 # tmp1 = G["G"]
 # G=GraphSig(tmp1["W"],xy=tmp1["xy"],f=tmp1["f"],name =tmp1["name"],plotspecs = tmp1["plotspecs"])
 #
@@ -121,14 +121,14 @@ println("\n")
 # 4. Testing HGLET functions and hybrid methods related functions on RGC100 #
 #############################################################################
 println("4. Testing HGLET functions and hybrid methods related functions")
-#JLD2.@load "Dendrite.jld2" G
+#JLD2.@load "runtests_data/Dendrite.jld2" G
 #G = G["G"]
 # convert to SparseMatrixCSC{Float64,Int} where Int is machine dependent.
 #A = Array(G["W"])
 #B = sparse(A)
 #G = GraphSig(B, xy = G["xy"], f = G["f"], name = G["name"])
 
-JLD2.@load "Toronto.jld2"
+JLD2.@load "runtests_data/Toronto_new.jld2"
 tmp1 = toronto["G"]
 G=GraphSig(tmp1["W"],xy=tmp1["xy"],f=tmp1["f"],name =tmp1["name"],plotspecs = tmp1["plotspecs"])
 
@@ -153,7 +153,7 @@ println("\n")
 ###########################################################################
 println("5. GraphSig_Plot on mutilated Gaussian signal on the MN roadmap")
 println("... this may not display the plot if you run it via the package test.")
-JLD2.@load "MN_MutGauss.jld2" G
+JLD2.@load "runtests_data/MN_MutGauss.jld2" G
 tmp1 = G["G"]
 G=GraphSig(tmp1["W"],xy=tmp1["xy"],f=tmp1["f"],name =tmp1["name"],plotspecs = tmp1["plotspecs"])
 G = Adj2InvEuc(G)
