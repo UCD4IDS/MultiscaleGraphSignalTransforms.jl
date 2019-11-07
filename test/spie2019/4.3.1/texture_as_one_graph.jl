@@ -1,6 +1,6 @@
 using Plots, SparseArrays, JLD2, LinearAlgebra, MTSG
 
-@load "handcut_images.jld2"
+JLD2.@load "handcut_images.jld2"
 
 heatmap(tmp["block5"],ratio=1, yaxis =:flip, axis = false, color = :grays)
 #savefig("original.pdf")
@@ -133,10 +133,29 @@ function approx_error(DVEC::Array{Array{Float64,1},1})
     end
 end
 
-approx_error([dvec_haar[:], dvec_walsh[:], dvec_c2f[:], dvec_f2c[:], dvec_eghwt[:]])
-current()
+#approx_error([dvec_haar[:], dvec_walsh[:], dvec_c2f[:], dvec_f2c[:], dvec_eghwt[:]])
+#current()
 #savefig("approx_error.pdf")
 
+################################################################################
+####################### Approximation error plot################################
+################################################################################
+### function to plot the approximation error curve
+function approx_error2(DVEC::Array{Array{Float64,1},1})
+    plot(xaxis = "Fraction of Coefficients Retained", yaxis = "Relative Approximation Error")
+    frac = 0.3
+    T = ["Haar","Walsh","GHWT_c2f", "GHWT_f2c", "eGHWT"]
+    L = [(:dashdot,:orange),(:dashdot,:blue),(:solid, :red),(:solid, :green),(:solid, :black)]
+    for i = 1:5
+        dvec = DVEC[i]
+        N = length(dvec)
+        dvec_norm = norm(dvec,2)
+        dvec_sort = sort(dvec.^2) # the smallest first
+        er = sqrt.(reverse(cumsum(dvec_sort)))/dvec_norm # this is the relative L^2 error of the whole thing, i.e., its length is N
+        p = Int64(floor(frac*N)) + 1 # upper limit
+        plot!(frac*(0:(p-1))/(p-1), er[1:p], yaxis=:log, xlims = (0.,frac), label = T[i], line = L[i])
+    end
+end
 
 
 ############################
@@ -145,7 +164,10 @@ current()
 # Figure 9(a)
 heatmap(tmp["block5"],ratio=1, yaxis =:flip, axis = false, color = :grays)
 # Figure 9(b)
-approx_error([dvec_haar[:], dvec_walsh[:], dvec_c2f[:], dvec_f2c[:], dvec_eghwt[:]])
+#approx_error([dvec_haar[:], dvec_walsh[:], dvec_c2f[:], dvec_f2c[:], dvec_eghwt[:]])
+approx_error2([dvec_haar[:], dvec_walsh[:], dvec_c2f[:], dvec_f2c[:], dvec_eghwt[:]])
+current()
+savefig("figure9b.pdf")
 # Figure 10(a)
 top_vectors_plot(dvec_haar, BS_haar, GP)
 # Figure 10(b)
