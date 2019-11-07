@@ -24,7 +24,7 @@ using MTSG
 
 2. J. Irion and N. Saito, [The generalized Haar-Walsh transform](http://dx.doi.org/10.1109/SSP.2014.6884678), *Proc. 2014 IEEE Statistical Signal Processing Workshop*, pp. 488-491, 2014.
 
-3. J. Irion and N. Saito, [Applied and computational harmonic analysis on
+3. J. Irion and N. Saito, [Applied and computational harmonic analysis on 
 graphs and networks](http://dx.doi.org/10.1117/12.2186921), *Wavelets and Sparsity XVI*, (M. Papadakis, V. K. Goyal, D. Van De Ville, eds.), *Proc. SPIE 9597*, Paper #95971F, Invited paper, 2015.
 
 4. J. Irion, [Multiscale Transforms for Signals on Graphs: Methods and Applications](https://jefflirion.github.io/publications_and_presentations/irion_dissertation.pdf), Ph.D. dissertation, University of California, Davis, Dec. 2015.
