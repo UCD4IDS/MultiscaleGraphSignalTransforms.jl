@@ -32,3 +32,5 @@ graphs and networks](http://dx.doi.org/10.1117/12.2186921), *Wavelets and Sparsi
 5. J. Irion and N. Saito, [Learning sparsity and structure of matrices with multiscale graph basis dictionaries](http://dx.doi.org/10.1109/MLSP.2016.7738892), *Proc. 2016 IEEE 26th International Workshop on Machine Learning for Signal Processing (MLSP)*, (A. Uncini, K. Diamantaras, F. A. N. Palmieri, and J. Larsen, eds.), 2016.
 
 6. J. Irion and N. Saito, [Efficient approximation and denoising of graph signals using the multiscale basis dictionaries](http://dx.doi.org/10.1109/TSIPN.2016.2632039), *IEEE Transactions on Signal and Information Processing over Networks*, Vol. 3, no. 3, pp. 607-616, 2017.
+
+7. Y. Shao and N. Saito, [The extended Generalized Haar-Walsh Transform and applications](https://www.math.ucdavis.edu/~saito/publications/saito_eghwt.pdf), *Wavelets and Sparsity XVIII*, (D. Van De Ville, M. Papadakis, and Y. M. Lu, eds.), *Proc. SPIE 11138*, Paper #111380C, 2019.
