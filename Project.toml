@@ -1,6 +1,6 @@
 name = "MTSG"
 uuid = "cc44fc10-d0fb-5545-af72-ba1cb661a341"
-authors = ["Naoki Saito" <saito@math.ucdavis.edu>, "Yiqun Shao" <shaoyiqun1992@gmail.com>]
+authors = ["Naoki Saito <saito@math.ucdavis.edu>", "Yiqun Shao <shaoyiqun1992@gmail.com>"]
 version = "1.2"
 
 [deps]
