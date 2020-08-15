@@ -10,7 +10,7 @@ heatmap(matrix,ratio=1, yaxis =:flip, axis = false, color = :grays, clim = (0,1)
 
 matrix_gt = matrix[:]
 
-sigma = 0.001
+sigma = 0.01
 m, n = size(matrix)
 
 
@@ -46,10 +46,15 @@ G = GraphSig(W, f = reshape(matrix,(length(matrix_gt),1)))
 GP = partition_tree_fiedler(G)
 dmatrix = ghwt_analysis!(G, GP=GP)
 
+G_tmp = Glevel(G,GP,4)
+heatmap(reshape(G_tmp.f[:],(128,128)))
 ############# Construct or search the specific basis
 ############# Haar
 BS_haar = bs_haar(GP)
 dvec_haar = dmatrix2dvec(dmatrix, GP, BS_haar)
+
+############# eGHWT
+dvec_eghwt, BS_eghwt = ghwt_tf_bestbasis(dmatrix, GP)
 
 ############# Walsh
 BS_walsh = bs_walsh(GP)
@@ -61,8 +66,7 @@ dvec_c2f, BS_c2f = ghwt_c2f_bestbasis(dmatrix, GP)
 ############# GHWT_f2c
 dvec_f2c, BS_f2c = ghwt_f2c_bestbasis(dmatrix, GP)
 
-############# eGHWT
-dvec_eghwt, BS_eghwt = ghwt_tf_bestbasis(dmatrix, GP)
+
 
 
 
@@ -80,7 +84,7 @@ function top_vectors_plot(dvec::Array{Float64, 2}, BS::BasisSpec, GP::GraphPart;
         dvecT[sorted_ind[i]] = 1
         f = ghwt_synthesis(dvecT, GP, BS)
         #print((maximum(f), minimum(f)))
-        heatmap!(reshape(f, size(matrix)), subplot=i, ratio=1, yaxis=:flip, axis=false, color = :grays, clims = clims)
+        heatmap!(reshape(f, size(matrix)), subplot=i, ratio=1, yaxis=:flip, axis=false, color = :balance, clims = clims)
     end
     current()
 end
