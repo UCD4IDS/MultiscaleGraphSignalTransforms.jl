@@ -66,6 +66,9 @@ function top_vectors_synthesis_2d(p::Int64, dvec::Vector{Float64}, loc::Matrix{I
 
     matrix_syn = ghwt_tf_synthesis_2d(dvecT, loc, GProws, GPcols)
     heatmap(matrix_syn[row_zoom, col_zoom],ratio=1, yaxis =:flip, axis = false, color = :grays)
+    mse = norm(matrix - matrix_syn,2)^2/length(matrix)
+    psnr = -10*log10(mse)
+    return psnr
 end
 
 ################################################################################

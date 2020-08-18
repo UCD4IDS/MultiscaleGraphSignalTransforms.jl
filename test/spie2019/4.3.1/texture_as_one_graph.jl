@@ -153,7 +153,7 @@ function approx_error2(DVEC::Array{Array{Float64,1},1})
         dvec_sort = sort(dvec.^2) # the smallest first
         er = sqrt.(reverse(cumsum(dvec_sort)))/dvec_norm # this is the relative L^2 error of the whole thing, i.e., its length is N
         p = Int64(floor(frac*N)) + 1 # upper limit
-        plot!(frac*(0:(p-1))/(p-1), er[1:p], yaxis=:log, xlims = (0.,frac), label = T[i], line = L[i])
+        plot!(frac*(0:(p-1))/(p-1), er[1:p], yaxis=:log, xlims = (0.,frac),ylims = (10^(-2.5),1), label = T[i], line = L[i])
     end
 end
 

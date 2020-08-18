@@ -10,7 +10,7 @@ using Plots
       linewidth::Float64 = 1.,
       linecolor::Symbol = :blue,
       linestyle::Symbol = :solid,
-      clim::Vector{Float64} = Vector{Float64}(undef, 0),
+      clim::Tuple{Float64,Float64} = (0., 0.),
       notitle::Bool = false, nocolorbar::Bool = false, nolegend::Bool = true,
       stemplot::Bool = false, sortnodes::Bool = false)
 
@@ -45,7 +45,7 @@ function GraphSig_Plot(G::GraphSig; symmetric::Bool = false,
       linewidth::Float64 = 1.,
       linecolor::Symbol = :blue,
       linestyle::Symbol = :solid,
-      clim::Vector{Float64} = Vector{Float64}(undef, 0),
+      clim::Tuple{Float64,Float64} = (0., 0.),
       notitle::Bool = false, nocolorbar::Bool = false, nolegend::Bool = true,
       stemplot::Bool = false, sortnodes::Bool = false)
 
