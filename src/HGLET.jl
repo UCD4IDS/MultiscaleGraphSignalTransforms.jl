@@ -401,8 +401,8 @@ end
 
 
 """
-    function HGLET_GHWT_BestBasis(GP::GraphPart; dmatrixH::Array{Float64,3} = Array{Float64,3}(0,0,0),dmatrixHrw::Array{Float64,3} = Array{Float64,3}(0,0,0)
-    ,dmatrixHsym::Array{Float64,3} = Array{Float64,3}(0,0,0),dmatrixG::Array{Float64,3} = Array{Float64,3}(0,0,0), costfun::Any = 0.1,flatten::Any = 1)
+    function HGLET_GHWT_BestBasis(GP::GraphPart; dmatrixH::Array{Float64,3} = Array{Float64,3}(undef,0,0,0),dmatrixHrw::Array{Float64,3} = Array{Float64,3}(undef,0,0,0)
+    ,dmatrixHsym::Array{Float64,3} = Array{Float64,3}(undef,0,0,0),dmatrixG::Array{Float64,3} = Array{Float64,3}(undef,0,0,0), costfun::Any = 0.1,flatten::Any = 1)
 
 Select the best basis from several matrices of expansion coefficients
 
@@ -424,8 +424,8 @@ Select the best basis from several matrices of expansion coefficients
                    10 = HGLET with Lsym
                    11 = GHWT
 """
-function HGLET_GHWT_BestBasis(GP::GraphPart; dmatrixH::Array{Float64,3} = Array{Float64,3}(0,0,0),dmatrixHrw::Array{Float64,3} = Array{Float64,3}(0,0,0)
-,dmatrixHsym::Array{Float64,3} = Array{Float64,3}(0,0,0),dmatrixG::Array{Float64,3} = Array{Float64,3}(0,0,0), costfun::Any = 0.1,flatten::Any = 1)
+function HGLET_GHWT_BestBasis(GP::GraphPart; dmatrixH::Array{Float64,3} = Array{Float64,3}(undef,0,0,0),dmatrixHrw::Array{Float64,3} = Array{Float64,3}(undef,0,0,0)
+,dmatrixHsym::Array{Float64,3} = Array{Float64,3}(undef,0,0,0),dmatrixG::Array{Float64,3} = Array{Float64,3}(undef,0,0,0), costfun::Any = 0.1,flatten::Any = 1)
     # specify transform codes
     transHsym = [true false]
     transG = [true true]
@@ -694,8 +694,8 @@ end
 
 
 """
-    function HGLET_GHWT_BestBasis_minrelerror(GP::GraphPart,G::GraphSig;dmatrixH::Array{Float64,3} = Array{Float64,3}(0,0,0), dmatrixHrw::Array{Float64,3} = Array{Float64,3}(0,0,0),
-        dmatrixHsym::Array{Float64,3} = Array{Float64,3}(0,0,0),dmatrixG::Array{Float64,3} = Array{Float64,3}(0,0,0), compare::Bool = true)
+    function HGLET_GHWT_BestBasis_minrelerror(GP::GraphPart,G::GraphSig;dmatrixH::Array{Float64,3} = Array{Float64,3}(undef,0,0,0), dmatrixHrw::Array{Float64,3} = Array{Float64,3}(undef,0,0,0),
+        dmatrixHsym::Array{Float64,3} = Array{Float64,3}(undef,0,0,0),dmatrixG::Array{Float64,3} = Array{Float64,3}(undef,0,0,0), compare::Bool = true)
 
     Find the best basis for approximating the signal 'G' by performing the best basis search with a range of tau-measures
     as cost functionals (tau = 0.1,0.2,...,1.9) and minimizing the relative error.
@@ -720,8 +720,8 @@ end
     * `tau`: the tau that yields the smallest relative error
 
 """
-function HGLET_GHWT_BestBasis_minrelerror(GP::GraphPart,G::GraphSig;dmatrixH::Array{Float64,3} = Array{Float64,3}(0,0,0), dmatrixHrw::Array{Float64,3} = Array{Float64,3}(0,0,0),
-    dmatrixHsym::Array{Float64,3} = Array{Float64,3}(0,0,0),dmatrixG::Array{Float64,3} = Array{Float64,3}(0,0,0), compare::Bool = true)
+function HGLET_GHWT_BestBasis_minrelerror(GP::GraphPart,G::GraphSig;dmatrixH::Array{Float64,3} = Array{Float64,3}(undef,0,0,0), dmatrixHrw::Array{Float64,3} = Array{Float64,3}(undef,0,0,0),
+    dmatrixHsym::Array{Float64,3} = Array{Float64,3}(undef,0,0,0),dmatrixG::Array{Float64,3} = Array{Float64,3}(undef,0,0,0), compare::Bool = true)
     dvec, BS, trans, tau = 0, 0, 0, 0 # predefine
     sumrelerror = Inf
     for tau_temp = 0.1:0.1:1.9
