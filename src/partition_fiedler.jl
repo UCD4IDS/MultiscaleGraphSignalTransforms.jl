@@ -116,7 +116,7 @@ function partition_fiedler(W::SparseMatrixCSC{Float64,Int};
                 val, ind = findmax(val) # val is set to be a scalar.
                 v = vtmp[:, ind]
                 # MATLAB: v = (full(sum(W,2)).^(-0.5)) .* v
-                v = vec((sum(W, dims = 2).^(-0.5)) .* v) # This is the Fiedler vector!
+                # v = vec((sum(W, dims = 2).^(-0.5)) .* v) # This is the Fiedler vector!
             end
         end
         if N <= cutoff || eigs_flag != 0 # if W is small or eigs had a problem,
