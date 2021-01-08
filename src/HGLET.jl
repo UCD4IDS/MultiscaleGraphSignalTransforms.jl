@@ -243,7 +243,7 @@ Generate the (j,k,l) indices for the HGLET basis vector corresponding to the coe
 function HGLET_jkl(GP::GraphPart, drow::Int, dcol::Int)
     j = dcol - 1
 
-    k = find(GP.rs[:,dcol] .> drow)
+    k = findfirst(GP.rs[:,dcol] .> drow)
     k = k-2
 
     l = drow - GP.rs[k+1,dcol]
