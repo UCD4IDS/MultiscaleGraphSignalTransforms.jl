@@ -6,7 +6,7 @@ using ..GraphSignal, ..GraphPartition, ..BasisSpecification, LinearAlgebra
 
 include("common.jl")
 
-export ghwt_core!, ghwt_analysis!, fine2coarse!, ghwt_synthesis, ghwt_c2f_bestbasis, ghwt_f2c_bestbasis, ghwt_bestbasis
+export ghwt_core!, ghwt_analysis!, fine2coarse!, ghwt_synthesis, ghwt_c2f_bestbasis, ghwt_f2c_bestbasis, ghwt_bestbasis, GHWT_jkl
 
 """
     ghwt_core!(GP::GraphPart)
@@ -843,5 +843,34 @@ function ghwt_bestbasis(dmatrix::Array{Float64,3}, GP::GraphPart;
     # Return things
     return dvec, BS
 end # of function ghwt_bestbasis
+
+"""
+    function GHWT_jkl(GP::GraphPart, drow::Int, dcol::Int)
+
+Generate the (j,k,l) indices for the GHWT basis vector corresponding to the coefficient dmatrix(drow,dcol)
+
+### Input Arguments
+* `GP`: a GraphPart object
+* `drow`: the row of the expansion coefficient
+* `dcol`: the column of the expansion coefficient
+
+### Output Argument
+* `j`: the level index of the expansion coefficient
+* `k`: the subregion index of the expansion coefficient
+* `l`: the tag of the expansion coefficient
+"""
+function GHWT_jkl(GP::GraphPart, drow::Int, dcol::Int)
+    j = dcol - 1
+
+    k = findfirst(GP.rs[:,dcol] .> drow)
+    k = k-2
+
+    if isempty(GP.tag)
+        GP = ghwt_core!(GP)
+    end
+    l = GP.tag[drow,dcol]
+
+    return j,k,l
+end # of function GHWT_jkl
 
 end # of module GHWT
