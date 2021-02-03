@@ -845,7 +845,7 @@ function ghwt_bestbasis(dmatrix::Array{Float64,3}, GP::GraphPart;
 end # of function ghwt_bestbasis
 
 """
-    function GHWT_jkl(GP::GraphPart, drow::Int, dcol::Int)
+    function GHWT_jkl(GP::GraphPart, drow::Int, dcol::Int; c2f::Bool = true)
 
 Generate the (j,k,l) indices for the GHWT basis vector corresponding to the coefficient dmatrix(drow,dcol)
 
@@ -859,17 +859,27 @@ Generate the (j,k,l) indices for the GHWT basis vector corresponding to the coef
 * `k`: the subregion index of the expansion coefficient
 * `l`: the tag of the expansion coefficient
 """
-function GHWT_jkl(GP::GraphPart, drow::Int, dcol::Int)
-    j = dcol - 1
+function GHWT_jkl(GP::GraphPart, drow::Int, dcol::Int; c2f::Bool = true)
+    if c2f
+        j = dcol - 1
 
-    k = findfirst(GP.rs[:,dcol] .> drow)
-    k = k-2
+        k = findfirst(GP.rs[:,dcol] .> drow)
+        k -= 2
 
-    if isempty(GP.tag)
-        GP = ghwt_core!(GP)
+        if isempty(GP.tag)
+            ghwt_core!(GP)
+        end
+        l = GP.tag[drow,dcol]
+    else
+        jmax = size(GP.rs, 2)
+        j = jmax - dcol
+
+        IX = fine2coarse!(GP; indp = true)
+        k = findfirst(GP.rs[:,j+1] .> IX[drow,dcol])
+        k -= 2
+
+        l = GP.tagf2c[drow,dcol]
     end
-    l = GP.tag[drow,dcol]
-
     return j,k,l
 end # of function GHWT_jkl
 
