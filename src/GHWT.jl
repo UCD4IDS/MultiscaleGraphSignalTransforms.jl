@@ -353,11 +353,19 @@ function fine2coarse!(GP::GraphPart;
     # 2. Return the appropriate variables if requested
     #
     if coefp && indp
+<<<<<<< HEAD
         return dmatrixf2c, IX
     elseif coefp && !indp
         return dmatrixf2c
     elseif !coefp && indp
         return IX
+=======
+        return dmatrix, IX
+    elseif coefp && !indp
+        return dmatrix
+    elseif !coefp && indp
+        return IX 
+>>>>>>> 0d7bc034dde23ba7c0f66675a62f828a10f4cbd1
     end
 end # of function fine2coarse!
 
