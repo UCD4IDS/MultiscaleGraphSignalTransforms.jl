@@ -9,7 +9,7 @@ export GraphPart, partition_tree_fiedler, partition_tree_matrixDhillon
 
 # GraphPart data structure and constructors
 """
-    GP = GraphPart(ind::Vector{Int}, rs::Matrix{Int}, tag::Matrix{Int}, compinfo::Matrix{Int}, rsf2c::Matrix{Int}, tagf2c::Matrix{Int}, compinfof2c::Matrix{Int}, method::Vector{Symbol})
+    GP = GraphPart(ind::Vector{Int}, rs::Matrix{Int}, tag::Matrix{Int}, compinfo::Matrix{Int}, rsf2c::Matrix{Int}, tagf2c::Matrix{Int}, compinfof2c::Matrix{Int}, inds::Matrix{Int}, method::Vector{Symbol})
 
 is a data structure for a GraphPart object containing the following fields:
 * `ind::Vector{Int}`: ordering of the indices on the finest level
@@ -19,6 +19,7 @@ is a data structure for a GraphPart object containing the following fields:
 * `rsf2c::Matrix{Int}`: the fine-to-coarse version of `rs`
 * `tagf2c::Matrix{Int}`: the fine-to-coarse version of `tag`
 * `compinfof2c::Matrix{Int}`: the fine-to-coarse version of `compinfo`
+* `inds::Matrix{Int}`: ordering of the indices on all levels
 * `method::Symbol`: how the partition tree was constructed
 
 The unsigned integer depends on the size of the underlying graph.
@@ -38,6 +39,7 @@ mutable struct GraphPart
     rsf2c::Matrix{Int}         # f2c version of `rs`
     tagf2c::Matrix{Int}        # f2c version of `tag`
     compinfof2c::Matrix{Int}   # f2c version of `compinfo`
+    inds::Matrix{Int}   # ordering of the indices on all levels
     method::Symbol           # specification of graph partition method
 
     # An inner constructor here.
@@ -47,6 +49,7 @@ mutable struct GraphPart
                        rsf2c::Matrix{Int} = Matrix{Int}(undef, 0, 0),
                        tagf2c::Matrix{Int} = Matrix{Int}(undef, 0, 0),
                        compinfof2c::Matrix{Int} = Matrix{Int}(undef, 0, 0),
+                       inds::Matrix{Int} = Matrix{Int}(undef, 0, 0),
                        method::Symbol = :unspecified)
 
         # Sanity checks
@@ -85,7 +88,7 @@ mutable struct GraphPart
             @warn("compf2c now becomes a null array!")
             compf2c = Matrix{Int}(undef, 0, 0)
         end
-        new(ind, rs, tag, compinfo, rsf2c, tagf2c, compinfof2c, method)
+        new(ind, rs, tag, compinfo, rsf2c, tagf2c, compinfof2c, inds, method)
     end # of an inner constructor GraphPart
 
  end # of type GraphPart
@@ -124,6 +127,10 @@ function partition_tree_fiedler(G::GraphSignal.GraphSig, method::Symbol = :Lrw)
 
     # `ind` records the way in which the nodes are indexed on each level
     ind = Vector{Int}(1:N)
+
+    # `inds` records the way in which the nodes are indexed on all levels
+    inds = zeros(Int, N, jmax)
+    inds[:, 1] = ind
 
     # `rs` stands for regionstarInt, meaning that the index in `ind` of the first
     # point in region number `i` is `rs[i]`
@@ -183,6 +190,7 @@ function partition_tree_fiedler(G::GraphSignal.GraphSig, method::Symbol = :Lrw)
             end # of if n > 1 ... elseif n==1 construct
         end # of for r=1:regioncount
         j = j + 1
+        inds[:, j] = ind
     end # of while regioncount < N statement
 
     #
@@ -190,8 +198,10 @@ function partition_tree_fiedler(G::GraphSignal.GraphSig, method::Symbol = :Lrw)
     #
     # get rid of excess columns in rs
     rs = rs[:, 1:(j - 1)]         # in MAIntAB, it was rs(:,j:end) = [];
+    # get rid of excess columns in inds
+    inds = inds[:, 1:(j - 1)]
     # create a GraphPart object
-    return GraphPart(ind, rs, method = method)
+    return GraphPart(ind, rs; inds = inds, method = method)
 end # of function partition_tree_fiedler
 
 
