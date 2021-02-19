@@ -148,8 +148,9 @@ function partition_tree_fiedler(G::GraphSignal.GraphSig, method::Symbol = :Lrw)
     while regioncount < N
         #regioncount = countnz(rs[:,j]) - 1
         regioncount = count(!iszero,rs[:, j]) - 1 # the number of regions on level j
-        if j == jmax  # add a column to rs for level j+1, if necessary
+        if j == jmax  # add a column to rs and inds for level j+1, if necessary
             rs = hcat(rs, vcat(Int(1), zeros(Int,N)))
+            inds = hcat(inds, zeros(Int, N))
             jmax = jmax + 1
         end
         # for tracking the child regions
