@@ -135,6 +135,26 @@ function dmatrix_flatten(dmatrix::Array{Float64,3}, flatten::Any)
             t = 0.5 * norm(dmatrix[:]) / length(dmatrix)
             dmatrix[abs.(dmatrix) .< t] = 0
             dmatrix = sum(dmatrix, 3)
+            # ASH pdf estimation followed by the entropy computation.
+        elseif flatten == :ash
+            (N, jmax, fcols) = Base.size(dmatrix)
+            for j = 1:jmax
+                for i = 1:N
+                    # ASH pdf estimation
+                    h = ash(dmatrix[i, j, :])
+                    # number of sampling points
+                    npts = length(h.density)
+                    # width of the sampling range (default: max - min + 1*std)
+                    width = h.rng[end] - h.rng[1]
+                    # nomalize pdf
+                    pdf = h.density / norm(h.density, 1)
+                    # estimate of differential entropy by the limiting density
+                    # of discrete points (uniform sampling)
+                    dmatrix[i, j, 1] = entropy(pdf, 2.0) + log2(width / npts)
+                end
+            end
+            # flatten dmatrix by slicing
+            dmatrix = reshape(dmatrix[:, :, 1], N, jmax, 1)
             # default (1-norm)
         else
             @warn("the specified flatten symbol $(flatten) is not recognized; hence we assume it as 1-norm.")
