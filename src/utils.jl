@@ -128,7 +128,7 @@ function dmatrix_flatten(dmatrix::Array{Float64,3}, flatten::Any)
             # now, all the column vectors have the same norm, so normalize it.
             dmatrix /= sum(dmatrix[:, 1, 1])
             # now, each column has a unit norm.
-            dmatrix = sum(dmatrix .* log2.(dmatrix), dims = 3)
+            dmatrix = sum(-dmatrix .* log2.(dmatrix), dims = 3)
             # threshold coefficients below 0.5*norm(dmatrix)/length(dmatrix) and sum
         elseif flatten == :sub
             # MATLAB: t = 0.5 * norm(dmatrix[:], 'fro') / numel(dmatrix)
@@ -142,11 +142,11 @@ function dmatrix_flatten(dmatrix::Array{Float64,3}, flatten::Any)
                 for i = 1:N
                     # ASH pdf estimation
                     h = ash(dmatrix[i, j, :])
-                    # number of sampling points
+                    # number of sampling points (default: 500)
                     npts = length(h.density)
                     # width of the sampling range (default: max - min + 1*std)
                     width = h.rng[end] - h.rng[1]
-                    # nomalize pdf
+                    # normalize pdf
                     pdf = h.density / norm(h.density, 1)
                     # estimate of differential entropy by the limiting density
                     # of discrete points (uniform sampling)
