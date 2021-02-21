@@ -1,10 +1,11 @@
 name = "MTSG"
 uuid = "cc44fc10-d0fb-5545-af72-ba1cb661a341"
 authors = ["Naoki Saito <saito@math.ucdavis.edu>", "Yiqun Shao <shaoyiqun1992@gmail.com>"]
-version = "1.2"
+version = "1.2.0"
 
 [deps]
 Arpack = "7d9fca2a-8960-54d3-9f78-7d1dccf2cb97"
+AverageShiftedHistograms = "77b51b56-6f8f-5c3a-9cb4-d71f9594ea6e"
 Distances = "b4f34e82-e78d-54a5-968a-f98e89d6e8f7"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
