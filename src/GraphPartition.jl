@@ -95,7 +95,7 @@ mutable struct GraphPart
 
 
 """
-    GP = partition_tree_fiedler(G::GraphSig, method::Symbol = :Lrw)
+    GP = partition_tree_fiedler(G::GraphSig, method::Symbol = :Lrw, swapRegion::Bool = true)
 
  Generate a partition tree for a graph using the Fiedler vector of either
  L (the unnormalized Laplacian) or L_rw (the random-walk normalized
@@ -104,6 +104,7 @@ mutable struct GraphPart
 ### Input ArgumenInt
 * `G::GraphSig`: an input GraphSig object
 * `method::Symbol`: how the partition tree was constructed (default: :Lrw)
+* `swapRegion::Bool`: swap the child regions based on the sum of the subgraphs' edge weights (default: true)
 
 ### Output Argument
 * `GP::GraphPart`: an ouput GraphPart object
@@ -113,7 +114,7 @@ Copyright 2015 The RegenInt of the University of California
 Implemented by Jeff Irion (Adviser: Dr. Naoki Saito) |
 Translated and modified by Naoki Saito, Feb. 7, 2017
 """
-function partition_tree_fiedler(G::GraphSignal.GraphSig, method::Symbol = :Lrw)
+function partition_tree_fiedler(G::GraphSignal.GraphSig, method::Symbol = :Lrw, swapRegion::Bool = true)
     #
     # 0. Preliminary stuff
     #
@@ -168,7 +169,7 @@ function partition_tree_fiedler(G::GraphSignal.GraphSig, method::Symbol = :Lrw)
                 n1 = sum(pm .> 0)
                 # switch regions 1 and 2, if necessary, based on the sum of
                 # edge weighInt to the previous child region (i.e., cousin)
-                if r > 1
+                if r > 1 && swapRegion
                     # MAIntAB: sum(sum(...)) instead of sum(...)
                     if sum(G.W[ind[rs0:(rs1 - 1)], indrs[pm .> 0]]) <
                         sum(G.W[ind[rs0:(rs1 - 1)], indrs[pm .< 0]])

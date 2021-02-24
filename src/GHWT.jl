@@ -694,7 +694,7 @@ function ghwt_c2f_bestbasis(dmatrix::Array{Float64,3}, GP::GraphPart;
             ##### compute the cost of the current best basis
             costBB = costfun(dvecc2f[indr])
             costNEW = costfun(dmatrix[indr, j, 1])
-            if costBB >= costNEW - tol
+            if costBB >= costNEW + tol
                 #(dvecc2f[indr], levlistc2f[indr]) = bbchange(dmatrix[indr, j, 1], j)
                 dvecc2f[indr] = dmatrix[indr, j, 1]
                 levlistc2f[indr] .= j
