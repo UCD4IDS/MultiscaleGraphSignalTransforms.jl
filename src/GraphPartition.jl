@@ -95,7 +95,7 @@ mutable struct GraphPart
 
 
 """
-    GP = partition_tree_fiedler(G::GraphSig, method::Symbol = :Lrw, swapRegion::Bool = true)
+    GP = partition_tree_fiedler(G::GraphSig; method::Symbol = :Lrw, swapRegion::Bool = true)
 
  Generate a partition tree for a graph using the Fiedler vector of either
  L (the unnormalized Laplacian) or L_rw (the random-walk normalized
@@ -114,7 +114,7 @@ Copyright 2015 The RegenInt of the University of California
 Implemented by Jeff Irion (Adviser: Dr. Naoki Saito) |
 Translated and modified by Naoki Saito, Feb. 7, 2017
 """
-function partition_tree_fiedler(G::GraphSignal.GraphSig, method::Symbol = :Lrw, swapRegion::Bool = true)
+function partition_tree_fiedler(G::GraphSignal.GraphSig; method::Symbol = :Lrw, swapRegion::Bool = true)
     #
     # 0. Preliminary stuff
     #

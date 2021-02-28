@@ -643,7 +643,10 @@ function ghwt_synthesis(dvec::Matrix{Float64}, GP::GraphPart, BS::BasisSpec, G::
 end # of ghwt_synthesis (with G input)
 
 """
-    (dvecc2f, BSc2f) = ghwt_c2f_bestbasis(dmatrix::Array{Float64,3}, GP::GraphPart; cfspec::Any = 1.0, flatten::Any = 1.0)
+    (dvecc2f, BSc2f) = ghwt_c2f_bestbasis(dmatrix::Array{Float64,3}, GP::GraphPart;
+                                          cfspec::Any = 1.0, flatten::Any = 1.0,
+                                          j_start::Int = 1, j_end::Int = size(dmatrix,2),
+                                          useParent::Bool = true)
 
 Select the coarse-to-fine best basis from the matrix of GHWT expansion coefficients
 
@@ -652,13 +655,17 @@ Select the coarse-to-fine best basis from the matrix of GHWT expansion coefficie
 * `GP::GraphPart`: an input GraphPart object
 * `cfspec::Any`: the specification of cost functional to be used (default = 1.0, i.e., 1-norm)
 * `flatten::Any`: the method for flattening vector-valued data to scalar-valued data (default = 1.0, i.e, 1-norm)
+* `useParent::Bool`: the flag to indicate if we update the selected best basis
+    subspace to the parent when parent and child have the same cost (default = true)
 
 ###  Output Arguments
 * `dvecc2f::Matrix{Float64}`: the vector of expansion coefficients corresponding to the coarse-to-fine best basis
 * `BSc2f::BasisSpec`: a BasisSpec object which specifies the coarse-to-fine best basis
 """
 function ghwt_c2f_bestbasis(dmatrix::Array{Float64,3}, GP::GraphPart;
-                            cfspec::Any = 1.0, flatten::Any = 1.0, j_start::Int = 1, j_end::Int = size(dmatrix,2))
+                            cfspec::Any = 1.0, flatten::Any = 1.0,
+                            j_start::Int = 1, j_end::Int = size(dmatrix,2),
+                            useParent::Bool = true)
 
     # determine the cost functional to be used
     costfun = cost_functional(cfspec)
@@ -683,8 +690,8 @@ function ghwt_c2f_bestbasis(dmatrix::Array{Float64,3}, GP::GraphPart;
     dvecc2f = dmatrix[:, j_end, 1]
     levlistc2f = j_end * ones(Int, N)
 
-    # set the tolerance
-    tol = 10^4 * eps()
+    # set the tolerance with sign
+    tol = 10^4 * eps() * (1 - useParent * 2)
 
     # perform the basis search
     for j = (j_end - 1):-1:j_start
@@ -718,7 +725,10 @@ function ghwt_c2f_bestbasis(dmatrix::Array{Float64,3}, GP::GraphPart;
 end # of function ghwt_c2f_bestbasis
 
 """
-    (dvecf2c, BSf2c) = ghwt_f2c_bestbasis(dmatrix::Array{Float64,3}, GP::GraphPart; cfspec::Any = 1.0, flatten::Any = 1.0)
+    (dvecf2c, BSf2c) = ghwt_f2c_bestbasis(dmatrix::Array{Float64,3}, GP::GraphPart;
+                                          cfspec::Any = 1.0, flatten::Any = 1.0,
+                                          j_start::Int = 1, j_end::Int = size(dmatrix,2),
+                                          useParent::Bool = true)
 
 Select the fine-to-coarse best basis from the matrix of GHWT expansion coefficients
 
@@ -727,13 +737,17 @@ Select the fine-to-coarse best basis from the matrix of GHWT expansion coefficie
 * `GP::GraphPart`: an input GraphPart object
 * `cfspec::Any`: the specification of cost functional to be used (default: 1.0, i.e., 1-norm)
 * `flatten::Any`: the method for flattening vector-valued data to scalar-valued data (default: 1.0, i.e., 1-norm)
+* `useParent::Bool`: the flag to indicate if we update the selected best basis
+    subspace to the parent when parent and child have the same cost (default = true)
 
 ###  Output Arguments
 * `dvecf2c::Matrix{Float64}`: the vector of expansion coefficients corresponding to the fine-to-coarse best basis
 *  `BSf2c::BasisSpec`: a BasisSpec object which specifies the fine-to-coarse best basis
 """
 function ghwt_f2c_bestbasis(dmatrix::Array{Float64,3}, GP::GraphPart;
-                            cfspec::Any = 1.0, flatten::Any = 1.0, j_start::Int = 1, j_end::Int = size(dmatrix,2))
+                            cfspec::Any = 1.0, flatten::Any = 1.0,
+                            j_start::Int = 1, j_end::Int = size(dmatrix,2),
+                            useParent::Bool = true)
 
     # determine the cost functional to be used
     costfun = cost_functional(cfspec)
@@ -763,8 +777,8 @@ function ghwt_f2c_bestbasis(dmatrix::Array{Float64,3}, GP::GraphPart;
     dvecf2c = dmatrixf2c[:, j_end, 1]
     levlistf2c = j_end * ones(Int, N)
 
-    # set the tolerance
-    tol = 10^4 * eps()
+    # set the tolerance with sign
+    tol = 10^4 * eps() * (1 - useParent * 2)
 
     # perform the basis search
     for j = (j_end - 1):-1:j_start
