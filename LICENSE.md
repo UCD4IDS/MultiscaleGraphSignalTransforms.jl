@@ -1,6 +1,6 @@
 The MTSG.jl (Multiscale Transforms for Signals on Graphs) is the proprietary property of The Regents of the University of California ("The Regents.")
 
-> Copyright (C) 2015-2017 The Regents of the University of California, Davis campus. All Rights Reserved.  
+> Copyright (C) 2015-2021 The Regents of the University of California, Davis campus. All Rights Reserved.  
 >
 > Redistribution and use in source and binary forms, with or without modification, are permitted by nonprofit, research institutions for research use only, provided that the following conditions are met:
 > - Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer. 

@@ -1,8 +1,8 @@
 ## COPYRIGHT
 
-Copyright 2015-2018 The Regents of the University of California
+Copyright 2015-2021 The Regents of the University of California
 
-Implemented by Jeff Irion, Naoki Saito, and Yiqun Shao
+Implemented by Jeff Irion, Haotian Li, Naoki Saito, and Yiqun Shao
 
 
 ## SETUP
@@ -10,13 +10,13 @@ Implemented by Jeff Irion, Naoki Saito, and Yiqun Shao
 To install the MTSG.jl (Multiscale Transforms for Signals on Graphs), run
 ```julia
 ]
-(v1.0) pkg> add https://gitlab.com/BoundaryValueProblems/MTSG.jl.git
+(v1.5) pkg> add https://gitlab.com/BoundaryValueProblems/MTSG.jl.git
 using MTSG
 ```
 
 ## GETTING STARTED
 
-### TODO: Write a demo function like `ArticleFigures.m` in the original MTSG_Toolbox in MATLAB. Currently, you can run a set of very small tests via ```] test MTSG```; see the actual file ```test/runtest.jl``` for more details.
+### Currently, you can run a set of very small tests via ```] test MTSG```; see the actual file ```test/runtest.jl``` for more details.
 
 ## REFERENCES
 
