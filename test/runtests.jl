@@ -1,80 +1,83 @@
 # This is a very preliminary test function;
 # Just small scale examples, e.g., P6 with 10 random signals. More coming!
-using Test, MTSG, LinearAlgebra, SparseArrays, JLD2
+using Test, MTSG, LinearAlgebra, SparseArrays, JLD2, Plots
 @testset "MTSG.jl" begin
 ##############################################################
 # 1. Testing basic GHWT functions on 10 random signals on P6 #
 ##############################################################
-    @testset "Basic GHWT Functions" begin
+    @testset "1. Testing basic GHWT functions" begin
         println("1. Testing basic GHWT functions")
         JLD2.@load "runtests_data/path6randn10.jld2" G
         G = gpath(6, G["tmp"])
         GP = partition_tree_fiedler(G)
         dc2f = ghwt_analysis!(G, GP=GP)
-        # Check the Haar basis
-        BH=bs_haar(GP)
-        dvec=dmatrix2dvec(dc2f, GP, BH)
-        frecon=ghwt_synthesis(dvec,GP,BH)
-        println("Relative L2 error of the Haar transform: ", norm(G.f-frecon)/norm(G.f))
-        @test norm(G.f-frecon)/norm(G.f) < 10 * eps()
-        # Check the Best Basis
-        bbc2f = ghwt_c2f_bestbasis(dc2f, GP)
-        levlist = collect(enumerate([4; 4; 3; 3; 3; 3]))
-        println("The true BB levlist: ", levlist)
-        println("The comp BB levlist: ", bbc2f[2].levlist)
-        println("They are equal: ", levlist == bbc2f[2].levlist)
-        @test levlist == bbc2f[2].levlist
-        # levlengths = collect(enumerate([1; 1; 1; 2; 1]))
-        # println("The true BB levlengths: ", levlengths)
-        # println("The comp BB levlengths: ", bbc2f[2].levlengths)
-        JLD2.@load "runtests_data/bbcoef.jld2" tmp2
-        println("The relative L2 error of the BB coefs: ", norm(tmp2["bbcoef"]-bbc2f[1])/norm(tmp2["bbcoef"]))
-        @test norm(tmp2["bbcoef"]-bbc2f[1])/norm(tmp2["bbcoef"]) < 10 * eps()
-        println("\n")
-   end
 
-#############################################################################
-# 2. Testing time-frequency adapted GHWT functions on a simple signal on P6 #
-#############################################################################
-    @testset "eGHWT test on P6" begin
+        @testset "Check the Haar basis" begin
+            BH=bs_haar(GP)
+            dvec=dmatrix2dvec(dc2f, GP, BH)
+            frecon=ghwt_synthesis(dvec,GP,BH)
+            println("Relative L2 error of the Haar transform: ", norm(G.f-frecon)/norm(G.f))
+            @test norm(G.f-frecon)/norm(G.f) < 10 * eps()
+        end            
+
+        @testset "Check the best basis and its expansion coefficients" begin
+            bbc2f = ghwt_c2f_bestbasis(dc2f, GP)
+            levlist = collect(enumerate([4; 4; 3; 3; 3; 3]))
+            println("The true BB levlist: ", levlist)
+            println("The comp BB levlist: ", bbc2f[2].levlist)
+            println("They are equal: ", levlist == bbc2f[2].levlist)
+            @test levlist == bbc2f[2].levlist
+            JLD2.@load "runtests_data/bbcoef.jld2" tmp2
+            println("The relative L2 error of the BB coefs: ", norm(tmp2["bbcoef"]-bbc2f[1])/norm(tmp2["bbcoef"]))
+            @test norm(tmp2["bbcoef"]-bbc2f[1])/norm(tmp2["bbcoef"]) < 10 * eps()
+        end
+        println("\n")
+    end
+
+################################################################
+# 2. Testing GHWT/eGHWT functions on a simple synthetic signal on P6 #
+################################################################
+    @testset "2. GHWT/eGHWT tests on P6" begin
         f = Array{Float64}([2. -2. 1. 3. -1. -2.]')
-        #G = GraphSig(SparseMatrixCSC(diagm(1 => ones(5))),f = f)
         G = gpath(6, f)
         GP = partition_tree_fiedler(G; method = :Lrw)
         dmatrix = ghwt_analysis!(G, GP=GP)
-        println("2. Testing time-frequency adapted GHWT functions on path signal: ", f)
+        println("2. Testing the GHWT functions on a path signal: ", f)
         println("The original signal has L1 norm: ", norm(f,1))
 
-        # through the old way
-        dvec,BS = ghwt_bestbasis(dmatrix, GP, cfspec=1.)
-        (f, GS) = ghwt_synthesis(dvec, GP, BS, G)
-        println("The coefficient vectors of GHWT best basis has L1 norm: ", norm(dvec,1))
-        println("Relative L2 error of the synthesized signal: ", norm(G.f-f)/norm(G.f))
-        @test norm(G.f-f)/norm(G.f) < 10 * eps()
+        @testset "The full level GHWT best basis" begin
+            dvec,BS = ghwt_bestbasis(dmatrix, GP, cfspec=1.)
+            (f, GS) = ghwt_synthesis(dvec, GP, BS, G)
+            println("The coefficient vectors of the GHWT best basis has L1 norm: ", norm(dvec,1))
+            println("Relative L2 error of the synthesized signal: ", norm(G.f-f)/norm(G.f))
+            @test norm(G.f-f)/norm(G.f) < 10 * eps()
+        end
 
-        # through the old way but restricted to level j_start to level j_end in c2f dictionary
-        j_start = 3
-        j_end = 4
-        dvec_restricted,BS_restricted = ghwt_bestbasis(dmatrix, GP, cfspec=1., j_start = j_start, j_end = j_end)
-        (f_restricted, GS_restricted) = ghwt_synthesis(dvec_restricted, GP, BS_restricted, G)
-        println("The coefficient vectors of GHWT best basis restricted from level $(j_start) to level $(j_end) in c2f dictionary has L1 norm: ", norm(dvec_restricted,1))
-        println("Relative L2 error of the synthesized signal: ", norm(G.f-f_restricted)/norm(G.f))
-        @test norm(G.f-f_restricted)/norm(G.f) < 10 * eps()
+        @testset "The GHWT best basis restricted levels" begin
+            j_start = 3
+            j_end = 4
+            dvec_restricted,BS_restricted = ghwt_bestbasis(dmatrix, GP, cfspec=1., j_start = j_start, j_end = j_end)
+            (f_restricted, GS_restricted) = ghwt_synthesis(dvec_restricted, GP, BS_restricted, G)
+            println("The coefficient vectors of the GHWT best basis restricted from level $(j_start) to level $(j_end) in c2f dictionary has L1 norm: ", norm(dvec_restricted,1))
+            println("Relative L2 error of the synthesized signal: ", norm(G.f-f_restricted)/norm(G.f))
+            @test norm(G.f-f_restricted)/norm(G.f) < 10 * eps()
+        end
 
-        # through the time-frequency adapted analysis
-        dvec_tf, BS_tf = ghwt_tf_bestbasis(dmatrix, GP, cfspec=1.)
-        (f_tf, GS_tf) = ghwt_synthesis(dvec_tf, GP, BS_tf, G)
-        println("The coefficient vectors of time-frequency adapted GHWT best basis has L1 norm: ", norm(dvec_tf,1))
-        println("Relative L2 error of the synthesized signal: ", norm(G.f-f_tf)/norm(G.f))
-        @test norm(G.f-f_tf)/norm(G.f) < 10 * eps()
+        @testset "The eGHWT best basis" begin
+            dvec_tf, BS_tf = ghwt_tf_bestbasis(dmatrix, GP, cfspec=1.)
+            (f_tf, GS_tf) = ghwt_synthesis(dvec_tf, GP, BS_tf, G)
+            println("The coefficient vectors of the time-frequency adapted GHWT best basis has L1 norm: ", norm(dvec_tf,1))
+            println("Relative L2 error of the synthesized signal: ", norm(G.f-f_tf)/norm(G.f))
+            @test norm(G.f-f_tf)/norm(G.f) < 10 * eps()
+        end
         println("\n")
     end
 
 #################################################################################
 # 3. Testing time-frequency adapted 2D GHWT functions using a simple 3x3 matrix #
 #################################################################################
-    @testset "2D eGHWT on 3x3 matrix" begin
-        println("3. Testing time-frequency adapted 2D GHWT functions")
+    @testset "3. 2D GHWT/eGHWT on 3x3 matrix" begin
+        println("3. Testing 2D GHWT/eGHWT functions")
         matrix = [ 1.0 2.0 3.0; 4.0 5.0 6.0]
         #matrix = matread("termdoc.mat")["matrix"]
 
@@ -92,20 +95,21 @@ using Test, MTSG, LinearAlgebra, SparseArrays, JLD2
         matrix_ghwt = ghwt_synthesis_2d(dvec_ghwt, GProws, GPcols, BSrows, BScols)
 
         println("The toy matrix [1 2 3; 4 5 6] has 1-vecnorm as ", norm(matrix,1))
-        println("The eghwt bestbasis of toy matrix [1 2 3; 4 5 6] has 1-vecnorm as ", norm(dvec_tf,1))
-        println("The ghwt bestbasis of toy matrix [1 2 3; 4 5 6] has 1-vecnorm as ", norm(dvec_ghwt,1))
-        println("Relative L2 error of the eghwt synthesized matrix: ", norm(matrix - matrix_tf, 2)/norm(matrix,2))
+        println("The eGHWT best basis of toy matrix [1 2 3; 4 5 6] has 1-vecnorm as ", norm(dvec_tf,1))
+        println("The GHWT best basis of toy matrix [1 2 3; 4 5 6] has 1-vecnorm as ", norm(dvec_ghwt,1))
+        println("Relative L2 error of the eGHWT synthesized matrix: ", norm(matrix - matrix_tf, 2)/norm(matrix,2))
         @test norm(matrix - matrix_tf, 2)/norm(matrix,2) < 10 * eps()
-        println("Relative L2 error of the ghwt synthesized matrix: ", norm(matrix - matrix_ghwt, 2)/norm(matrix,2))
+        println("Relative L2 error of the GHWT synthesized matrix: ", norm(matrix - matrix_ghwt, 2)/norm(matrix,2))
         @test norm(matrix - matrix_ghwt, 2)/norm(matrix,2) < 10 * eps()
         println("\n")
     end
 
-#############################################################################
-# 4. Testing HGLET functions and hybrid methods on a real dataset           #
-#############################################################################
-    @testset "HGLET on Toronto Street Network" begin
-        println("4. Testing HGLET functions and hybrid methods related functions")
+###################################################################
+# 4. Testing HGLET functions and hybrid methods on a real dataset #
+###################################################################
+
+    @testset "4. HGLET on Toronto Street Network" begin
+        println("4. HGLET on Toronto Street Network")
         #JLD2.@load "runtests_data/Dendrite.jld2" G
         #G = G["G"]
         # convert to SparseMatrixCSC{Float64,Int} where Int is machine dependent.
@@ -116,7 +120,6 @@ using Test, MTSG, LinearAlgebra, SparseArrays, JLD2
         JLD2.@load "runtests_data/Toronto_new.jld2"
         tmp1 = toronto["G"]
         G=GraphSig(tmp1["W"],xy=tmp1["xy"],f=tmp1["f"],name =tmp1["name"],plotspecs = tmp1["plotspecs"])
-
 
         GP = partition_tree_fiedler(G)
 
@@ -138,14 +141,16 @@ using Test, MTSG, LinearAlgebra, SparseArrays, JLD2
 ###########################################################################
 # 5. Testing GraphSig_Plot on mutilated Gaussian signal on the MN roadmap #
 ###########################################################################
-    @testset "GraphSig_Plot on MN roadmap" begin
-        println("5. GraphSig_Plot on mutilated Gaussian signal on the MN roadmap")
+    @testset "5. GraphSig_Plot on the MN roadmap" begin
+        println("5. GraphSig_Plot on the MN roadmap")
         println("... this may not display the plot if you run it via the package test.")
         JLD2.@load "runtests_data/MN_MutGauss.jld2" G
         tmp1 = G["G"]
         G=GraphSig(tmp1["W"],xy=tmp1["xy"],f=tmp1["f"],name =tmp1["name"],plotspecs = tmp1["plotspecs"])
         G = Adj2InvEuc(G)
-        display(GraphSig_Plot(G))
+        plt = GraphSig_Plot(G)
+        display(plt)
+        @test typeof(plt) == Plots.Plot{Plots.GRBackend}
     end
 end
 # End of runtests.jl
