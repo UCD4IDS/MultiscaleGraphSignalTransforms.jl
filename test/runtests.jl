@@ -40,7 +40,7 @@ using Test, MTSG, LinearAlgebra, SparseArrays, JLD2
             f = Array{Float64}([2. -2. 1. 3. -1. -2.]')
             #G = GraphSig(SparseMatrixCSC(diagm(1 => ones(5))),f = f)
             G = gpath(6, f)
-            GP = partition_tree_fiedler(G,:Lrw)
+            GP = partition_tree_fiedler(G; method = :Lrw)
             dmatrix = ghwt_analysis!(G, GP=GP)
             println("2. Testing time-frequency adapted GHWT functions on path signal: ", f)
             println("The original signal has L1 norm: ", norm(f,1))
@@ -96,14 +96,14 @@ using Test, MTSG, LinearAlgebra, SparseArrays, JLD2
             println("Relative L2 error of the eghwt synthesized matrix: ", norm(matrix - matrix_tf, 2)/norm(matrix,2))
             println("Relative L2 error of the ghwt synthesized matrix: ", norm(matrix - matrix_ghwt, 2)/norm(matrix,2))
             println("\n")
-        @end    
+        @end
     @end
-                            
+
 #############################################################################
 # 4. Testing HGLET functions and hybrid methods on a real dataset           #
 #############################################################################
     @testset "HGLET on Toronto Street Network" begin
-        @test begin            
+        @test begin
             println("4. Testing HGLET functions and hybrid methods related functions")
             #JLD2.@load "runtests_data/Dendrite.jld2" G
             #G = G["G"]
@@ -133,12 +133,12 @@ using Test, MTSG, LinearAlgebra, SparseArrays, JLD2
             println("\n")
         @end
     @end
-                                    
+
 ###########################################################################
 # 5. Testing GraphSig_Plot on mutilated Gaussian signal on the MN roadmap #
 ###########################################################################
     @testset "GraphSig_Plot on MN roadmap" begin
-        @test begin          
+        @test begin
             println("5. GraphSig_Plot on mutilated Gaussian signal on the MN roadmap")
             println("... this may not display the plot if you run it via the package test.")
             JLD2.@load "runtests_data/MN_MutGauss.jld2" G
