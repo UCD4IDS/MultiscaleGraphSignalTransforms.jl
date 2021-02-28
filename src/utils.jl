@@ -92,57 +92,77 @@ function dmatrix_flatten(dmatrix::Array{Float64,3}, flatten::Any)
         # sum of absolute values = 1-norm
     elseif isa(flatten, Symbol)
         if flatten == :abs
-            dmatrix = sum(abs.(dmatrix), 3)
+            dmatrix = sum(abs.(dmatrix), dims = 3)
             # standard deviation
         elseif flatten == :std
             # MATLAB: dmatrix = std(dmatrix, 0, 3)
-            dmatrix = std(dmatrix, 3)
+            dmatrix = std(dmatrix, dims = 3)
             # variance
         elseif flatten == :var
-            dmatrix = var(dmatrix, 3)
+            dmatrix = var(dmatrix, dims = 3)
             # inverse variance
         elseif flatten == :invvar
-            dmatrix = var(dmatrix, 3)
+            dmatrix = var(dmatrix, dims = 3)
             dmatrix[ abs.(dmatrix) < eps() ] = eps()
             dmatrix = dmatrix.^-1;
             # max coefficient - min coefficient
         elseif flatten == :minmax || flatten == :maxmin
             # MATLAB: dmatrix = max(dmatrix, [], 3) - min(dmatrix, [], 3)
-            dmatrix = maximum(dmatrix, 3) - minimum(dmatrix, 3)
+            dmatrix = maximum(dmatrix, dims = 3) - minimum(dmatrix, dims = 3)
             # sum (no absolute value)
         elseif flatten == :sum
-            dmatrix = sum(dmatrix, 3)
+            dmatrix = sum(dmatrix, dims = 3)
             # the sum of the differences of consecutive coeffs
         elseif flatten == :sumdiff
-            dmatrix = sum(dmatrix[:, :, 2:end] - dmatrix[:, :, 1:(end - 1)], 3)
+            dmatrix = sum(dmatrix[:, :, 2:end] - dmatrix[:, :, 1:(end - 1)], dims = 3)
             # the sum of the absolute values of the differences of consecutive coeffs
         elseif flatten == :sumabsdiff
-            dmatrix = sum(abs.(dmatrix[:, :, 2:end] - dmatrix[:, :, 1:(end - 1)]), 3)
+            dmatrix = sum(abs.(dmatrix[:, :, 2:end] - dmatrix[:, :, 1:(end - 1)]), dims = 3)
             # Shannon entropy
         elseif flatten === :entropy
             # MATLAB: p = abs(dmatrix)/norm(dmatrix[:], 'fro')
             # p = abs(dmatrix)/norm(dmatrix[:])
             # dmatrix = sum(p. * log2(p), 3)
             # Normally, we flatten to get an energy matrix, and then take entropy
-            dmatrix = sum(abs(dmatrix).^2, 3)
+            dmatrix = sum(abs.(dmatrix).^2, dims = 3)
             # now, all the column vectors have the same norm, so normalize it.
             dmatrix /= sum(dmatrix[:, 1, 1])
             # now, each column has a unit norm.
-            dmatrix = sum(dmatrix .* log2(dmatrix), 3)
+            dmatrix = sum(-dmatrix .* log2.(dmatrix), dims = 3)
             # threshold coefficients below 0.5*norm(dmatrix)/length(dmatrix) and sum
         elseif flatten == :sub
             # MATLAB: t = 0.5 * norm(dmatrix[:], 'fro') / numel(dmatrix)
             t = 0.5 * norm(dmatrix[:]) / length(dmatrix)
             dmatrix[abs.(dmatrix) .< t] = 0
-            dmatrix = sum(dmatrix, 3)
+            dmatrix = sum(dmatrix, dims = 3)
+            # ASH pdf estimation followed by the entropy computation.
+        elseif flatten == :ash
+            (N, jmax, fcols) = Base.size(dmatrix)
+            for j = 1:jmax
+                for i = 1:N
+                    # ASH pdf estimation
+                    h = ash(dmatrix[i, j, :])
+                    # number of sampling points (default: 500)
+                    npts = length(h.density)
+                    # width of the sampling range (default: max - min + 1*std)
+                    width = h.rng[end] - h.rng[1]
+                    # normalize pdf
+                    pdf = h.density / norm(h.density, 1)
+                    # estimate of differential entropy by the limiting density
+                    # of discrete points (uniform sampling)
+                    dmatrix[i, j, 1] = entropy(pdf, 2.0) + log2(width / npts)
+                end
+            end
+            # flatten dmatrix by slicing
+            dmatrix = reshape(dmatrix[:, :, 1], N, jmax, 1)
             # default (1-norm)
         else
             @warn("the specified flatten symbol $(flatten) is not recognized; hence we assume it as 1-norm.")
-            dmatrix = sum(abs.(dmatrix), 3)
+            dmatrix = sum(abs.(dmatrix), dims = 3)
         end
     else
         @warn("the specified flatten argument $(flatten) is neither of number nor of symbol type; hence we assume it as 1-norm.")
-        dmatrix = sum(abs.(dmatrix), 3)
+        dmatrix = sum(abs.(dmatrix), dims = 3)
     end
     return dmatrix
 end # of function dmatrix_flatten!
