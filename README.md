@@ -16,7 +16,7 @@ using MTSG
 
 ## GETTING STARTED
 
-### Currently, you can run a set of very small tests via ```] test MTSG```; see the actual file ```test/runtest.jl``` for more details.
+Currently, you can run a set of very small tests via ```] test MTSG```; see the actual file ```test/runtest.jl``` for more details.
 
 ## REFERENCES
 
