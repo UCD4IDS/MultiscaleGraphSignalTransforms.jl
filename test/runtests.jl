@@ -29,8 +29,8 @@ using Test, MTSG, LinearAlgebra, SparseArrays, JLD2
             JLD2.@load "runtests_data/bbcoef.jld2" tmp2
             println("The relative L2 error of the BB coefs: ", norm(tmp2["bbcoef"]-bbc2f[1])/norm(tmp2["bbcoef"]))
             println("\n")
-       @end
-   @end
+       end
+   end
 
 #############################################################################
 # 2. Testing time-frequency adapted GHWT functions on a simple signal on P6 #
@@ -65,8 +65,8 @@ using Test, MTSG, LinearAlgebra, SparseArrays, JLD2
             println("The coefficient vectors of time-frequency adapted GHWT best basis has L1 norm: ", norm(dvec_tf,1))
             println("Relative L2 error of the synthesized signal: ", norm(G.f-f_tf)/norm(G.f))
             println("\n")
-        @end
-    @end
+        end
+    end
 
 #################################################################################
 # 3. Testing time-frequency adapted 2D GHWT functions using a simple 3x3 matrix #
@@ -96,8 +96,8 @@ using Test, MTSG, LinearAlgebra, SparseArrays, JLD2
             println("Relative L2 error of the eghwt synthesized matrix: ", norm(matrix - matrix_tf, 2)/norm(matrix,2))
             println("Relative L2 error of the ghwt synthesized matrix: ", norm(matrix - matrix_ghwt, 2)/norm(matrix,2))
             println("\n")
-        @end
-    @end
+        end
+    end
 
 #############################################################################
 # 4. Testing HGLET functions and hybrid methods on a real dataset           #
@@ -131,8 +131,8 @@ using Test, MTSG, LinearAlgebra, SparseArrays, JLD2
             println("The coefficients of best-basis selected from hybrid method has L1 norm: ", norm(dvec5,1))
             println("Relative L2 error of the synthesized signal: ", norm(G.f-fS5)/norm(G.f))
             println("\n")
-        @end
-    @end
+        end
+    end
 
 ###########################################################################
 # 5. Testing GraphSig_Plot on mutilated Gaussian signal on the MN roadmap #
@@ -146,7 +146,7 @@ using Test, MTSG, LinearAlgebra, SparseArrays, JLD2
             G=GraphSig(tmp1["W"],xy=tmp1["xy"],f=tmp1["f"],name =tmp1["name"],plotspecs = tmp1["plotspecs"])
             G = Adj2InvEuc(G)
             GraphSig_Plot(G)
-        @end
-    @end
-@end
+        end
+    end
+end
 # End of runtests.jl
