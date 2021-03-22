@@ -1,0 +1,44 @@
+.check: # Specifying files to run CI/CD
+  script: echo "Running CI/CD only if specific files are changed"
+  rules:
+  - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH
+    changes:
+    - src/*
+    - test/runtest.jl
+    - Project.toml
+    - Manifest.toml 
+    when: manual
+
+# Generated using PkgTemplate and altered to check specific files for changes
+.script:
+  script:
+    - |
+      julia --project=@. -e '
+        using Pkg
+        Pkg.build()
+        Pkg.test(coverage=true)'
+.coverage:
+  coverage: /Test coverage (\d+\.\d+%)/
+  after_script:
+    - |
+      julia -e '
+        using Pkg
+        Pkg.add("Coverage")
+        using Coverage
+        c, t = get_summary(process_folder())
+        using Printf
+        @printf "Test coverage %.2f%%\n" 100c / t'
+
+Julia 1.0:
+  image: julia:1.0
+  extends:
+    - .check
+    - .script
+    - .coverage
+
+Julia 1.5:
+  image: julia:1.5
+  extends:
+    - .check
+    - .script
+    - .coverage
