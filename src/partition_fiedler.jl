@@ -73,7 +73,7 @@ function partition_fiedler(W::SparseMatrixCSC{Float64,Int};
                 # val = real.(val)
                 # vtmp = real.(vtmp)
                 if isa(val[1], Complex{Float64})
-                    emsg = 1
+                    eigs_flag = 1
                 end
             catch emsg
                 @warn("Exception in eigs(L) occurred: ", emsg)
@@ -115,7 +115,7 @@ function partition_fiedler(W::SparseMatrixCSC{Float64,Int};
                 # val = real.(val)
                 # vtmp = real.(vtmp)
                 if isa(val[1], Complex{Float64})
-                    emsg = 1
+                    eigs_flag = 1
                 end
             catch emsg
                 @warn("Exception in eigs(Lrw) occurred: ", emsg)
