@@ -109,6 +109,8 @@ function partition_fiedler(W::SparseMatrixCSC{Float64,Int};
                 temp = sparse(diagm(0 => vec(sum(W, dims = 1))))
                 val, vtmp = eigs(temp - W, temp,
                                  nev = 2, sigma = sigma, v0 = v0)
+                val = real.(val)
+                vtmp = real.(vtmp)
             catch emsg
                 @warn("Exception in eigs(Lrw) occurred: ", emsg)
                 eigs_flag = 2
