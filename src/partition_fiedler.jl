@@ -70,6 +70,8 @@ function partition_fiedler(W::SparseMatrixCSC{Float64,Int};
                 # MATLAB, [v,val,eigs_flag] = eigs(diag(sum(W))-W,2,sigma,opts);
                 val, vtmp = eigs(sparse(diagm(0 => vec(sum(W, dims = 1)))) - W,
                                  nev = 2, sigma = sigma, v0 = v0)
+                val = real.(val)
+                vtmp = real.(vtmp)
             catch emsg
                 @warn("Exception in eigs(L) occurred: ", emsg)
                 eigs_flag = 2
