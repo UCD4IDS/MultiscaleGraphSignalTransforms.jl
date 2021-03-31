@@ -3,7 +3,7 @@
   rules:
   - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH
     changes:
-    - src/*
+    - src/**
     - test/runtest.jl
     - Project.toml
     - Manifest.toml 
