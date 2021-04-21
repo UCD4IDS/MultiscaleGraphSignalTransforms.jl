@@ -1,3 +1,5 @@
+![Haar-Walsh on R vs on Graph](./GHWT.png "Haar-Walsh on R vs on Graph")
+
 ## COPYRIGHT
 
 Copyright 2015-2021 The Regents of the University of California
@@ -10,7 +12,7 @@ Implemented by Jeff Irion, Haotian Li, Naoki Saito, and Yiqun Shao
 To install the MTSG.jl (Multiscale Transforms for Signals on Graphs), run
 ```julia
 ]
-(v1.5) pkg> add https://gitlab.com/BoundaryValueProblems/MTSG.jl.git
+(v1.6) pkg> add https://gitlab.com/BoundaryValueProblems/MTSG.jl.git
 using MTSG
 ```
 
