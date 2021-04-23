@@ -1,7 +1,7 @@
 # This is a very preliminary test function;
 # Just small scale examples, e.g., P6 with 10 random signals. More coming!
-using Test, MTSG, LinearAlgebra, SparseArrays, JLD2, Plots
-@testset "MTSG.jl" begin
+using Test, MultiscaleGraphSignalTransforms, LinearAlgebra, SparseArrays, JLD2, Plots
+@testset "MultiscalGraphSignalTransforms.jl" begin
 ##############################################################
 # 1. Testing basic GHWT functions on 10 random signals on P6 #
 ##############################################################
