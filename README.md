@@ -9,16 +9,16 @@ Implemented by Jeff Irion, Haotian Li, Naoki Saito, and Yiqun Shao
 
 ## SETUP
 
-To install the MTSG.jl (Multiscale Transforms for Signals on Graphs), run
+To install the MultiscaleGraphSignalTransforms.jl, run
 ```julia
 ]
-(v1.6) pkg> add https://gitlab.com/BoundaryValueProblems/MTSG.jl.git
+(v1.6) pkg> add https://gitlab.com/BoundaryValueProblems/MultiscaleGraphSignalTransforms.jl.git
 using MTSG
 ```
 
 ## GETTING STARTED
 
-Currently, you can run a set of very small tests via ```] test MTSG```; see the actual file ```test/runtest.jl``` for more details.
+Currently, you can run a set of very small tests via ```] test MultiscaleGraphSignalTransforms```; see the actual file ```test/runtest.jl``` for more details.
 
 ## REFERENCES
 
