@@ -1,6 +1,6 @@
 __precompile__()
 
-module MTSG
+module MultiscaleGraphSignalTransforms
 
 include("GraphSignal.jl")
 include("GraphPartition.jl")
