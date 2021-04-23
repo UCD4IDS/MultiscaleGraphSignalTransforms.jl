@@ -13,7 +13,7 @@ To install the MultiscaleGraphSignalTransforms.jl, run
 ```julia
 ]
 (v1.6) pkg> add https://gitlab.com/BoundaryValueProblems/MultiscaleGraphSignalTransforms.jl.git
-using MTSG
+using MultiscaleGraphSignalTransforms
 ```
 
 ## GETTING STARTED
