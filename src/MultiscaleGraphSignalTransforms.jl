@@ -21,6 +21,11 @@ using Reexport
 export dvec2dmatrix, dmatrix2dvec, levlist2levlengths!, bsfull, bs_haar, bs_level, bs_walsh, dvec_Threshold, rs_to_region, GraphSig_Plot, gplot, gplot!, partition_fiedler
 
 ## export functions of NGWP.jl
+using LinearAlgebra, SparseArrays, LightGraphs, SimpleWeightedGraphs, Clustering
+using JuMP, Clp, Optim, Statistics, QuadGK, Arpack
+import Plots: plot, plot!, scatter, scatter!
+import StatsBase: crosscor
+
 include("dualgraph.jl")
 include("eigDAG_Distance.jl")
 include("eigHAD_Distance.jl")
