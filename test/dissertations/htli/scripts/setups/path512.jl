@@ -1,4 +1,5 @@
 using MultiscaleGraphSignalTransforms, LightGraphs, Plots, LaTeXStrings
+import WaveletsExt: wiggle
 
 ## Build Graph
 N = 512; G = path_graph(N)
