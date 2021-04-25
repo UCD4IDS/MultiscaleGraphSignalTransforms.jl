@@ -18,7 +18,7 @@ using Test, MultiscaleGraphSignalTransforms, LinearAlgebra, SparseArrays, JLD2, 
             frecon=ghwt_synthesis(dvec,GP,BH)
             println("Relative L2 error of the Haar transform: ", norm(G.f-frecon)/norm(G.f))
             @test norm(G.f-frecon)/norm(G.f) < 10 * eps()
-        end            
+        end
 
         @testset "Check the best basis and its expansion coefficients" begin
             bbc2f = ghwt_c2f_bestbasis(dc2f, GP)
@@ -151,6 +151,32 @@ using Test, MultiscaleGraphSignalTransforms, LinearAlgebra, SparseArrays, JLD2, 
         plt = GraphSig_Plot(G)
         display(plt)
         @test typeof(plt) == Plots.Plot{Plots.GRBackend}
+        println("\n")
     end
+
+###################################################
+# 6. Testing LP-HGLET functions on a real dataset #
+###################################################
+
+    @testset "6. LP-HGLET on RGC100" begin
+        println("6. LP-HGLET on RGC100")
+        JLD2.@load "runtests_data/Dendrite.jld2" G
+        G = G["G_3D"]
+        f = rand(1154, 1)
+        G_Sig = GraphSig(1.0 * G["W"]; xy = G["xy"], f = f)
+        G_Sig = Adj2InvEuc(G_Sig)
+        GP = partition_tree_fiedler(G_Sig; swapRegion = false)
+
+        dmatrixlH, _ = LPHGLET_Analysis_All(G_Sig, GP; ϵ = 0.3)
+        dvec_lphglet, BS_lphglet, _ = HGLET_GHWT_BestBasis(GP, dmatrixH = dmatrixlH)
+
+        fS, GS = LPHGLET_Synthesis(reshape(dvec_lphglet, (length(dvec_lphglet), 1)), GP, BS_lphglet, G_Sig; ϵ = 0.3)
+        println("The original signal has L1 norm: ", norm(f, 1))
+        println("The coefficients of LP-HGLET best-basis has L1 norm: ", norm(dvec_lphglet, 1))
+        println("Relative L2 error of the synthesized signal: ", norm(f - fS) / norm(f))
+        @test norm(f - fS) / norm(f) < 20 * eps()
+        println("\n")
+    end
+
 end
 # End of runtests.jl
