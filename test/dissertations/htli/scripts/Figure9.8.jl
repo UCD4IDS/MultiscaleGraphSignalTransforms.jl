@@ -15,6 +15,6 @@ savefig(signal_plt, "../figs/Toronto_fp.png")
 #                                VM_NGWP_Lsym, PC_NGWP_Lsym, LP_NGWP_Lsym, 𝚽, 𝚽sym)
 # use precomputed results
 DVEC = load("../datasets/Toronto_fp_DVEC.jld", "DVEC")
-approx_error_plot2(DVEC; frac = 0.01);
+approx_error_plot2(DVEC);
 plt = plot!(xguidefontsize = 14, yguidefontsize = 14, legendfontsize = 11)
 savefig(plt, "../figs/Toronto_fp_DAG_approx.png")
