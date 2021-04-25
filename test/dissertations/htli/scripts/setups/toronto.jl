@@ -21,8 +21,7 @@ Lsym = diagm(deg.^(-1/2)) * (diagm(deg) - W) * diagm(deg.^(-1/2))
 standardize_eigenvectors!(𝚽sym)
 
 ## Build Dual Graph by DAG metric
-# distDAG = eigDAG_Distance(𝚽, Q, N; edge_weight = edge_weight) #52.375477 seconds
-distDAG = load("../datasets/Toronto_distDAG.jld", "distDAG")
+distDAG = eigDAG_Distance(𝚽, Q, N; edge_weight = edge_weight) #52.375477 seconds
 Gstar_Sig = dualgraph(distDAG)
 G_Sig = GraphSig(A, xy = X); G_Sig = Adj2InvEuc(G_Sig)
 GP_dual = partition_tree_fiedler(Gstar_Sig; swapRegion = false)
@@ -39,8 +38,7 @@ end
 
 
 ## Build Dual Graph by DAG metric (Lsym)
-# distDAG_Lsym = eigDAG_Distance(𝚽sym, Q, N; edge_weight = edge_weight)
-distDAG_Lsym = load("../datasets/Toronto_distDAG_Lsym.jld", "distDAG_Lsym")
+distDAG_Lsym = eigDAG_Distance(𝚽sym, Q, N; edge_weight = edge_weight)
 Gstar_Sig_Lsym = dualgraph(distDAG_Lsym)
 GP_dual_Lsym = partition_tree_fiedler(Gstar_Sig_Lsym; swapRegion = false)
 GP_primal_Lsym = pairclustering(𝚽sym, GP_dual_Lsym)
