@@ -26,7 +26,7 @@ Currently, you can run a set of very small tests via ```] test MultiscaleGraphSi
 
 2. J. Irion and N. Saito, [The generalized Haar-Walsh transform](http://dx.doi.org/10.1109/SSP.2014.6884678), *Proc. 2014 IEEE Statistical Signal Processing Workshop*, pp. 488-491, 2014.
 
-3. J. Irion and N. Saito, [Applied and computational harmonic analysis on 
+3. J. Irion and N. Saito, [Applied and computational harmonic analysis on
 graphs and networks](http://dx.doi.org/10.1117/12.2186921), *Wavelets and Sparsity XVI*, (M. Papadakis, V. K. Goyal, D. Van De Ville, eds.), *Proc. SPIE 9597*, Paper #95971F, Invited paper, 2015.
 
 4. J. Irion, [Multiscale Transforms for Signals on Graphs: Methods and Applications](https://jefflirion.github.io/publications_and_presentations/irion_dissertation.pdf), Ph.D. dissertation, University of California, Davis, Dec. 2015.
@@ -36,3 +36,9 @@ graphs and networks](http://dx.doi.org/10.1117/12.2186921), *Wavelets and Sparsi
 6. J. Irion and N. Saito, [Efficient approximation and denoising of graph signals using the multiscale basis dictionaries](http://dx.doi.org/10.1109/TSIPN.2016.2632039), *IEEE Transactions on Signal and Information Processing over Networks*, Vol. 3, no. 3, pp. 607-616, 2017.
 
 7. Y. Shao and N. Saito, [The extended Generalized Haar-Walsh Transform and applications](https://www.math.ucdavis.edu/~saito/publications/saito_eghwt.pdf), *Wavelets and Sparsity XVIII*, (D. Van De Ville, M. Papadakis, and Y. M. Lu, eds.), *Proc. SPIE 11138*, Paper #111380C, 2019.
+
+8. H. Li and N. Saito, [Metrics of graph Laplacian eigenvectors](https://www.math.ucdavis.edu/~saito/publications/metgraphlap.html), *Wavelets and Sparsity XVIII*, (D. Van De Ville, M. Papadakis, and Y. M. Lu, eds.), *Proc. SPIE 11138*, Paper #111381K, 2019.
+
+9. C. Alexander, H. Li and N. Saito, [Natural graph wavelet packet dictionaries](https://link.springer.com/article/10.1007/s00041-021-09832-3), *J. Fourier Anal. Appl.*, vol. 27, Article \#41, 2021.
+
+10. H. Li, Natural Graph Wavelet Dictionaries: Methods and Applications, Ph.D. dissertation, University of California, Davis, 2021.
