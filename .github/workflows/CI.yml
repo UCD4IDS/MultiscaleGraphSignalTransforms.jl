@@ -5,13 +5,11 @@ on:
     paths: # Specifying which files to run CI/CD for
     - src/** 
     - test/runtests.jl
-    - Manifest.toml
     - Project.toml
   pull_request:
     paths:
     - src/** 
     - test/runtests.jl
-    - Manifest.toml
     - Project.toml
 jobs:
   test:
