@@ -1,4 +1,4 @@
-using NGWP, Plots, LightGraphs, Random
+using MultiscaleGraphSignalTransforms, Plots, LightGraphs, Random
 using PrettyTables
 
 nsim = 500

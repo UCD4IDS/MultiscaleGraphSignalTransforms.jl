@@ -1,4 +1,4 @@
-using NGWP, JLD, Plots, LightGraphs, MTSG, Distances
+using MultiscaleGraphSignalTransforms, JLD, Plots, LightGraphs, Distances
 
 ## Build weighted toronto street network graph
 G = loadgraph("../datasets/new_toronto_graph.lgz"); N = nv(G)

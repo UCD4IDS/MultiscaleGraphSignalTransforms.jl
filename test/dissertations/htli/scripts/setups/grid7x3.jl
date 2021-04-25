@@ -1,4 +1,4 @@
-using NGWP, MTSG, Plots, LightGraphs, MultivariateStats
+using MultiscaleGraphSignalTransforms, Plots, LightGraphs, MultivariateStats
 using LaTeXStrings
 
 Nx, Ny = 7, 3

@@ -1,4 +1,4 @@
-using Plots, LightGraphs, JLD, LaTeXStrings, MTSG, NGWP, Distances
+using Plots, LightGraphs, JLD, LaTeXStrings, MultiscaleGraphSignalTransforms, Distances
 using Plots.PlotMeasures
 
 G = loadgraph("../datasets/RGC100.lgz"); N = nv(G)

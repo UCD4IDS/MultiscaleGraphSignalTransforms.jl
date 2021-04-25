@@ -1,4 +1,4 @@
-using MLDatasets, LightGraphs, Plots, LaTeXStrings, NGWP, MTSG
+using MLDatasets, LightGraphs, Plots, LaTeXStrings, MultiscaleGraphSignalTransforms
 # Load local module
 push!(LOAD_PATH, @__DIR__)
 using pSGWT

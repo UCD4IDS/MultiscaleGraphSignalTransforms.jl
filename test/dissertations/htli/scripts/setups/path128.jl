@@ -1,4 +1,4 @@
-using NGWP, LightGraphs, MTSG, Plots, LaTeXStrings
+using MultiscaleGraphSignalTransforms, LightGraphs, Plots, LaTeXStrings
 
 ## Build Graph
 N = 128; G = path_graph(N)

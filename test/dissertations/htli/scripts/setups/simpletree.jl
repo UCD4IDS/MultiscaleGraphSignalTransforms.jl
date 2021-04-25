@@ -1,4 +1,4 @@
-using NGWP, MTSG, JLD, Plots, LightGraphs, MultivariateStats
+using MultiscaleGraphSignalTransforms, JLD, Plots, LightGraphs, MultivariateStats
 using LaTeXStrings
 push!(LOAD_PATH, @__DIR__)
 using pSGWT
