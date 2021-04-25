@@ -69,8 +69,8 @@ function LPHGLET_Synthesis(dvec::Matrix{Float64}, GP::GraphPart, BS::BasisSpec, 
                 # standardize the eigenvector signs
                 standardize_eigenvector_signs!(vec)
 
-                # construct smooth orthognal projector custom to current region
-                P = Uf[indrs, :]' * Uf[indrs, indrs]
+                # construct unfolder operator custom to current region
+                P = Uf[indrs, :]'
 
                 # reconstruct the signal
                 f += (P * vec) * dmatrix[indr, j, :]
@@ -150,8 +150,8 @@ function LPHGLET_Analysis_All(G::GraphSig, GP::GraphPart; ϵ::Float64 = 0.3)
             vec_sym = vec_sym[:, end:-1:1]
             standardize_eigenvector_signs!(vec_sym)
 
-            # construct smooth orthognal projector custom to current region
-            P = Uf[indrs, :]' * Uf[indrs, indrs]
+            # construct unfolding operator custom to current region
+            P = Uf[indrs, :]'
             # obtain the expansion coefficients
             dmatrixlH[indr, j, :] = (P * vec)' * G.f
             dmatrixlHsym[indr, j, :] = (P * vec_sym)' * G.f

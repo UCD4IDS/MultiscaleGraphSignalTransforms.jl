@@ -230,8 +230,8 @@ end
 
 function const_meyer_wavelets(𝚽, Uf; idx = 1:size(Uf, 1))
     N = size(𝚽, 1)
-    # assemble smooth orthogonal projector custom to nodes `idx`
-    P = Uf[idx, :]' * Uf[idx, idx]
+    # assemble unfolding operator custom to nodes `idx`
+    P = Uf[idx, :]'
     if diag(P) == χ(idx, N)
         B = 𝚽[:, idx]
     else
