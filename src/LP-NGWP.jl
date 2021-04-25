@@ -230,16 +230,17 @@ end
 
 function const_meyer_wavelets(𝚽, Uf; idx = 1:size(Uf, 1))
     N = size(𝚽, 1)
-    # assemble smooth orthogonal projector custom to nodes `idx`
-    P = Uf[idx, :]' * Uf[idx, idx]
-    if diag(P) == χ(idx, N)
-        B = 𝚽[:, idx]
-    else
-        # folding the eigenspace, i.e., 𝚽's column space
-        Y = 𝚽 * P
-        # find its column space's orthogonal basis
-        B = svd(Y).U
-    end
+    # # assemble smooth orthogonal projector custom to nodes `idx`
+    # P = Uf[idx, :]' * Uf[idx, idx]
+    # if diag(P) == χ(idx, N)
+    #     B = 𝚽[:, idx]
+    # else
+    #     # folding the eigenspace, i.e., 𝚽's column space
+    #     Y = 𝚽 * P
+    #     # find its column space's orthogonal basis
+    #     B = svd(Y).U
+    # end
+    B = 𝚽 * Uf[:, idx]
     # perform varimax rotation to get the meyer_wavelets
     Wavelets = varimax(B)
     return Wavelets
