@@ -85,27 +85,3 @@ function ROT_Distance(A::Any, B::Any, Q::SparseMatrixCSC{Int64,Int64};
     end
     return dis
 end
-
-
-using OptimalTransport
-"""
-    eigEMD_Distance(P, C)
-
-EIGEMD\\_DISTANCE computes the EMD distance matrix of P's column vectors on a graph.
-
-# Input Argument
-- `P::Matrix{Float64}`: a matrix whose columns are probability measures.
-- `C::Matrix{Float64}`: the cost matrix, which is the ground metric between pairwise nodes.
-
-# Output Argument
-- `dis::Matrix{Float64}`: distance matrix, dis[i,j] = d\\_EMD(pᵢ, pⱼ).
-
-"""
-function eigEMD_Distance(P, C)
-    n = size(P,2)
-    dis = zeros(n,n)
-    for i = 1:n-1, j = i+1:n
-        dis[i,j] = emd2(P[:,i], P[:,j], C)
-    end
-    return dis + dis'
-end
