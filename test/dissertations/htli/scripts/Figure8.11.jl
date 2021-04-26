@@ -36,6 +36,7 @@ header = ["basis vector" "main support width" "sidelobe attenuation"]
 res = Matrix{String}(undef, 0, 3)
 iter = sort(collect(keys(dict_VM)))
 for γ in iter
+   global res
    ms = find_mainsupport(dict_VM[γ]; ϵ = 0.01)
    sa = sidelobe_attenuation(dict_VM[γ])
    j, k, l = γ
@@ -44,4 +45,4 @@ for γ in iter
    sa = sidelobe_attenuation(dict_LP[γ])
    res = vcat(res, ["ψ^{$(j)}_{$(k), $(l)} (LP)" ms[2] - ms[1] + 1 round(sa; digits = 4)])
 end
-pretty_table(res, header; alignment = :c)
+pretty_table(res; header = tuple(header), alignment = :c)
