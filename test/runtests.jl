@@ -162,7 +162,7 @@ using Test, MultiscaleGraphSignalTransforms, LinearAlgebra, SparseArrays, JLD2, 
         println("6. LP-HGLET on RGC100")
         JLD2.@load "runtests_data/Dendrite.jld2" G
         G = G["G_3D"]
-        f = rand(1154, 1)
+        f = G["f"]
         G_Sig = GraphSig(1.0 * G["W"]; xy = G["xy"], f = f)
         G_Sig = Adj2InvEuc(G_Sig)
         GP = partition_tree_fiedler(G_Sig; swapRegion = false)
