@@ -242,7 +242,7 @@ function const_meyer_wavelets(𝚽, Uf; idx = 1:size(Uf, 1))
         B = svd(Y).U
     end
     # 2. alternative faster way by orthogonal unfolding operator
-    # B = 𝚽[:, idx] * Uf[idx, idx]
+    # B = 𝚽 * Uf[:, idx]
     # perform varimax rotation to get the meyer_wavelets
     Wavelets = varimax(B)
     return Wavelets
