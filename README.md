@@ -37,8 +37,10 @@ graphs and networks](http://dx.doi.org/10.1117/12.2186921), *Wavelets and Sparsi
 
 7. Y. Shao and N. Saito, [The extended Generalized Haar-Walsh Transform and applications](https://www.math.ucdavis.edu/~saito/publications/saito_eghwt.pdf), *Wavelets and Sparsity XVIII*, (D. Van De Ville, M. Papadakis, and Y. M. Lu, eds.), *Proc. SPIE 11138*, Paper #111380C, 2019.
 
-8. H. Li and N. Saito, [Metrics of graph Laplacian eigenvectors](https://www.math.ucdavis.edu/~saito/publications/metgraphlap.html), *Wavelets and Sparsity XVIII*, (D. Van De Ville, M. Papadakis, and Y. M. Lu, eds.), *Proc. SPIE 11138*, Paper #111381K, 2019.
+8. Y. Shao, The Extended Generalized Haar-Walsh Transform and Applications, Ph.D. dissertation, University of California, Davis, Sep. 2020.
 
-9. C. Alexander, H. Li and N. Saito, [Natural graph wavelet packet dictionaries](https://link.springer.com/article/10.1007/s00041-021-09832-3), *J. Fourier Anal. Appl.*, vol. 27, Article \#41, 2021.
+9. H. Li and N. Saito, [Metrics of graph Laplacian eigenvectors](https://www.math.ucdavis.edu/~saito/publications/metgraphlap.html), *Wavelets and Sparsity XVIII*, (D. Van De Ville, M. Papadakis, and Y. M. Lu, eds.), *Proc. SPIE 11138*, Paper #111381K, 2019.
 
-10. H. Li, Natural Graph Wavelet Dictionaries: Methods and Applications, Ph.D. dissertation, University of California, Davis, 2021.
+10. C. Alexander, H. Li and N. Saito, [Natural graph wavelet packet dictionaries](https://link.springer.com/article/10.1007/s00041-021-09832-3), *J. Fourier Anal. Appl.*, vol. 27, Article \#41, 2021.
+
+11. H. Li, Natural Graph Wavelet Dictionaries: Methods and Applications, Ph.D. dissertation, University of California, Davis, 2021.
