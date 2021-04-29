@@ -18,7 +18,7 @@ using Test, MultiscaleGraphSignalTransforms, LinearAlgebra, SparseArrays, JLD2, 
             frecon=ghwt_synthesis(dvec,GP,BH)
             println("Relative L2 error of the Haar transform: ", norm(G.f-frecon)/norm(G.f))
             @test norm(G.f-frecon)/norm(G.f) < 10 * eps()
-        end            
+        end
 
         @testset "Check the best basis and its expansion coefficients" begin
             bbc2f = ghwt_c2f_bestbasis(dc2f, GP)
@@ -151,6 +151,74 @@ using Test, MultiscaleGraphSignalTransforms, LinearAlgebra, SparseArrays, JLD2, 
         plt = GraphSig_Plot(G)
         display(plt)
         @test typeof(plt) == Plots.Plot{Plots.GRBackend}
+        println("\n")
     end
+
+###################################################
+# 6. Testing LP-HGLET functions on a real dataset #
+###################################################
+
+    @testset "6. LP-HGLET on RGC100" begin
+        println("6. LP-HGLET on RGC100")
+        JLD2.@load "runtests_data/Dendrite.jld2" G
+        G = G["G_3D"]
+        f = G["f"]
+        G_Sig = GraphSig(1.0 * G["W"]; xy = G["xy"], f = f)
+        G_Sig = Adj2InvEuc(G_Sig)
+        GP = partition_tree_fiedler(G_Sig; swapRegion = false)
+
+        dmatrixlH, _ = LPHGLET_Analysis_All(G_Sig, GP; ϵ = 0.3)
+        dvec_lphglet, BS_lphglet, _ = HGLET_GHWT_BestBasis(GP, dmatrixH = dmatrixlH)
+
+        fS, GS = LPHGLET_Synthesis(reshape(dvec_lphglet, (length(dvec_lphglet), 1)), GP, BS_lphglet, G_Sig; ϵ = 0.3)
+        println("The original signal has L1 norm: ", norm(f, 1))
+        println("The coefficients of LP-HGLET best-basis has L1 norm: ", norm(dvec_lphglet, 1))
+        println("Relative L2 error of the synthesized signal: ", norm(f - fS) / norm(f))
+        @test norm(f - fS) / norm(f) < 20 * eps()
+        println("\n")
+    end
+
+#########################################################
+# 7. Testing VM-NGWP, PC-NGWP, LP-NGWP functions on P64 #
+#########################################################
+
+    @testset "7. testing VM-NGWP/PC-NGWP/LP-NGWP on P64" begin
+        println("7. testing VM-NGWP/PC-NGWP/LP-NGWP on P64")
+        N = 64
+        G = gpath(N)
+        # use Chebyshev polynomial T₅(x) (x ∈ [0, 1]) as the path signal
+        G.f = reshape([16 * x^5 - 20 * x^3 + 5 * x for x in LinRange(0, 1, N)], (N, 1))
+        # compute graph Laplacian eigenvectors
+        W = G.W
+        L = diagm(sum(W; dims = 1)[:]) - W
+        𝛌, 𝚽 = eigen(L); 𝚽 = 𝚽 .* sign.(𝚽[1,:])'
+        # build Gstar
+        Gstar = GraphSig(W)
+        GP = partition_tree_fiedler(G; swapRegion = false)
+        GP_dual = partition_tree_fiedler(Gstar; swapRegion = false)
+        GP_primal = pairclustering(𝚽, GP_dual) # for PC-NGWP
+        # construct NGWP dictionaries
+        VM_NGWP = vm_ngwp(𝚽, GP_dual)
+        PC_NGWP = pc_ngwp(𝚽, GP_dual, GP_primal)
+        LP_NGWP = lp_ngwp(𝚽, W, GP_dual; ϵ = 0.3)
+        # NGWP analysis
+        dmatrix_VM = ngwp_analysis(G, VM_NGWP)
+        dvec_vm_ngwp, BS_vm_ngwp = ngwp_bestbasis(dmatrix_VM, GP_dual)
+        dmatrix_PC = ngwp_analysis(G, PC_NGWP)
+        dvec_pc_ngwp, BS_pc_ngwp = ngwp_bestbasis(dmatrix_PC, GP_dual)
+        dmatrix_LP = ngwp_analysis(G, LP_NGWP)
+        dvec_lp_ngwp, BS_lp_ngwp = ngwp_bestbasis(dmatrix_LP, GP_dual)
+
+        println("The original signal has L2 norm: ", norm(G.f))
+        println("The coefficients of VM-NGWP best-basis has L2 norm: ", norm(dvec_vm_ngwp))
+        @test abs(norm(G.f) - norm(dvec_vm_ngwp)) / norm(G.f) < 10 * eps()
+        println("The coefficients of PC-NGWP best-basis has L2 norm: ", norm(dvec_pc_ngwp))
+        @test abs(norm(G.f) - norm(dvec_pc_ngwp)) / norm(G.f) < 10 * eps()
+        println("The coefficients of LP-NGWP best-basis has L2 norm: ", norm(dvec_lp_ngwp))
+        @test abs(norm(G.f) - norm(dvec_lp_ngwp)) / norm(G.f) < 10 * eps()
+        println("\n")
+    end
+
+
 end
 # End of runtests.jl
