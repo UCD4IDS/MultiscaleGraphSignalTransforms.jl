@@ -1,4 +1,4 @@
-# This is a very preliminary test function;
+# This is a very preliminary test function;  
 # Just small scale examples, e.g., P6 with 10 random signals. More coming!
 using Test, MultiscaleGraphSignalTransforms, LinearAlgebra, SparseArrays, JLD2, Plots
 @testset "MultiscalGraphSignalTransforms.jl" begin
