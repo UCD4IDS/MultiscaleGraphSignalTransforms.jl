@@ -31,7 +31,7 @@ for i in 1:length(T)
         scatter_gplot!(X; marker = 𝚽lH[:, l], plotOrder = :s2l)
         plot!(xlims = [-180, 220], xlabel = "x(μm)", ylabel = "y(μm)", frame = :box, cbar = false)
         plot!(left_margin = 3mm, bottom_margin = 3mm, clims = (-0.05, 0.05))
-    plt = plot(p1, p2, size = (640, 400), layout = Plots.grid(1, 2),
+    plt = plot(p1, p2, size = (640, 350), layout = Plots.grid(1, 2),
         # xlims = XLs[i], ylims = YLs[i])
         xlims = [-120, 120], ylims = [-150, 150])
     savefig(plt, "../figs/RGC100_HGLET_LPHGLET_j$(j-1)k$(k-1)l$(l-1).png")
