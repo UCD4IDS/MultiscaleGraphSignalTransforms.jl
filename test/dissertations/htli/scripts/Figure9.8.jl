@@ -5,7 +5,7 @@ gr(dpi = 200)
 ## (a) pedestrian volume graph signal
 fp = load("../datasets/new_toronto.jld", "fp")
 G_Sig.f = reshape(fp, (N, 1))
-gplot(A, X; width=1); plot!(size = (600, 500), right_margin = 5mm)
+gplot(A, X; width=1); plot!(size = (600, 600), right_margin = 5mm)
 signal_plt = scatter_gplot!(X; marker = fp, plotOrder = :s2l, ms = 3)
 savefig(signal_plt, "../figs/Toronto_fp.png")
 
@@ -16,5 +16,5 @@ savefig(signal_plt, "../figs/Toronto_fp.png")
 # use precomputed results
 DVEC = load("../datasets/Toronto_fp_DVEC.jld", "DVEC")
 approx_error_plot2(DVEC);
-plt = plot!(xguidefontsize = 14, yguidefontsize = 14, legendfontsize = 11)
+plt = plot!(xguidefontsize = 14, yguidefontsize = 14, legendfontsize = 11, size = (600, 600))
 savefig(plt, "../figs/Toronto_fp_DAG_approx.png")

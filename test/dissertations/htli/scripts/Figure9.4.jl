@@ -18,5 +18,5 @@ savefig(plt, "../figs/SunFlower_barbara_ftrouser.png")
 DVEC = getall_expansioncoeffs2(G_Sig, GP_dual, GP_dual_Lsym, VM_NGWP, PC_NGWP, LP_NGWP,
                                VM_NGWP_Lsym, PC_NGWP_Lsym, LP_NGWP_Lsym, 𝚽, 𝚽sym)
 approx_error_plot2(DVEC);
-plt = plot!(xguidefontsize = 14, yguidefontsize = 14, legendfontsize = 11)
+plt = plot!(xguidefontsize = 14, yguidefontsize = 14, legendfontsize = 11, size = (600, 600))
 savefig(plt, "../figs/SunFlower_barbara_ftrouser_DAG_approx.png")
