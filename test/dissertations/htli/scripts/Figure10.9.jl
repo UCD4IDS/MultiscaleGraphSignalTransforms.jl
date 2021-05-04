@@ -9,12 +9,15 @@ f = digit_img[:]
 
 important_idx = sortperm((rNGWF' * f).^2; rev = true)
 red_box_inds = [41, 43, 66, 69, 71, 73, 75, 84, 85, 86, 89, 99]
+green_box_inds = [40, 53, 54, 55, 72]
 plot(layout = Plots.grid(10,10), size = (2300, 2200))
 for i = 1:100
     plot!(clims = (-0.002, 0.02))
     grid_vector_plot!(important_idx[i], i, rNGWF)
     if i in red_box_inds
         plot_square!(Nx, Ny; subplot = i)
+    elseif i in green_box_inds
+        plot_square!(Nx, Ny; subplot = i, c = :green)
     end
 end
 plt = current()

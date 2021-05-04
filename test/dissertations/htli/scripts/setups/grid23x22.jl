@@ -26,16 +26,16 @@ function grid_NGWFvector_plot(l, x, D, 𝚽; σ = 0.2 * maximum(D))
         c = :viridis, ratio = 1, frame = :none, xlim = [1, Nx], size = (500, 400))
 end
 
-function plot_edge!(A, B; style = :solid, subplot = 1)
-    plot!([A[1], B[1], NaN], [A[2], B[2], NaN], c = :red, legend = false,
+function plot_edge!(A, B; style = :solid, subplot = 1, c = :red)
+    plot!([A[1], B[1], NaN], [A[2], B[2], NaN], c = c, legend = false,
         width = 10, style = style, subplot = subplot)
 end
 
-function plot_square!(Nx, Ny; subplot = 1)
-    plot_edge!([-0.33, 0], [Nx + 1.24, 0]; subplot = subplot)
-    plot_edge!([0, 0], [0, Ny + 1]; subplot = subplot)
-    plot_edge!([-0.33, Ny + 1], [Nx + 1.24, Ny + 1]; subplot = subplot)
-    plot_edge!([Nx + 0.92, 0], [Nx + 0.92, Ny + 1]; subplot = subplot)
+function plot_square!(Nx, Ny; subplot = 1, c = :red)
+    plot_edge!([-0.33, 0], [Nx + 1.24, 0]; subplot = subplot, c = c)
+    plot_edge!([0, 0], [0, Ny + 1]; subplot = subplot, c = c)
+    plot_edge!([-0.33, Ny + 1], [Nx + 1.24, Ny + 1]; subplot = subplot, c = c)
+    plot_edge!([Nx + 0.92, 0], [Nx + 0.92, Ny + 1]; subplot = subplot, c = c)
 end
 
 function grid_vector_plot!(l, i, VECs)
