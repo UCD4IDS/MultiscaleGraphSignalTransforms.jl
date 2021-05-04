@@ -8,7 +8,7 @@ SGWT_dual = (SGWT * SGWT') \ SGWT
 f = digit_img[:]
 
 important_idx = sortperm((SGWT' * f).^2; rev = true)
-plot(layout = Plots.grid(10,10), size = (2300, 2200))
+plot(layout = Plots.grid(10,10), size = (2300, 2800))
 for i = 1:100
     grid_vector_plot!(important_idx[i], i, SGWT)
     if i == 90

@@ -10,7 +10,7 @@ f = digit_img[:]
 important_idx = sortperm((rNGWF' * f).^2; rev = true)
 red_box_inds = [41, 43, 66, 69, 71, 73, 75, 84, 85, 86, 89, 99]
 orange_box_inds = [40, 53, 54, 55, 72]
-plot(layout = Plots.grid(10,10), size = (2300, 2200))
+plot(layout = Plots.grid(10,10), size = (2300, 2800))
 for i = 1:100
     plot!(clims = (-0.002, 0.02))
     grid_vector_plot!(important_idx[i], i, rNGWF)
