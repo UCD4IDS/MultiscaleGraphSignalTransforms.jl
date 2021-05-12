@@ -123,6 +123,7 @@ SCATTER\\_GPLOT!(X; ...) adds a plot to `current` one.
 function scatter_gplot(X; marker = nothing, ms = 4, plotOrder = :normal, c = :viridis)
     dim = size(X,2)
     if marker != nothing && plotOrder != :normal
+        marker = marker[:]  # reshape N x 1 matrix to a N-dim vector
         if plotOrder == :s2l
             idx = sortperm(marker)
         elseif plotOrder == :l2s
@@ -148,6 +149,7 @@ end
 function scatter_gplot!(X; marker = nothing, ms = 4, plotOrder = :normal, c = :viridis)
     dim = size(X,2)
     if marker != nothing && plotOrder != :normal
+        marker = marker[:]  # reshape N x 1 matrix to a N-dim vector
         if plotOrder == :s2l
             idx = sortperm(marker)
         elseif plotOrder == :l2s
