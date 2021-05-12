@@ -126,11 +126,11 @@ function scatter_gplot(X; marker = nothing, ms = 4, plotOrder = :normal, c = :vi
         if size(marker) == (N,) || size(marker) == (N, 1)
             marker = marker[:]  # reshape N x 1 matrix to a vector of length N
         else
-            error("marker only accepts a vector of length N or an N x 1 matrix,
-                where N is the total number of points.")
+            error("marker only accepts a vector of length N or an N x 1 matrix, where N is the total number of points.")
         end
-        idx = 1:N
-        if plotOrder == :s2l
+        if plotOrder == :normal
+            idx = 1:N
+        elseif plotOrder == :s2l
             idx = sortperm(marker)
         elseif plotOrder == :l2s
             idx = sortperm(marker, rev = true)
@@ -162,11 +162,11 @@ function scatter_gplot!(X; marker = nothing, ms = 4, plotOrder = :normal, c = :v
         if size(marker) == (N,) || size(marker) == (N, 1)
             marker = marker[:]  # reshape N x 1 matrix to a vector of length N
         else
-            error("marker only accepts a vector of length N or an N x 1 matrix,
-                where N is the total number of points.")
+            error("marker only accepts a vector of length N or an N x 1 matrix, where N is the total number of points.")
         end
-        idx = 1:N
-        if plotOrder == :s2l
+        if plotOrder == :normal
+            idx = 1:N
+        elseif plotOrder == :s2l
             idx = sortperm(marker)
         elseif plotOrder == :l2s
             idx = sortperm(marker, rev = true)
