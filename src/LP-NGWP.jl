@@ -247,3 +247,49 @@ function const_meyer_wavelets(𝚽, Uf; idx = 1:size(Uf, 1))
     Wavelets = varimax(B)
     return Wavelets
 end
+
+"""
+    lp_ngwp_analysis(G::GraphSig, 𝚽::Matrix{Float64}, W_dual::SparseMatrixCSC{Float64, Int64},
+            GP_dual::GraphPart; ϵ::Float64 = 0.3)
+
+perform the LP-NGWP transform of the graph signal(s) `G.f`.
+
+# Input Arguments
+- `G::GraphSig`: a GraphSig object
+- `𝚽::Matrix{Float64}`: graph Laplacian eigenvectors
+- `W_dual::SparseMatrixCSC{Float64, Int64}`: weight matrix of the dual graph
+- `GP_dual::GraphPart`: GraphPart object of the dual graph
+
+# Output Argument
+- `wavelet_packet::Array{Float64,3}`: the lapped NGWP dictionary. The first
+    index is for selecting wavelets at a fixed level; the second index is for
+    selecting the level `j`; the third index is for selecting elements in the
+    wavelet vector.
+
+"""
+function lp_ngwp_analysis(G::GraphSig, 𝚽::Matrix{Float64}, W_dual::SparseMatrixCSC{Float64, Int64},
+                 GP_dual::GraphPart; ϵ::Float64 = 0.3)
+    rs = GP_dual.rs
+    inds = GP_dual.inds
+    (N, jmax) = Base.size(inds)
+    fcols = size(G.f, 2)
+
+    GP_dual.tag = zeros(Int, N, jmax)
+    GP_dual.tag[:, 1] = Vector{Int}(0:(N - 1))
+
+    Uf = Matrix{Float64}(I, N, N)
+    used_node = Set()
+
+    dmatrix = zeros(N, jmax, fcols)
+    dmatrix[:, 1, :] = G.f
+    for j = 2:jmax
+        regioncount = count(!iszero, rs[:, j]) - 1
+        keep_folding!(Uf, used_node, W_dual, GP_dual; ϵ = ϵ, j = j - 1)
+        for r = 1:regioncount
+            indr = rs[r, j]:(rs[r + 1, j] - 1)
+            GP_dual.tag[indr, j] = Vector{Int}(0:(length(indr) - 1))
+            dmatrix[indr, j, :] = const_meyer_wavelets(𝚽, Uf; idx = inds[indr, j])' * G.f
+        end
+    end
+    return dmatrix
+end

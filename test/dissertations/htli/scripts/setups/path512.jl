@@ -10,6 +10,7 @@ W = 1.0 * adjacency_matrix(G)
 
 Gstar_Sig = GraphSig(W)
 G_Sig = GraphSig(W, xy = X)
+GP = partition_tree_fiedler(G_Sig; swapRegion = false)
 GP_dual = partition_tree_fiedler(Gstar_Sig; swapRegion = false)
 GP_primal = pairclustering(𝚽, GP_dual)
 

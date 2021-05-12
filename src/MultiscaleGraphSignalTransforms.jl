@@ -52,7 +52,7 @@ export natural_eigdist
 export SunFlowerGraph, dualgraph
 export pc_ngwp, pairclustering
 export vm_ngwp, varimax
-export lp_ngwp, rising_cutoff, find_pairinds, pair_inds_shadding
+export lp_ngwp, rising_cutoff, find_pairinds, pair_inds_shadding, lp_ngwp_analysis
 export LPHGLET_Synthesis, LPHGLET_Analysis_All, HGLET_dictionary, LPHGLET_dictionary
 export unitary_folding_operator, keep_folding!
 export ngwp_analysis, ngwp_bestbasis, NGWP_jkl

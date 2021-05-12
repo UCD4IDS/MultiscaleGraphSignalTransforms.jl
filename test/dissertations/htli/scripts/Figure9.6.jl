@@ -4,7 +4,7 @@ gr(dpi = 200)
 ## (a) a smooth spatial distribution of the street intersections graph signal
 f = zeros(N); for i in 1:N; f[i] = length(findall(dist_X[:,i] .< 1/minimum(edge_weight))); end
 G_Sig.f = reshape(f, (N, 1))
-gplot(A, X; width=1); plot!(size = (600, 500))
+gplot(A, X; width=1); plot!(size = (600, 600))
 signal_plt = scatter_gplot!(X; marker = f, plotOrder = :s2l, ms = 3)
 savefig(signal_plt, "../figs/Toronto_fdensity.png")
 
@@ -15,5 +15,5 @@ savefig(signal_plt, "../figs/Toronto_fdensity.png")
 # use precomputed results
 DVEC = load("../datasets/Toronto_fdensity_DVEC.jld", "DVEC")
 approx_error_plot2(DVEC);
-plt = plot!(xguidefontsize = 14, yguidefontsize = 14, legendfontsize = 11)
+plt = plot!(xguidefontsize = 14, yguidefontsize = 14, legendfontsize = 11, size = (600, 600))
 savefig(plt, "../figs/Toronto_fdensity_DAG_approx.png")

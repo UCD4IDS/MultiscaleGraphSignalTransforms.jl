@@ -1,5 +1,5 @@
 using MultiscaleGraphSignalTransforms, Plots, LightGraphs, Random
-using PrettyTables
+using PrettyTables, StatsPlots
 
 nsim = 500
 
@@ -26,7 +26,7 @@ function display_basic_stats(ρs)
             round.([minimum(ρ) maximum(ρ) mean(ρ) std(ρ)]; digits = 4)
             )
     end
-    pretty_table(basic_stats, header)
+    pretty_table(basic_stats; header = tuple([header[i] for i = 1:length(header)]))
 end
 
 
