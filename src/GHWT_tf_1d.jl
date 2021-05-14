@@ -6,7 +6,7 @@ using ..GraphSignal, ..GraphPartition, ..BasisSpecification, LinearAlgebra
 
 include("common.jl")
 
-export ghwt_tf_bestbasis
+export ghwt_tf_bestbasis, eghwt_bestbasis
 
 
 """
@@ -280,5 +280,7 @@ function ghwt_tf_bestbasis(dmatrix::Array{Float64,3}, GP::GraphPart; cfspec::Flo
     dvec = dmatrix2dvec(dmatrix0, GP, BS)
     return dvec, BS
 end # of function ghwt_tf_bestbasis
+
+const eghwt_bestbasis = ghwt_tf_bestbasis # This should be a useful alias!
 
 end # of module GHWT_tf_1d
