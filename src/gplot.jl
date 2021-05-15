@@ -4,7 +4,7 @@ using SparseArrays
           style = :auto, width = 2, color = :blue,
           shape = :none, mwidth = 2, mcolor = color, malpha = 1.0,
           mscolor = color, mswidth = 1, msalpha = 1.0,
-          grid::Bool = false)
+          grid::Bool = false, label = "", subplot = 1)
 
 GPLOT Plot graph, as in graph theory. GPLOT(A,xyz,...) plots the graph
 specified by the adjacency matrix A and the node coordinates xyz.
@@ -30,6 +30,7 @@ GPLOT!(A,xyz,...) adds a plot to `current` one.
 * `msalpha::Float64`: opacity of marker stroke; choose from [0,1] (default: 1.0)
 * `grid::Bool`: a flag to show grid lines (default: false)
 * `label::String`: a string for legend (default: "")
+* `subplot::Int`: subplot index (default: 1)
 
 ### Output Arguments
 * `X::Matrix{Float64}`: Nan-punctuated X coordinate vector
@@ -64,7 +65,7 @@ function gplot(A::SparseMatrixCSC{Float64,Int}, xyz::Matrix{Float64}; plotp::Boo
                 style::Symbol = :auto, width::Number = 2, color::Symbol = :blue,
                 shape::Symbol = :none, mwidth::Number = 1, mcolor::Symbol = color, malpha::Float64 = 1.0,
                 mscolor::Symbol = color, mswidth::Number = 1, msalpha::Float64 = 1.0,
-                grid::Bool = false, label::String = "")
+                grid::Bool = false, label::String = "", subplot::Int = 1)
 
     # If A is symmetric, then use only the upper triangular part for efficiency.
     if issymmetric(A)
@@ -101,24 +102,24 @@ function gplot(A::SparseMatrixCSC{Float64,Int}, xyz::Matrix{Float64}; plotp::Boo
         if nspacedim < 3        # 2D
             if shape == :none   # no markers
                 Plots.plot(X, Y,
-                    linestyle=style, linewidth=width, linecolor=color, grid=grid, label=label)
+                    linestyle=style, linewidth=width, linecolor=color, grid=grid, label=label, subplot=subplot)
             else                # marker attributes are set.
                 Plots.plot(X, Y,
                     linestyle=style, linewidth=width, linecolor=color,
                     markershape=shape, markersize=mwidth, markercolor=mcolor, markeralpha=malpha,
                     markerstrokecolor=mscolor, markerstrokewidth=mswidth, markerstrokealpha=msalpha,
-                    grid=grid, label=label)
+                    grid=grid, label=label, subplot=subplot)
             end
         else                    #3D
             if shape == :none   # no markers
                 Plots.plot(X, Y, Z,
-                    linestyle=style, linewidth=width, linecolor=color, grid=grid, label=label)
+                    linestyle=style, linewidth=width, linecolor=color, grid=grid, label=label, subplot=subplot)
             else                # marker attributes are set.
                 Plots.plot(X, Y, Z,
                     linestyle=style, linewidth=width, linecolor=color,
                     markershape=shape, markersize=mwidth, markercolor=mcolor, markeralpha=malpha,
                     markerstrokecolor=mscolor, markerstrokewidth=mswidth, markerstrokealpha=msalpha,
-                    grid=grid, label=label)
+                    grid=grid, label=label, subplot=subplot)
             end
         end
     else                        # Return the X, Y, Z array if desired.
@@ -134,7 +135,7 @@ function gplot!(A::SparseMatrixCSC{Float64,Int}, xyz::Matrix{Float64}; plotp::Bo
                 style::Symbol = :auto, width::Number = 2, color::Symbol = :blue,
                 shape::Symbol = :none, mwidth::Number = 1, mcolor::Symbol = color, malpha::Float64 = 1.0,
                 mscolor::Symbol = color, mswidth::Number = 1, msalpha::Float64 = 1.0,
-                grid::Bool = false, label::String = "")
+                grid::Bool = false, label::String = "", subplot::Int = 1)
 
     # If A is symmetric, then use only the upper triangular part for efficiency.
     if issymmetric(A)
@@ -171,24 +172,24 @@ function gplot!(A::SparseMatrixCSC{Float64,Int}, xyz::Matrix{Float64}; plotp::Bo
         if nspacedim < 3        # 2D
             if shape == :none   # no markers
                 Plots.plot!(X, Y,
-                    linestyle=style, linewidth=width, linecolor=color, grid=grid, label=label)
+                    linestyle=style, linewidth=width, linecolor=color, grid=grid, label=label, subplot=subplot)
             else                # marker attributes are set.
                 Plots.plot!(X, Y,
                     linestyle=style, linewidth=width, linecolor=color,
                     markershape=shape, markersize=mwidth, markercolor=mcolor, markeralpha=malpha,
                     markerstrokecolor=mscolor, markerstrokewidth=mswidth, markerstrokealpha=msalpha,
-                    grid=grid, label=label)
+                    grid=grid, label=label, subplot=subplot)
             end
         else                    #3D
             if shape == :none   # no markers
                 Plots.plot!(X, Y, Z,
-                    linestyle=style, linewidth=width, linecolor=color, grid=grid, label=label)
+                    linestyle=style, linewidth=width, linecolor=color, grid=grid, label=label, subplot=subplot)
             else                # marker attributes are set.
                 Plots.plot!(X, Y, Z,
                     linestyle=style, linewidth=width, linecolor=color,
                     markershape=shape, markersize=mwidth, markercolor=mcolor, markeralpha=malpha,
                     markerstrokecolor=mscolor, markerstrokewidth=mswidth, markerstrokealpha=msalpha,
-                    grid=grid, label=label)
+                    grid=grid, label=label, subplot=subplot)
             end
         end
     else                        # Return the X, Y, Z array if desired.
