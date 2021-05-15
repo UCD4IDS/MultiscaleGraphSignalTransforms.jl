@@ -29,7 +29,7 @@ include("setups/rgc100.jl")
 plt = boxplot(["(a) Path" "(b) Grid" "(c) ER" "(d) RGC100"], [ρ1, ρ2, ρ3, ρ4];
     legend = false, frame = :box, ylim = [0.9, 1.9], tickfontsize = 11,
     outliers = true, grid = false, range = 3, lw = 1, size = (800, 600),
-    ylab = "ρ", yguidefontsize = 14)
+    ylab = "ρ", yguidefontsize = 14, xtickfontsize = 12, color = :white)
 savefig(plt, "../figs/ROT_TSD_boxplots.png")
 
 ## Table 4.1
