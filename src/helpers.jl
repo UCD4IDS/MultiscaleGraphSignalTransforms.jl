@@ -104,7 +104,7 @@ end
 
 
 """
-    scatter_gplot(X; marker = nothing, ms = 4, plotOrder = :normal, c = :viridis)
+    scatter_gplot(X; marker = nothing, ms = 4, plotOrder = :normal, c = :viridis, subplot = 1)
 
 SCATTER\\_GPLOT generates a scatter plot figure, which is for quick viewing of a graph signal.
 SCATTER\\_GPLOT!(X; ...) adds a plot to `current` one.
@@ -118,9 +118,10 @@ SCATTER\\_GPLOT!(X; ...) adds a plot to `current` one.
 - `plotOrder::Symbol`: default is normal. Optional choices :s2l or :l2s, i.e.,
     plots from the smallest value of `marker` to the largest value or the other way around.
 - `c::Symbol`: default is :viridis. Colors.
+- `subgplot::Int`: default is 1. The subplot index.
 
 """
-function scatter_gplot(X; marker = nothing, ms = 4, plotOrder = :normal, c = :viridis)
+function scatter_gplot(X; marker = nothing, ms = 4, plotOrder = :normal, c = :viridis, subplot = 1)
     N, dim = size(X)
     if marker != nothing
         if size(marker) == (N,) || size(marker) == (N, 1)
@@ -146,17 +147,17 @@ function scatter_gplot(X; marker = nothing, ms = 4, plotOrder = :normal, c = :vi
     if dim == 2
         scatter(X[:, 1], X[:, 2], marker_z = marker, ms = ms, c = c,
                 legend = false, mswidth = 0, cbar = true, aspect_ratio = 1,
-                grid = false)
+                grid = false, subplot = subplot)
     elseif dim == 3
         scatter(X[:, 1], X[:, 2], X[:, 3], marker_z = marker, ms = ms, c = c,
                 legend = false, mswidth = 0, cbar = true, aspect_ratio = 1,
-                grid = false)
+                grid = false, subplot = subplot)
     else
         error("Dimension Error: scatter_gplot only supports for 2-dim or 3-dim scatter plots.")
     end
 end
 
-function scatter_gplot!(X; marker = nothing, ms = 4, plotOrder = :normal, c = :viridis)
+function scatter_gplot!(X; marker = nothing, ms = 4, plotOrder = :normal, c = :viridis, subplot = 1)
     N, dim = size(X)
     if marker != nothing
         if size(marker) == (N,) || size(marker) == (N, 1)
@@ -182,11 +183,11 @@ function scatter_gplot!(X; marker = nothing, ms = 4, plotOrder = :normal, c = :v
     if dim == 2
         scatter!(X[:, 1], X[:, 2], marker_z = marker, ms = ms, c = c,
                 legend = false, mswidth = 0, cbar = true, aspect_ratio = 1,
-                grid = false)
+                grid = false, subplot = subplot)
     elseif dim == 3
         scatter!(X[:, 1], X[:, 2], X[:, 3], marker_z = marker, ms = ms, c = c,
                 legend = false, mswidth = 0, cbar = true, aspect_ratio = 1,
-                grid = false)
+                grid = false, subplot = subplot)
     else
         error("Dimension Error: scatter_gplot! only supports for 2-dim or 3-dim scatter plots.")
     end
