@@ -6,11 +6,11 @@ using ..GraphSignal, ..GraphPartition, ..BasisSpecification, LinearAlgebra
 
 include("common.jl")
 
-export ghwt_tf_bestbasis, tf_threshold, tf_synthesis
+export ghwt_tf_bestbasis, eghwt_bestbasis
 
 
 """
-    coeffdict = tf_init(dmatrix::Matrix{Float64},GP::GraphPart)
+coeffdict = tf_init(dmatrix::Matrix{Float64},GP::GraphPart)
 
 Store the expanding coeffcients from matrix into a list of dictionary (inbuilt hashmap in Julia)
 
@@ -47,18 +47,11 @@ function tf_init(dmatrix::Matrix{Float64},GP::GraphPart)
 end
 
 
-
-
-
 """
-    coeffdict_new,tag_tf = tf_core_new(coeffdict::Array{Dict{Tuple{Int,Int},Float64},1})
+coeffdict_new,tag_tf = tf_core_new(coeffdict::Array{Dict{Tuple{Int,Int},Float64},1})
 
-
-One forward iteration of time-frequency adapted GHWT method. For each entry in `coeffdict_new`, we compare
-two (or one) entries in 'coeffdict' on time-direction and two (or one) entries in 'coeffdict' on frequency-direction.
-Those two groups reprensent the same subspace. We compare the cost-functional value of them and choose the smaller one
-as a new entry in 'coeffdict_new'.
-
+One forward iteration of time-frequency adapted GHWT method. For each entry in `coeffdict_new`, we compare two (or one) entries in 'coeffdict' on time-direction and two (or one) entries in 'coeffdict' on frequency-direction.
+Those two groups reprensent the same subspace. We compare the cost-functional value of them and choose the smaller one as a new entry in 'coeffdict_new'.
 
 ### Input Arguments
 * `coeffdict`: The entries of which reprensents the cost functional value of some basis-vectors' coefficients.
@@ -66,7 +59,6 @@ as a new entry in 'coeffdict_new'.
 ### Output Arguments
 * `coeffdict_new`: The entries of which represents the cost functional value of some basis-vectors' coefficients
 * `tag_tf`: Indicating whether the time-direction (0) or frequency direction (1) was chosen for each entry in coeffdict_new.
-
 
 Copyright 2018 The Regents of the University of California
 
@@ -134,24 +126,17 @@ function tf_core_new(coeffdict::Array{Dict{Tuple{Int,Int},Float64},1})
 end
 
 
-
-
-
-
 """
     tag_tf_b_new = tf_basisrecover_new(tag_tf_b::Array{Dict{Tuple{Int,Int},Bool}},tag_tf_f::Array{Dict{Tuple{Int,Int},Bool}})
 
-
-One backward iteration of time-frequency adapted GHWT method to recover the best-basis from the `tag_tf`s recorded.
+    One backward iteration of time-frequency adapted GHWT method to recover the best-basis from the `tag_tf`s recorded.
 
 ### Input Arguments
 * `tag_tf_b`: The `dictionary` recording the time-or-frequency information on some iteration 'i' in the main algorithm
 * `tag_tf_f`: The `dictionary` recording the time-or-frequency information on some iteration 'i+1' in the main algorithm
 
-
 ### Output Arguments
 * `tag_tf_b_new`: The updated 'tag_tf_b'. Eventually the 'tag_tf' on iteration 1 will represent the selected best-basis
-
 
 Copyright 2018 The Regents of the University of California
 
@@ -183,7 +168,7 @@ function tf_basisrecover_new(tag_tf_b::Array{Dict{Tuple{Int,Int},Bool}},tag_tf_f
                     tag_tf_b_new[j][(k,2*l+1)] =  tag_tf_b[j][(k,2*l+1)]
                 end
             else
-            # The entries on time-direction are selected
+                # The entries on time-direction are selected
                 if ~haskey(tag_tf_b[j+1],(2*k,l))
                     tag_tf_b_new[j+1][(2*k+1,l)] =  tag_tf_b[j+1][(2*k+1,l)]
                 elseif  ~haskey(tag_tf_b[j+1],(2*k+1,l))
@@ -200,26 +185,26 @@ end
 
 
 """
-bestbasis_tag_matrix, bestbasis = ghwt_tf_bestbasis(dmatrix::Matrix{Float64},GP::GraphPart)
+(dvec, BS) = ghwt_tf_bestbasis(dmatrix::Array{Float64,3}, GP::GraphPart; cfspec::Float64 = 1.0, flatten::Any = 1.0)
 
-Implementation of time-frequency adapted GHWT method.
-Modified from the algorithm in paper 'A Fast Algorithm for Adapted Time Frequency Tilings' by Christoph M Thiele and Lars F Villemoes.
+Implementation of time-frequency adapted GHWT method = eGHWT.
+Modified from the algorithm in the paper: "A Fast Algorithm for Adapted Time Frequency Tilings" by Christoph M. Thiele and Lars F. Villemoes.
 
 ### Input Arguments
-### Input Arguments
-* `dmatrix`: The expanding GHWT coefficients of all levels corresponding to input GP.
-* `GP::GraphPart`: an input GraphPart object.
+* `dmatrix::Array{Float64,3}`: the matrix of expansion coefficients
+* `GP::GraphPart`: an input GraphPart object
+* `cfspec::Any`: the specification of cost functional to be used (default: 1.0, i.e., 1-norm)
+* `flatten::Any`: the method for flattening vector-valued data to scalar-valued data (default: 1.0, i.e., 1-norm)
 
 ### Output Arguments
-* `bestbasis_tag_matrix`: binary 0-1 matrix indicating the location of best-basis in dmatrix
-* `bestbasis`: same size as dmatrix, but only coefficients of best-basis vectors are nonzero
+* `dvec::Matrix{Float64}`: the vector of expansion coefficients corresponding to the eGHWT best basis
+* `BS::BasisSpec`: a BasisSpec object which specifies the eGHWT best basis
 
 Copyright 2018 The Regents of the University of California
 
 Implemented by Yiqun Shao (Adviser: Dr. Naoki Saito)
 """
 function ghwt_tf_bestbasis(dmatrix::Array{Float64,3}, GP::GraphPart; cfspec::Float64 = 1.0, flatten::Any = 1.0)
-
 
     # determine the cost functional to be used
     costfun = cost_functional(cfspec)
@@ -294,174 +279,8 @@ function ghwt_tf_bestbasis(dmatrix::Array{Float64,3}, GP::GraphPart; cfspec::Flo
     BS = BasisSpec(levlist, c2f = true, description = "eGHWT Best Basis")
     dvec = dmatrix2dvec(dmatrix0, GP, BS)
     return dvec, BS
-end
+end # of function ghwt_tf_bestbasis
 
+const eghwt_bestbasis = ghwt_tf_bestbasis # This should be a useful alias!
 
-"""
- bestbasis_new = tf_threshold(bestbasis::Matrix{Float64}, GP::GraphPart, keep::Float64, SORH::String)
-
- Thresholding the coefficients of bestbasis.
-
-### Input Arguments
- *   `bestbasis::Matrix{Float64}`        the matrix of expansion coefficients
- *   `SORH::String`        use soft ('s') or hard ('h') thresholding
- *   `keep::Float64`        a fraction between 0 and 1 which says how many coefficients should be kept
- *   `GP::GraphPart`          a GraphPart object, used to identify scaling coefficients
-
-### Output Argument
- *   `bestbasis_new::Matrix{Float64}`       the thresholded expansion coefficients
-"""
-function tf_threshold(bestbasis::Matrix{Float64}, GP::GraphPart, keep::Float64, SORH::String)
-
-  tag = GP.tag
-  if keep > 1 || keep < 0
-    error("keep should be floating point between 0~1")
-  end
-  kept = UInt32(round(keep*size(bestbasis,1)))
-  dvec_S = sort(abs.(bestbasis[:]), rev = true)
-  T = dvec_S[kept + 1]
-  bestbasis_new = deepcopy(bestbasis[:])
-  indp = bestbasis_new .> T           #index for coefficients > T
-  indn = bestbasis_new .< -1*T        #index for coefficients < -T
-
-  # hard thresholding
-  if SORH == "h" || SORH == "hard"
-    bestbasis_new[.~(indp .| indn)] .= 0
-
-  # soft thresholding
-  elseif SORH == "s" || SORH == "soft"
-    bestbasis_new[(.~indp) .& (.~indn) .& (tag[:].!=0)] .= 0
-    bestbasis_new[indp .& (tag[:].!=0)] = bestbasis[indp .& (tag[:].!=0)] .- T
-    bestbasis_new[indn .& (tag[:].!=0)] = bestbasis[indn .& (tag[:].!=0)] .+ T
-  end
-
-  bestbasis_new = reshape(bestbasis_new,size(bestbasis))
-end
-
-
-
-"""
-    (f, GS) = tf_synthesis(bestbasis::Matrix{Float64},bestbasis_tag::Matrix{Int},GP::GraphPart,G::GraphSig)
-
-Given a vector of GHWT expansion coefficients and info about the graph
-partitioning and the choice of basis, reconstruct the signal
-
-### Input Arguments
-* `bestbasis::Matrix{Float64}`: the expansion coefficients corresponding to the chosen basis
-* 'bestbasis_tag::Matrix{Int}': the location of the best basis coefficients in bestbasis matrix
-* `GP::GraphPart`: an input GraphPart object
-* `G::GraphSig`: an input GraphSig object
-
-### Output Arguments
-* `f::Matrix{Float64}`: the reconstructed signal(s)
-* `GS::GraphSig`: the reconstructed GraphSig object
-"""
-function tf_synthesis(bestbasis::Matrix{Float64},bestbasis_tag::Matrix{Int},GP::GraphPart,G::GraphSig)
-  tag = GP.tag
-  rs = GP.rs
-  bestbasis_new = deepcopy(bestbasis)
-  bestbasis_tag = deepcopy(bestbasis_tag)
-  jmax = size(rs,2)
-  for j = 1:(jmax-1)
-    regioncount = count(!iszero, rs[:,j]) - 1
-    for r = 1:regioncount
-      # the index that marks the start of the first subregion
-      rs1 = rs[r,j]
-
-      # the index that is one after the end of the second subregion
-      rs3 = rs[r+1,j]
-
-      # the number of points in the current region
-      n = rs3 - rs1
-
-      # only proceed forward if the coefficients do not exist
-      if count(!iszero, bestbasis_tag[rs1:(rs3-1),j]) !=0
-        if n == 1
-          # scaling coefficient
-          if bestbasis_tag[rs1,j] == 1 # check ind
-            bestbasis_new[rs1,j+1] = bestbasis_new[rs1,j]
-            bestbasis_tag[rs1,j+1] = 1
-          end
-        elseif n > 1
-          # the index that marks the start of the second subregion
-          rs2 = rs1 + 1
-          while rs2 < rs3 && tag[rs2, j+1] != 0
-            rs2 = rs2 +1
-          end
-
-          # only one child
-          if rs2 == rs3
-            if bestbasis_tag[rs1:rs3-1,j] == 1
-              bestbasis_new[rs1:rs3-1,j+1] = bestbasis_new[rs1:rs3-1,j]
-              bestbasis_tag[rs1:rs3-1,j+1] = 1
-            end
-
-          else
-
-            # the number of points in the first subregion
-            n1 = rs2-rs1
-            # the number of points in the second subregion
-            n2 = rs3-rs2
-
-            # scaling coefficients
-            if bestbasis_tag[rs1,j] == 1 && bestbasis_tag[rs1+1,j] == 1 # check if it is the coefficients of best basis
-              bestbasis_new[rs1,j+1] = (sqrt(n1) *bestbasis_new[rs1,j] + sqrt(n2)*bestbasis_new[rs1+1,j])/sqrt(n)
-              bestbasis_new[rs2,j+1] = (sqrt(n2) *bestbasis_new[rs1,j] - sqrt(n1)*bestbasis_new[rs1+1,j])/sqrt(n)
-              bestbasis_tag[rs1,j+1] = 1
-              bestbasis_tag[rs2,j+1] = 1
-            end
-
-            ### HAAR-LIKE & WALSH-LIKE coefficients
-
-            # search through the remaining coefficients in each subregion
-            parent = rs1 + 2
-            child1 = rs1 + 1
-            child2 = rs2 + 1
-            while child1 < rs2 || child2 < rs3
-              # subregion 1 has the smaller tag
-              if child2 == rs3 || (tag[child1,j+1] < tag[child2, j+1] && child1 < rs2)
-                if bestbasis_tag[parent,j]==1 # check if it is the coefficients of best basis
-                  bestbasis_new[child1,j+1] = bestbasis_new[parent,j]
-                  bestbasis_tag[child1, j+1] =1
-                end
-                child1 = child1 + 1
-                parent = parent + 1
-
-              # subregion 2 has the smaller tag
-              elseif child1 == rs2 || (tag[child2, j+1] < tag[child1, j+1] && child2 < rs3)
-                if bestbasis_tag[parent, j] == 1 # check if it is the coefficients of best basis
-                  bestbasis_new[child2, j+1] = bestbasis_new[parent, j]
-                  bestbasis_tag[child2, j+1] = 1
-                end
-                child2 = child2 + 1
-                parent = parent + 1
-
-                # both subregions have the same tag
-              else
-                if bestbasis_tag[parent,j] == 1 && bestbasis_tag[parent+1, j] == 1 # check if it is the coefficients of best basis
-                  bestbasis_new[child1,j+1] = (bestbasis_new[parent,j] + bestbasis_new[parent+1,j])/sqrt(2)
-                  bestbasis_new[child2,j+1] = (bestbasis_new[parent,j] - bestbasis_new[parent+1,j])/sqrt(2)
-                  bestbasis_tag[child1,j+1]=1
-                  bestbasis_tag[child2,j+1]=1
-                end
-                child1 = child1 + 1
-                child2 = child2 + 1
-                parent = parent + 2
-              end
-            end
-          end
-        end
-      end
-    end
-  end
-  ftemp = bestbasis_new[:,end]
-
-  f = zeros(size(ftemp))
-  f[GP.ind] = ftemp
-  f = reshape(f,(length(f),1)) # reorder f
-  GS = deepcopy(G)
-  replace_data!(GS, f) # create the new graph signal
-  return f, GS
-end
-
-end
+end # of module GHWT_tf_1d
