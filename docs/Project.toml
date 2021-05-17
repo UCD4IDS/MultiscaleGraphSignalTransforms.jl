@@ -1,0 +1,3 @@
+[deps]
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+MultiscaleGraphSignalTransforms = "cc44fc10-d0fb-5545-af72-ba1cb661a341"
