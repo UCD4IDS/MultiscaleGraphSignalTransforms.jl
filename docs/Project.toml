@@ -4,3 +4,5 @@ MultiscaleGraphSignalTransforms = "cc44fc10-d0fb-5545-af72-ba1cb661a341"
 
 [compat]
 Documenter = "0.26"
+MultiscaleGraphSignalTransforms = "1.5"
+

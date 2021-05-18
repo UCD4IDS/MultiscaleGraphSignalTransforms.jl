@@ -5,7 +5,7 @@ makedocs(
     format = Documenter.HTML(),
     authors = "Jeff Irion, Haotian Li, Naoki Saito, Yiqun Shao",
     clean = true,
-    pages = [
+    pages = Any[
         "Home" => "index.md",
         "Functions" => "functions.md",
     ]
