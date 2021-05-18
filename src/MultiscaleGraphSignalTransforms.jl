@@ -50,7 +50,7 @@ export eigsROT_Distance
 export eigTSD_Distance, K_functional
 export natural_eigdist
 export SunFlowerGraph, dualgraph
-export pc_ngwp, pairclustering
+export pc_ngwp, pairclustering, mgslp
 export vm_ngwp, varimax
 export lp_ngwp, rising_cutoff, find_pairinds, pair_inds_shadding, lp_ngwp_analysis
 export LPHGLET_Synthesis, LPHGLET_Analysis_All, HGLET_dictionary, LPHGLET_dictionary

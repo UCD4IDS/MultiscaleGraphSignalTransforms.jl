@@ -382,7 +382,7 @@ function gram_schmidt(A; tol = 1e-12)
     return Q, complement_dim
 end
 
-#
+
 """
     mgslp(A::Matrix{Float64}; tol::Float64 = 1e-12, p::Float64 = 1.0)
 
