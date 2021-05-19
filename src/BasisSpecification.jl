@@ -20,7 +20,6 @@ Implemented by Jeff Irion (Adviser: Dr. Naoki Saito) |
 Translated to julia and revised by Naoki Saito, Feb. 22, 2017
 Modified by Yiqun Shao, May. 20, 2018
 """
-
 mutable struct BasisSpec
     levlist::Vector{Tuple{Int, Int}}
     c2f::Bool
