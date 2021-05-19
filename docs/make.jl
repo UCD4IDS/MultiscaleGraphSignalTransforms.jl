@@ -2,16 +2,16 @@ using Documenter, MultiscaleGraphSignalTransforms
 
 makedocs(
     sitename="MultiscaleGraphSignalTransforms.jl",
-    format = Documenter.HTML(),
+    format = Documenter.HTML(collapselevel = 1),
     authors = "Jeff Irion, Haotian Li, Naoki Saito, Yiqun Shao",
     clean = true,
-    pages = Any[
+    pages = [
         "Home" => "index.md",
-        "Examples" => Any[
+        "Examples" => [
             "1D Path" => "examples/P64.md",
             "Sunflower Graph" => "examples/Sunflower.md",
         ],
-        "Functions" => Any[
+        "Functions" => [
             "Recursive Graph Partitioning" => "functions/Partition.md",
             "Hierarchical Graph Laplacian Eigen Transform" => "functions/HGLET.md",
             "Generalized Haar-Walsh Transform" => "functions/GHWT.md",
