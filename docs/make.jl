@@ -17,6 +17,7 @@ makedocs(
             "Generalized Haar-Walsh Transform" => "functions/GHWT.md",
             "extended Generalized Haar-Walsh Transform" => "functions/eGHWT.md",
             "Natural Graph Wavelet Dictionaries" => "functions/NGWD.md",
+            "Utils" => "functions/Utils.md",
         ],
     ]
 )

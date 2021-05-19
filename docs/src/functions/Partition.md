@@ -1,7 +1,15 @@
 # Recursive Graph Partitioning
+```@index
+Pages = ["Partition.md"]
+```
+
+## Graph Partition
+```@autodocs
+Modules = [GraphPartition]
+Pages = ["GraphPartition.jl"]
+```
 
 ## BasisSpec Object
-```@autodocs
-Modules = [MultiscaleGraphSignalTransforms]
-Pages = ["BasisSpecification.jl"]
+```@docs
+BasisSpec
 ```
