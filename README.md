@@ -1,6 +1,6 @@
 # MultiscaleGraphSignalTransforms.jl
 ![Haar-Walsh on R vs on Graph](./GHWT.png "Haar-Walsh on R vs on Graph")
-[![](https://img.shields.io/badge/docs-passing-success)](https://haotian127.github.io/MultiscaleGraphSignalTransforms.jl/dev)
+Documentation: [![](https://img.shields.io/badge/docs-passing-success)](https://haotian127.github.io/MultiscaleGraphSignalTransforms.jl/dev)
 
 ## COPYRIGHT
 
