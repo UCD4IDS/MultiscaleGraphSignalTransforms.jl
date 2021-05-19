@@ -7,7 +7,17 @@ makedocs(
     clean = true,
     pages = Any[
         "Home" => "index.md",
-        "Functions" => "functions.md",
+        "Examples" => Any[
+            "1D Path" => "examples/P64.md",
+            "Sunflower Graph" => "examples/Sunflower.md",
+        ],
+        "Functions" => Any[
+            "Recursive Graph Partitioning" => "functions/Partition.md",
+            "Hierarchical Graph Laplacian Eigen Transform" => "functions/HGLET.md",
+            "Generalized Haar-Walsh Transform" => "functions/GHWT.md",
+            "extended Generalized Haar-Walsh Transform" => "functions/eGHWT.md",
+            "Natural Graph Wavelet Dictionaries" => "functions/NGWD.md",
+        ],
     ]
 )
 
