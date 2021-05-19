@@ -1,4 +1,5 @@
 # MultiscaleGraphSignalTransforms.jl
+![Haar-Walsh on R vs on Graph](../../GHWT.png)
 
 MultiscaleGraphSignalTransforms.jl is a collection of tools for graph signal processing including HGLET, GHWT, eGHWT, NGWP, Lapped NGWP, and Lapped HGLET. Some of them were originally written in MATLAB by Jeff Irion, but we added more functionalities, e.g., eGHWT, NGWP, etc.
 
