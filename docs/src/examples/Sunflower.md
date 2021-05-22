@@ -1,7 +1,7 @@
 # Visualization of the Sunflower Graph
 
 ```@example sunflower
-using MultiscaleGraphSignalTransforms, LightGraphs, Plots
+using MultiscaleGraphSignalTransforms, LightGraphs, Plots; gr()
 
 # construct the sunflower graph
 G, L, X = SunFlowerGraph(); N = nv(G)

@@ -7,10 +7,12 @@ using Plots, LaTeXStrings, LinearAlgebra; pyplot()
 
 # compute the graph related quantities
 Nx, Ny = 7, 3
-G = LightGraphs.grid([Nx, Ny]); N = nv(G);
+G = LightGraphs.grid([Nx, Ny])
+N = nv(G)
 L = Matrix(laplacian_matrix(G))
 Q = incidence_matrix(G; oriented = true)
-𝛌, 𝚽 = eigen(L); 𝚽 = 𝚽.*sign.(𝚽[1,:])'; # sign of DCT
+𝛌, 𝚽 = eigen(L)
+𝚽 = 𝚽 .* sign.(𝚽[1, :])'  # sign of DCT
 ∇𝚽 = Q' * 𝚽
 W = 1.0 * adjacency_matrix(G)
 
