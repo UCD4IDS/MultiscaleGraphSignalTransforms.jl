@@ -3,7 +3,7 @@
 ## Set up
 ```@example grid
 using MultiscaleGraphSignalTransforms, LightGraphs, MultivariateStats
-using Plots, LaTeXStrings, LinearAlgebra; pyplot()
+using Plots, LaTeXStrings, LinearAlgebra
 
 # compute the graph related quantities
 Nx, Ny = 7, 3
