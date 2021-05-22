@@ -48,8 +48,9 @@ for i in 1:N
 end
 plot!(size = (815, 350)) # hide
 ```
-
-Create a custom function for later use.
+What we really want to do is to *organize* those eigenvectors based on their natural frequencies or their behaviors instead of their eigenvalues.
+To do that, we utilize the metrics discussed in the [paper](https://www.math.ucdavis.edu/~saito/publications/metgraphlap.html) as follows.
+But first, we create a custom plotting function for later use.
 ```@example grid
 function grid7x3_mds_heatmaps(E, 𝚽; Nx = 7, Ny = 3, annotate_ind = 1:N, plotOrder = 1:N)
     # set up all heatmap plots' positions
