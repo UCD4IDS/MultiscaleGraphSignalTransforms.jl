@@ -9,6 +9,7 @@ makedocs(
         "Home" => "index.md",
         "Examples" => [
             "1D Path" => "examples/P64.md",
+            "2D Lattice" => "examples/Grid7x3.md",
             "Sunflower Graph" => "examples/Sunflower.md",
         ],
         "Functions" => [
