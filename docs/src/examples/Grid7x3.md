@@ -20,8 +20,10 @@ eig2grid_ind = sortperm(grid2eig_ind);
 eig2dct = Array{Int64,3}(undef, Nx, Ny, 2);
 for i = 1:Nx; for j = 1:Ny; eig2dct[i,j,1] = i-1; eig2dct[i,j,2] = j-1; end; end
 eig2dct = reshape(eig2dct, (N, 2)); eig2dct = eig2dct[eig2grid_ind, :];
-
-# show the comparison between 1D ordering vs. 2D ordering of the eigenvectors
+nothing # hide
+```
+Let us see the comparison between 1D ordering vs. 2D ordering of the eigenvectors.
+```@example grid
 ## 1D ordering
 plot(layout = Plots.grid(3, 7), title = "Non-decreasing eigenvalue ordering")
 for i in 1:N
@@ -30,9 +32,9 @@ for i in 1:N
                 title = latexstring("\\phi_{", i-1, "}"), titlefont = 12,
                 subplot = i)
 end
-plot!(size = (849, 350)) # hide
-savefig("grid_1d_order.svg"); nothing # hide
-
+plot!(size = (408, 175)) # hide
+```
+```@example grid
 ## 2D ordering
 plot(layout = Plots.grid(3, 7), title = "Natural frequency ordering")
 for i in 1:N
@@ -42,8 +44,7 @@ for i in 1:N
                 title = latexstring("\\varphi_{", string(eig2dct[k,1]),
                 ",", string(eig2dct[k,2]), "}"), titlefont = 12, subplot = i)
 end
-plot!(size = (849, 350)) # hide
-savefig("grid_2d_order.svg"); nothing # hide
+plot!(size = (408, 175)) # hide
 ```
 ![](grid_1d_order.svg)
 
@@ -96,7 +97,7 @@ After we got the ROT distance matrix of the eigenvectors, we visualize the arran
 D = natural_eigdist(𝚽, 𝛌, Q; α = 0.5, input_format = :pmf1, distance = :ROT)
 E = transform(fit(MDS, D, maxoutdim=2, distances=true))
 grid7x3_mds_heatmaps(E, 𝚽)
-plot!(size = (815, 611)) # hide
+plot!(size = (408, 306)) # hide
 ```
 
 ## DAG distance
@@ -105,7 +106,7 @@ We organize the eigenvectors by the DAG distance.
 D = natural_eigdist(𝚽, 𝛌, Q; distance = :DAG)
 E = transform(fit(MDS, D, maxoutdim=2, distances=true))
 grid7x3_mds_heatmaps(E, 𝚽)
-plot!(size = (815, 611)) # hide
+plot!(size = (408, 306)) # hide
 ```
 
 ## TSD distance
@@ -114,5 +115,5 @@ We organize the eigenvectors by the TSD distance with the parameter ``T = 0.1``.
 D = natural_eigdist(𝚽, 𝛌, Q; T = 0.1, distance = :TSD)  # T = 0.1
 E = transform(fit(MDS, D, maxoutdim=2, distances=true))
 grid7x3_mds_heatmaps(E, 𝚽)
-plot!(size = (815, 611)) # hide
+plot!(size = (408, 306)) # hide
 ```
