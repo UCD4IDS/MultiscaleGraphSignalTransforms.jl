@@ -22,6 +22,8 @@ julia> using MultiscaleGraphSignalTransforms
 
 Currently, you can run a set of very small tests via ```] test MultiscaleGraphSignalTransforms```; see the actual file [`test/runtest.jl`](https://github.com/UCD4IDS/MultiscaleGraphSignalTransforms.jl/blob/master/test/runtests.jl) for more details.
 
+You can also check out the examples we provided in the sidebar.
+
 ## REFERENCES
 
 1. J. Irion and N. Saito, [Hierarchical graph Laplacian eigen transforms](http://doi.org/10.14495/jsiaml.6.21), *Japan SIAM Letters*, vol. 6, pp. 21-24, 2014.
