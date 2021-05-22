@@ -3,7 +3,7 @@
 ## Set up
 ```@example grid
 using MultiscaleGraphSignalTransforms, LightGraphs, MultivariateStats
-using Plots, LaTeXStrings, LinearAlgebra; pyplot(dpi = 200)
+using Plots, LaTeXStrings, LinearAlgebra; pyplot()
 
 # compute the graph related quantities
 Nx, Ny = 7, 3
@@ -24,19 +24,19 @@ nothing # hide
 ```
 Let us see the comparison between 1D ordering vs. 2D ordering of the eigenvectors.
 ```@example grid
-## 1D ordering
-plot(layout = Plots.grid(3, 7), title = "Non-decreasing eigenvalue ordering")
+## 1D ordering: non-decreasing eigenvalue ordering
+plot(layout = Plots.grid(3, 7))
 for i in 1:N
     heatmap!(reshape(𝚽[:, i], (Nx, Ny))', c = :viridis, cbar = false,
                 clims = (-0.4,0.4), frame = :none, ratio = 1, ylim = [0, Ny + 1],
                 title = latexstring("\\phi_{", i-1, "}"), titlefont = 12,
                 subplot = i)
 end
-plot!(size = (408, 175)) # hide
+plot!(size = (815, 350)) # hide
 ```
 ```@example grid
-## 2D ordering
-plot(layout = Plots.grid(3, 7), title = "Natural frequency ordering")
+## 2D ordering: natural frequency ordering
+plot(layout = Plots.grid(3, 7))
 for i in 1:N
     k = grid2eig_ind[i]
     heatmap!(reshape(𝚽[:,k], (Nx, Ny))', c = :viridis, cbar = false,
@@ -44,15 +44,10 @@ for i in 1:N
                 title = latexstring("\\varphi_{", string(eig2dct[k,1]),
                 ",", string(eig2dct[k,2]), "}"), titlefont = 12, subplot = i)
 end
-plot!(size = (408, 175)) # hide
+plot!(size = (815, 350)) # hide
 ```
-![](grid_1d_order.svg)
 
-![](grid_2d_order.svg)
-
-
-
-
+Create a custom function for later use.
 ```@example grid
 function grid7x3_mds_heatmaps(E, 𝚽; Nx = 7, Ny = 3, annotate_ind = 1:N, plotOrder = 1:N)
     # set up all heatmap plots' positions
@@ -97,7 +92,7 @@ After we got the ROT distance matrix of the eigenvectors, we visualize the arran
 D = natural_eigdist(𝚽, 𝛌, Q; α = 0.5, input_format = :pmf1, distance = :ROT)
 E = transform(fit(MDS, D, maxoutdim=2, distances=true))
 grid7x3_mds_heatmaps(E, 𝚽)
-plot!(size = (408, 306)) # hide
+plot!(size = (815, 611)) # hide
 ```
 
 ## DAG distance
@@ -106,7 +101,7 @@ We organize the eigenvectors by the DAG distance.
 D = natural_eigdist(𝚽, 𝛌, Q; distance = :DAG)
 E = transform(fit(MDS, D, maxoutdim=2, distances=true))
 grid7x3_mds_heatmaps(E, 𝚽)
-plot!(size = (408, 306)) # hide
+plot!(size = (815, 611)) # hide
 ```
 
 ## TSD distance
@@ -115,5 +110,5 @@ We organize the eigenvectors by the TSD distance with the parameter ``T = 0.1``.
 D = natural_eigdist(𝚽, 𝛌, Q; T = 0.1, distance = :TSD)  # T = 0.1
 E = transform(fit(MDS, D, maxoutdim=2, distances=true))
 grid7x3_mds_heatmaps(E, 𝚽)
-plot!(size = (408, 306)) # hide
+plot!(size = (815, 611)) # hide
 ```
