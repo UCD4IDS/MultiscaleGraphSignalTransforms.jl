@@ -10,4 +10,9 @@ WaveletsExt = "8f464e1e-25db-479f-b0a5-b7680379e03f"
 
 [compat]
 Documenter = "0.26"
+LightGraphs = "1.3"
+LaTeXStrings = "1.2"
 MultiscaleGraphSignalTransforms = "1.5"
+WaveletsExt = "0.1"
+MultivariateStats = "0.8"
+Plots = "1.15"
