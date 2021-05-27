@@ -23,7 +23,7 @@ julia> using MultiscaleGraphSignalTransforms
 
 ## GETTING STARTED
 
-Currently, you can run a set of very small tests via ```] test MultiscaleGraphSignalTransforms```; see the actual file ```test/runtest.jl``` for more details.
+Currently, you can run a set of very small tests via ```] test MultiscaleGraphSignalTransforms```; see the actual file ```test/runtest.jl``` as well as [the documentation](https://ucd4ids.github.io/MultiscaleGraphSignalTransforms.jl/dev) for further information.
 
 ## REFERENCES
 
