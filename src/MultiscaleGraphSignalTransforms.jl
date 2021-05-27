@@ -19,6 +19,7 @@ using Reexport
 @reexport using .GraphSignal, .GraphPartition, .BasisSpecification, .GHWT, .GHWT_2d, .GHWT_tf_1d, .GHWT_tf_2d, .HGLET
 
 export dvec2dmatrix, dmatrix2dvec, levlist2levlengths!, bsfull, bs_haar, bs_level, bs_walsh, dvec_Threshold, rs_to_region, GraphSig_Plot, gplot, gplot!, partition_fiedler
+export cost_functional, dmatrix_flatten
 
 ## export functions of NGWP.jl
 using LinearAlgebra, SparseArrays, LightGraphs, SimpleWeightedGraphs, Clustering
@@ -50,7 +51,7 @@ export eigsROT_Distance
 export eigTSD_Distance, K_functional
 export natural_eigdist
 export SunFlowerGraph, dualgraph
-export pc_ngwp, pairclustering
+export pc_ngwp, pairclustering, mgslp
 export vm_ngwp, varimax
 export lp_ngwp, rising_cutoff, find_pairinds, pair_inds_shadding, lp_ngwp_analysis
 export LPHGLET_Synthesis, LPHGLET_Analysis_All, HGLET_dictionary, LPHGLET_dictionary
