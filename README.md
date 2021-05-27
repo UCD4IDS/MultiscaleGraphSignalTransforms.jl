@@ -1,5 +1,8 @@
 # MultiscaleGraphSignalTransforms.jl
-Documentation: [![](https://img.shields.io/badge/docs-passing-success)](https://haotian127.github.io/MultiscaleGraphSignalTransforms.jl/dev)
+| Doc | Build | Test |
+|------|-------|------|
+| [![](https://img.shields.io/badge/docs-passing-success)](https://haotian127.github.io/MultiscaleGraphSignalTransforms.jl/dev) | [![CI](https://github.com/UCD4IDS/MultiscaleGraphSignalTransforms.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/UCD4IDS/MultiscaleGraphSignalTransforms.jl/actions) | [![codecov](https://codecov.io/gh/UCD4IDS/MultiscaleGraphSignalTransforms.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/UCD4IDS/MultiscaleGraphSignalTransforms.jl) |
+
 
 ![Haar-Walsh on R vs on Graph](./GHWT.png "Haar-Walsh on R vs on Graph")
 
