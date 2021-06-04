@@ -1,4 +1,4 @@
-using Plots, SparseArrays, JLD2, LinearAlgebra, MTSG
+using Plots, SparseArrays, JLD2, LinearAlgebra, MultiscaleGraphSignalTransforms
 
 #@load "MN_MutGauss.jld2"
 #tmp1 = G["G"]

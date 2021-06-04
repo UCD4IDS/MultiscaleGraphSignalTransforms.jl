@@ -1,6 +1,6 @@
 #Figure 2.5
 #Run function "Glevel" at bottom of file first
-using Plots, SparseArrays, JLD2, LinearAlgebra, MTSG
+using Plots, SparseArrays, JLD2, LinearAlgebra, MultiscaleGraphSignalTransforms
 
 JLD2.@load "../data/Toronto.jld2"
 tmp1 = toronto["G"]

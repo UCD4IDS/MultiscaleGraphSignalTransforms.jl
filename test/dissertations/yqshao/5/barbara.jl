@@ -1,5 +1,5 @@
 #Figure 5.4, 5.5
-using Plots, SparseArrays, JLD2, LinearAlgebra, MTSG
+using Plots, SparseArrays, JLD2, LinearAlgebra, MultiscaleGraphSignalTransforms
 
 JLD2.@load "../data/spie_data.jld2"
 matrix = vars["barbara"]

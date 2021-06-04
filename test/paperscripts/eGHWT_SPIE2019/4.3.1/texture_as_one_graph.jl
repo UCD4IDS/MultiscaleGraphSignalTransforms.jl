@@ -1,4 +1,4 @@
-using Plots, SparseArrays, JLD2, LinearAlgebra, MTSG
+using Plots, SparseArrays, JLD2, LinearAlgebra, MultiscaleGraphSignalTransforms
 
 JLD2.@load "handcut_images.jld2"
 

@@ -1,5 +1,5 @@
 #Figure 5.7, 5.8
-using TestImages, Plots, SparseArrays, LinearAlgebra, Wavelets, MTSG
+using TestImages, Plots, SparseArrays, LinearAlgebra, Wavelets, MultiscaleGraphSignalTransforms
 img = testimage("camera");
 matrix = convert(Array{Float64,2}, img)[1:4:512,1:4:512]
 

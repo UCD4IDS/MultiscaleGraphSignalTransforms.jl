@@ -1,7 +1,7 @@
 #Table 6.2
 #Run uility functions at bottom
 #Change the setting of Lambda if necessary
-using NMF, LinearAlgebra, eghwt, ScikitLearn
+using NMF, LinearAlgebra, MultiscaleGraphSignalTransforms, ScikitLearn
 @sk_import linear_model:Lasso
 
 k = 5

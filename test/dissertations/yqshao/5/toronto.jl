@@ -1,5 +1,5 @@
 #Figure 5.1, 5.2, 5.3
-using Plots, SparseArrays, JLD2, LinearAlgebra, MTSG
+using Plots, SparseArrays, JLD2, LinearAlgebra, MultiscaleGraphSignalTransforms
 
 
 JLD2.@load "../data/Toronto.jld2"

@@ -1,4 +1,4 @@
-using Plots, SparseArrays, JLD2, LinearAlgebra, Wavelets, MTSG
+using Plots, SparseArrays, JLD2, LinearAlgebra, Wavelets, MultiscaleGraphSignalTransforms
 
 @load "../spie_data.jld2"
 matrix = vars["barbara"]

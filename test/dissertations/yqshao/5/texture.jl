@@ -1,5 +1,5 @@
 #Figure 5.9, 5.10
-using Plots, SparseArrays, JLD2, LinearAlgebra, MTSG, PyCall
+using Plots, SparseArrays, JLD2, LinearAlgebra, MultiscaleGraphSignalTransforms, PyCall
 py"""
 import numpy
 xs = numpy.load('../data/texture_mask.npy')
