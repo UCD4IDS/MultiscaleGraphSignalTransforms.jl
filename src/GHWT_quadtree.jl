@@ -174,8 +174,8 @@ D2[D2 .== 0] = maximum([0.01, minimum(D2[D2 .> 0])/10])
 u,_,v = svd(diagm(0 => D1[:].^(-0.5))*A*diagm(0 => D2[:].^(-0.5)))
 
 # extract the 2nd singular vectors and multiply by D_i^-0.5
-u = diagm(0 => D1[:].^-0.5)*u[:,2]
-v = diagm(0 => D2[:].^-0.5)*v[:,2]
+u = Diagonal(D1[:].^-0.5)*u[:,2]
+v = Diagonal(D2[:].^-0.5)*v[:,2]
 return u,v
 end
 
