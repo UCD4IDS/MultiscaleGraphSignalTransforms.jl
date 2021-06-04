@@ -4,90 +4,7 @@
 using NMF, LinearAlgebra, MultiscaleGraphSignalTransforms, ScikitLearn
 @sk_import linear_model:Lasso
 
-k = 5
-m = 125
-n = 25
-sigma = 0.5 #noise parameter
-#methodid = 1 corresponds to ALSPGRAD.
-#methodid = 2 corresponds to HALS.
-methodid = 2
-
-
-num_pos_eghwt_svd = 0
-num_neg_eghwt_svd = 0
-num_pos_eghwt_rand = 0
-num_neg_eghwt_rand = 0
-num_pos_svd_rand = 0
-num_neg_svd_rand = 0
-num_pos_svd_newsvd = 0
-num_neg_svd_newsvd = 0
-num_pos_eghwt_newsvd = 0
-num_neg_eghwt_newsvd = 0
-for i = 1:50
-    Wtrue = rand(m,k)
-    Htrue = rand(k,n)
-    X = Wtrue*Htrue + sigma*rand(m,n)
-
-    #X = rand(m,n)
-
-    ################
-    ######################################
-
-    Wtilda, Htilda = ghwtinit(X, k)
-    if Wtilda == false
-        continue
-    end
-    Wsvd, Hsvd = NMF.nndsvd(X, k)
-    Wrand, Hrand = NMF.randinit(X, k)
-    Wnewsvd, Hnewsvd = improved_NNDSVD(X, k)
-
-    iters = 100000
-    method = [NMF.ALSPGrad{Float64}(maxiter=iters, tolg=1.0e-6), NMF.CoordinateDescent{Float64}(maxiter=iters, α=0.5, l₁ratio=0.5)]
-
-    a = NMF.solve!(method[methodid], X, copy(Wtilda), copy(Htilda))
-    b = NMF.solve!(method[methodid], X, copy(Wsvd), copy(Hsvd))
-    c = NMF.solve!(method[methodid], X, copy(Wrand), copy(Hrand))
-    d = NMF.solve!(method[methodid], X, copy(Wnewsvd), copy(Hnewsvd))
-
-    #println("initial norm ",norm(X - Wtilda*Htilda)," ",norm(X-Wsvd*Hsvd)," ",norm(X - Wrand*Hrand)," ", norm(X - Wnewsvd*Hnewsvd))
-    #println(" ",a.niters," ",b.niters," ",c.niters," ",d.niters)
-    #println("final norm",norm(X - a.W*a.H)," ",norm(X-b.W*b.H)," ",norm(X - c.W*c.H)," ", norm(X - d.W*d.H))
-    if a.niters < b.niters
-        global num_pos_eghwt_svd += 1
-    else
-        global num_neg_eghwt_svd += 1
-    end
-    if a.niters < c.niters
-        global num_pos_eghwt_rand += 1
-    else
-        global num_neg_eghwt_rand += 1
-    end
-    if b.niters < c.niters
-        global num_pos_svd_rand += 1
-    else
-        global num_neg_svd_rand += 1
-    end
-    if a.niters < d.niters
-        global num_pos_eghwt_newsvd += 1
-    else
-        global num_neg_eghwt_newsvd += 1
-    end
-    if b.niters < d.niters
-        global num_pos_svd_newsvd += 1
-    else
-        global num_neg_svd_newsvd += 1
-    end
-end
-
-println("compare eGHWT with NNDSVD ", num_pos_eghwt_svd/(num_pos_eghwt_svd + num_neg_eghwt_svd))
-println("compare eGHWT with Random ", num_pos_eghwt_rand/(num_pos_eghwt_rand + num_neg_eghwt_rand))
-println("compare eGHWT with NNSVD-LRC ", num_pos_eghwt_newsvd/(num_pos_eghwt_newsvd + num_neg_eghwt_newsvd))
-
-
-
-
-###########################
-########################### utility functions
+########################### utility functions ###########################
 function create_scaling_vectors(GProws::GraphPart)
     GP = GProws
     ### creating scaling vectors
@@ -133,9 +50,9 @@ function ghwtinit(matrix, k)
     #Lambda = range(0.001, stop = 0.01, length = 10)
     B = fill(0., (size(scaling_vectors,2), length(Lambda))) ### initialize coefficients
     for i = 1:length(Lambda)
-        lasso = Lasso(alpha = Lambda[i], positive = true, fit_intercept = false)
-        fit!(lasso, scaling_vectors, f)
-        B[:,i] = lasso.coef_
+        lasso_out = Lasso(alpha = Lambda[i], positive = true, fit_intercept = false)
+        ScikitLearn.fit!(lasso_out, scaling_vectors, f)
+        B[:,i] = lasso_out.coef_
     end
 
     j = 1
@@ -180,3 +97,90 @@ function improved_NNDSVD(matrix, k)
     end
     return W, H
 end
+########################### end of utility functions ###########################
+
+
+### Now the start of the actual NMF experiments.
+
+k = 5
+m = 125
+n = 25
+sigma = 0.5 #noise parameter
+#methodid = 1 corresponds to ALSPGRAD.
+#methodid = 2 corresponds to HALS.
+methodid = 2
+
+
+num_pos_eghwt_svd = 0
+num_neg_eghwt_svd = 0
+num_pos_eghwt_rand = 0
+num_neg_eghwt_rand = 0
+num_pos_svd_rand = 0
+num_neg_svd_rand = 0
+num_pos_svd_newsvd = 0
+num_neg_svd_newsvd = 0
+num_pos_eghwt_newsvd = 0
+num_neg_eghwt_newsvd = 0
+for i = 1:50
+    Wtrue = rand(m,k)
+    Htrue = rand(k,n)
+    X = Wtrue*Htrue + sigma*rand(m,n)
+
+    #X = rand(m,n)
+
+    ################
+    ######################################
+
+    Wtilda, Htilda = ghwtinit(X, k)
+    if Wtilda == false
+        continue
+    end
+    Wsvd, Hsvd = NMF.nndsvd(X, k)
+    Wrand, Hrand = NMF.randinit(X, k)
+    Wnewsvd, Hnewsvd = improved_NNDSVD(X, k)
+
+    iters = 1000000
+    method = [NMF.ALSPGrad{Float64}(maxiter=iters, tolg=1.0e-6), NMF.CoordinateDescent{Float64}(maxiter=iters, α=0.5, l₁ratio=0.5)]
+
+    a = NMF.solve!(method[methodid], X, copy(Wtilda), copy(Htilda))
+    b = NMF.solve!(method[methodid], X, copy(Wsvd), copy(Hsvd))
+    c = NMF.solve!(method[methodid], X, copy(Wrand), copy(Hrand))
+    d = NMF.solve!(method[methodid], X, copy(Wnewsvd), copy(Hnewsvd))
+
+    #println("initial norm ",norm(X - Wtilda*Htilda)," ",norm(X-Wsvd*Hsvd)," ",norm(X - Wrand*Hrand)," ", norm(X - Wnewsvd*Hnewsvd))
+    #println(" ",a.niters," ",b.niters," ",c.niters," ",d.niters)
+    #println("final norm",norm(X - a.W*a.H)," ",norm(X-b.W*b.H)," ",norm(X - c.W*c.H)," ", norm(X - d.W*d.H))
+    if a.niters < b.niters
+        global num_pos_eghwt_svd += 1
+    else
+        global num_neg_eghwt_svd += 1
+    end
+    if a.niters < c.niters
+        global num_pos_eghwt_rand += 1
+    else
+        global num_neg_eghwt_rand += 1
+    end
+    if b.niters < c.niters
+        global num_pos_svd_rand += 1
+    else
+        global num_neg_svd_rand += 1
+    end
+    if a.niters < d.niters
+        global num_pos_eghwt_newsvd += 1
+    else
+        global num_neg_eghwt_newsvd += 1
+    end
+    if b.niters < d.niters
+        global num_pos_svd_newsvd += 1
+    else
+        global num_neg_svd_newsvd += 1
+    end
+end
+
+println("compare eGHWT with NNDSVD ", num_pos_eghwt_svd/(num_pos_eghwt_svd + num_neg_eghwt_svd))
+println("compare eGHWT with Random ", num_pos_eghwt_rand/(num_pos_eghwt_rand + num_neg_eghwt_rand))
+println("compare eGHWT with NNSVD-LRC ", num_pos_eghwt_newsvd/(num_pos_eghwt_newsvd + num_neg_eghwt_newsvd))
+
+
+
+
