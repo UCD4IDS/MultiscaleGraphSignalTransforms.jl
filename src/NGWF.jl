@@ -44,7 +44,7 @@ function ngwf_all_vectors(D, 𝚽; σ = 0.2 * maximum(D))
     𝓤 = zeros(N, 0)
     for l = 1:N
         𝛍 = nat_spec_filter(l, D; σ = σ)
-        P = 𝚽 * diagm(𝛍) * 𝚽'
+        P = 𝚽 * Diagonal(𝛍) * 𝚽'
         𝓤 = hcat(𝓤, P)
     end
     return 𝓤
@@ -73,7 +73,7 @@ function rngwf_all_vectors(D, 𝚽; σ = 0.2 * maximum(D), thres = 0.2)
     dic_l2x = Dict()
     for l = 1:N
         𝛍 = nat_spec_filter(l, D; σ = σ, method = :reduced, thres = thres)
-        P = 𝚽 * diagm(𝛍) * 𝚽'
+        P = 𝚽 * Diagonal(𝛍) * 𝚽'
         dic_l2x[l] = qr(P, Val(true)).p[1:rank(P, rtol = 10^4 * eps())]
         𝓤 = hcat(𝓤, P[:, dic_l2x[l]])
     end
@@ -82,7 +82,7 @@ end
 
 function ngwf_vector(D, l, x, 𝚽; σ = 0.1 * maximum(D))
     N = size(𝚽, 1)
-    P = 𝚽 * diagm(nat_spec_filter(l, D; σ = σ)) * 𝚽'
+    P = 𝚽 * Diagonal(nat_spec_filter(l, D; σ = σ)) * 𝚽'
     ψ = P * spike(x, N)
     ψ ./= norm(ψ, 2)
     return ψ

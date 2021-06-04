@@ -38,7 +38,7 @@ function partition_fiedler(W::SparseMatrixCSC{Float64,Int};
             # Note also, the result of the quadratic form is scalar
             # mathematically, but in julia, it's 1x1 array; so need to
             # convert it to a real scalar via `val = val[1]`.
-            val = v' * (diagm(0 => vec(sum(W, dims = 1))) - W) * v; val = val[1]
+            val = v' * (Diagonal(vec(sum(W, dims = 1))) - W) * v; val = val[1]
             pm = partition_fiedler_troubleshooting(pm, v, W, val)
         else
             pm = partition_fiedler_troubleshooting(pm)
@@ -68,7 +68,7 @@ function partition_fiedler(W::SparseMatrixCSC{Float64,Int};
             v0 = ones(N) / sqrt(N)
             try
                 # MATLAB, [v,val,eigs_flag] = eigs(diag(sum(W))-W,2,sigma,opts);
-                val, vtmp = eigs(sparse(diagm(0 => vec(sum(W, dims = 1)))) - W,
+                val, vtmp = eigs(sparse(Diagonal(vec(sum(W, dims = 1)))) - W,
                                  nev = 2, sigma = sigma, v0 = v0)
                 # val = real.(val)
                 # vtmp = real.(vtmp)
@@ -109,7 +109,7 @@ function partition_fiedler(W::SparseMatrixCSC{Float64,Int};
                 # MATLAB: [v,val,eigs_flag] = ...
                 #           eigs(diag(sum(W))-W,diag(sum(W)),2,sigma,opts);
                 # This is L*v = \lambda*D*v case.
-                temp = sparse(diagm(0 => vec(sum(W, dims = 1))))
+                temp = sparse(Diagonal(vec(sum(W, dims = 1))))
                 val, vtmp = eigs(temp - W, temp,
                                  nev = 2, sigma = sigma, v0 = v0)
                 # val = real.(val)
@@ -132,8 +132,8 @@ function partition_fiedler(W::SparseMatrixCSC{Float64,Int};
         if N <= cutoff || eigs_flag != 0 # if W is small or eigs had a problem,
                                          # then use full svd
             colsumW = vec(sum(W, dims = 1))
-            D = sparse(diagm(0 => colsumW))
-            D2 = sparse(diagm(0 => colsumW.^(-0.5)))
+            D = sparse(Diagonal(colsumW))
+            D2 = sparse(Diagonal(colsumW.^(-0.5)))
             vtmp, val = svd(Matrix(D2 * (D - W) * D2)) # SVD of Lsym
             # MATLAB: [v,val,~] = svd(full(...
             # bsxfun(@times,bsxfun(@times,full(sum(W,2)).^(-0.5),diag(sum(W))-W),
