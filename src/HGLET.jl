@@ -386,7 +386,7 @@ function HGLET_Analysis_All(G::GraphSig, GP::GraphPart)
 
                 # obtain the expansion coeffcients for L_rw
                 if useLrw
-                    dmatrixHrw[rs1:rs3-1,j,:] = vec'*diagm(0 => dropdims(sum(W_temp,dims = 1),dims = 1).^(1/2))*G.f[indrs,:]
+                    dmatrixHrw[rs1:rs3-1,j,:] = vec'*Diagonal(dropdims(sum(W_temp,dims = 1),dims = 1).^(1/2))*G.f[indrs,:]
                 else
                     dmatrixHrw[rs1:rs3-1,j,:] = vec'*G.f[indrs,:]
                 end

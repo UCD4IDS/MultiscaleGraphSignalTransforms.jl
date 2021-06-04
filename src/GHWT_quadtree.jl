@@ -171,7 +171,7 @@ D1[D1 .== 0] = maximum([0.01, minimum(D1[D1 .> 0])/10])
 D2 = sum(A,1)
 D2[D2 .== 0] = maximum([0.01, minimum(D2[D2 .> 0])/10])
 
-u,_,v = svd(diagm(0 => D1[:].^(-0.5))*A*diagm(0 => D2[:].^(-0.5)))
+u,_,v = svd(Diagonal(D1[:].^(-0.5))*A*Diagonal(D2[:].^(-0.5)))
 
 # extract the 2nd singular vectors and multiply by D_i^-0.5
 u = Diagonal(D1[:].^-0.5)*u[:,2]

@@ -458,7 +458,7 @@ function second_largest_singular_vectors(A::Matrix{Float64})
   D2[D2.==0] .= max(0.01, minimum(D2[D2.>0]/10))
 
   # compute the singular vectors
-  (u,D,v) = svd(diagm(0 => D1[:].^(-0.5))*A*diagm(0 => D2[:].^(-0.5)), full = false)
+  (u,D,v) = svd(Diagonal(D1[:].^(-0.5))*A*Diagonal(D2[:].^(-0.5)), full = false)
 
   if (rows > 1) && (cols > 1)
 
