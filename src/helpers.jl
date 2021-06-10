@@ -111,17 +111,21 @@ SCATTER\\_GPLOT!(X; ...) adds a plot to `current` one.
 
 # Input Arguments
 - `X::Matrix{Float64}`: points locations, can be 2-dim or 3-dim.
-- `marker::Array{Float64}`: default is nothing. Present different colors given
+- `marker::Array{Float64}`: default is `nothing`. Present different colors given
     different signal value at each node.
-- `ms::Array{Float64}`: default is 4. Present different node sizes given
+- `ms::Array{Float64}`: default is `4`. Present different node sizes given
     different signal value at each node.
-- `plotOrder::Symbol`: default is normal. Optional choices :s2l or :l2s, i.e.,
+- `shape::Symbol`: default is `:none`. Shape of the markers.
+- `mswidth::Number`: default is `0`. Width of the marker stroke border.
+- `msalpha::Number`: default is `nothing`. The opacity for the marker stroke.
+- `plotOrder::Symbol`: default is `:normal`. Optional choices `:s2l` or `:l2s`, i.e.,
     plots from the smallest value of `marker` to the largest value or the other way around.
-- `c::Symbol`: default is :viridis. Colors.
-- `subgplot::Int`: default is 1. The subplot index.
+- `c::Symbol`: default is `:viridis`. Colors of the markers.
+- `subgplot::Int`: default is `1`. The subplot index.
 
 """
-function scatter_gplot(X; marker = nothing, ms = 4, plotOrder = :normal, c = :viridis, subplot = 1)
+function scatter_gplot(X; marker = nothing, ms = 4, shape = :none, mswidth = 0,
+                          msalpha = nothing, plotOrder = :normal, c = :viridis, subplot = 1)
     N, dim = size(X)
     if marker != nothing
         if size(marker) == (N,) || size(marker) == (N, 1)
@@ -145,19 +149,20 @@ function scatter_gplot(X; marker = nothing, ms = 4, plotOrder = :normal, c = :vi
         end
     end
     if dim == 2
-        scatter(X[:, 1], X[:, 2], marker_z = marker, ms = ms, c = c,
-                legend = false, mswidth = 0, cbar = true, aspect_ratio = 1,
-                grid = false, subplot = subplot)
+        scatter(X[:, 1], X[:, 2], marker_z = marker, ms = ms, shape = shape, c = c,
+                legend = false, mswidth = mswidth, msalpha = msalpha, cbar = true,
+                aspect_ratio = 1, grid = false, subplot = subplot)
     elseif dim == 3
-        scatter(X[:, 1], X[:, 2], X[:, 3], marker_z = marker, ms = ms, c = c,
-                legend = false, mswidth = 0, cbar = true, aspect_ratio = 1,
-                grid = false, subplot = subplot)
+        scatter(X[:, 1], X[:, 2], X[:, 3], marker_z = marker, ms = ms, shape = shape, c = c,
+                legend = false, mswidth = mswidth, msalpha = msalpha, cbar = true,
+                aspect_ratio = 1, grid = false, subplot = subplot)
     else
         error("Dimension Error: scatter_gplot only supports for 2-dim or 3-dim scatter plots.")
     end
 end
 
-function scatter_gplot!(X; marker = nothing, ms = 4, plotOrder = :normal, c = :viridis, subplot = 1)
+function scatter_gplot!(X; marker = nothing, ms = 4, shape = :none, mswidth = 0,
+                          msalpha = nothing, plotOrder = :normal, c = :viridis, subplot = 1)
     N, dim = size(X)
     if marker != nothing
         if size(marker) == (N,) || size(marker) == (N, 1)
@@ -181,13 +186,13 @@ function scatter_gplot!(X; marker = nothing, ms = 4, plotOrder = :normal, c = :v
         end
     end
     if dim == 2
-        scatter!(X[:, 1], X[:, 2], marker_z = marker, ms = ms, c = c,
-                legend = false, mswidth = 0, cbar = true, aspect_ratio = 1,
-                grid = false, subplot = subplot)
+        scatter!(X[:, 1], X[:, 2], marker_z = marker, ms = ms, shape = shape, c = c,
+                legend = false, mswidth = mswidth, msalpha = msalpha, cbar = true,
+                aspect_ratio = 1, grid = false, subplot = subplot)
     elseif dim == 3
-        scatter!(X[:, 1], X[:, 2], X[:, 3], marker_z = marker, ms = ms, c = c,
-                legend = false, mswidth = 0, cbar = true, aspect_ratio = 1,
-                grid = false, subplot = subplot)
+        scatter!(X[:, 1], X[:, 2], X[:, 3], marker_z = marker, ms = ms, shape = shape, c = c,
+                legend = false, mswidth = mswidth, msalpha = msalpha, cbar = true,
+                aspect_ratio = 1, grid = false, subplot = subplot)
     else
         error("Dimension Error: scatter_gplot! only supports for 2-dim or 3-dim scatter plots.")
     end
