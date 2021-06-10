@@ -47,7 +47,7 @@ function GraphSig_Plot(G::GraphSig; symmetric::Bool = false,
       linestyle::Symbol = :solid,
       clim::Tuple{Float64,Float64} = (0., 0.),
       notitle::Bool = false, nocolorbar::Bool = false, nolegend::Bool = true,
-      stemplot::Bool = false, sortnodes::Symbol = :normal, subplot::Int = 1)
+      stemplot::Bool = false, sortnodes::Symbol = :normal)
 
     # only run this for 1D signals
     fcols = Base.size(G.f, 2)
@@ -147,7 +147,7 @@ function GraphSig_Plot(G::GraphSig; symmetric::Bool = false,
         #fig = figure('visible','on');
 
         # plot the graph
-        gplot(G.W, G.xy; style = linestyle, color = linecolor, width = linewidth, subplot = subplot)
+        gplot(G.W, G.xy; style = linestyle, color = linecolor, width = linewidth)
         #hold on
 
         # plot the nodes
@@ -155,7 +155,7 @@ function GraphSig_Plot(G::GraphSig; symmetric::Bool = false,
                        marker = G.f, ms = markersize,
                        shape = markershape, mswidth = markerstrokewidth,
                        msalpha = markerstrokealpha, plotOrder = sortnodes,
-                       c = markercolor, subplot = subplot)
+                       c = markercolor)
 
         # colorbar?
         if nocolorbar
