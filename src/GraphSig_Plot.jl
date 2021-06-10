@@ -36,7 +36,7 @@ Display a plot of the data in a GraphSig object
 *   `sortnodes`           plot the signal values from smallest to largest in magnitude
 """
 function GraphSig_Plot(G::GraphSig; symmetric::Bool = false,
-      markersize::Float64 = 2.,
+      markersize::Any = 2.,
       markercolor::Symbol = :balance,
       markershape::Symbol = :circle,
       markerstrokewidth::Float64 = 1.0,
@@ -47,7 +47,7 @@ function GraphSig_Plot(G::GraphSig; symmetric::Bool = false,
       linestyle::Symbol = :solid,
       clim::Tuple{Float64,Float64} = (0., 0.),
       notitle::Bool = false, nocolorbar::Bool = false, nolegend::Bool = true,
-      stemplot::Bool = false, sortnodes::Bool = false)
+      stemplot::Bool = false, sortnodes::Symbol = :normal, subplot::Int = 1)
 
     # only run this for 1D signals
     fcols = Base.size(G.f, 2)
@@ -146,85 +146,40 @@ function GraphSig_Plot(G::GraphSig; symmetric::Bool = false,
 
         #fig = figure('visible','on');
 
-        if sortnodes
-            IX = sortperm(abs.(G.f[:,1]),rev = true);
-            G.W = G.W[IX,IX];
-            G.xy = G.xy[IX,:];
-            G.f = G.f[IX,:];
-        end
-
         # plot the graph
-        gplot(G.W, G.xy, style = linestyle, color = linecolor, width = linewidth);
+        gplot(G.W, G.xy; style = linestyle, color = linecolor, width = linewidth, subplot = subplot)
         #hold on
 
         # plot the nodes
+        scatter_gplot!(G.xy;
+                       marker = G.f, ms = markersize,
+                       shape = markershape, mswidth = markerstrokewidth,
+                       msalpha = markerstrokealpha, plotOrder = sortnodes,
+                       c = markercolor, subplot = subplot)
 
-        if markersize != 0
-            # plot the nodes for a 2-D graph
-            if G.dim == 2
-                if ~markervaluevaries
-                    scatter!(G.xy[:,1], G.xy[:,2],
-                             markersize = markersize,
-                             markercolor = markercolor,
-                             markerstrokewidth = markerstrokewidth,
-                             markerstrokealpha = markerstrokealpha,
-                             markershape = markershape);
-                else
-                    scatter!(G.xy[:,1], G.xy[:,2],
-                             zcolor = G.f,
-                             markersize = markersize,
-                             markercolor = markercolor,
-                             markerstrokewidth = markerstrokewidth,
-                             markerstrokealpha = markerstrokealpha,
-                             markershape = markershape);
-                end
-
-                # plot the nodes for a 3-D graph
-            else
-                if ~markervaluevaries
-                    scatter!(G.xy[:,1], G.xy[:,2], G.xy[:,3],
-                             markersize = markersize,
-                             markercolor = markercolor,
-                             markerstrokewidth = markerstrokewidth,
-                             markerstrokealpha = markerstrokealpha,
-                             markershape = markershape);
-                else
-                    scatter!(G.xy[:,1], G.xy[:,2], G.xy[:,3],
-                             zcolor = G.f,
-                             markersize = markersize,
-                             markercolor = markercolor,
-                             markerstrokewidth = markerstrokewidth,
-                             markerstrokealpha = markerstrokealpha,
-                             markershape = markershape);
-                end
-            end
-
-            # colorbar?
-            #if !nocolorbar
-            #    colorbar();
-            #end
-            if nocolorbar
-                plot!(colorbar = :none)
-            end
-
-            # custom dynamic display range?
-            if clim != (0., 0.)
-                plot!(clim = clim)
-            end
-
-            # symmetric?
-            if symmetric
-                if clim != (0., 0.)
-                    cmax = maximum(abs.(clim));
-                else
-                    cmax = maximum(abs.(G.f[:]));
-                end
-                if cmax < 10*eps()
-                    cmax = 1;
-                end
-                plot!(cLims = (cmax, cmax))
-            end
+        # colorbar?
+        if nocolorbar
+            plot!(colorbar = :none)
         end
+
+        # custom dynamic display range?
+        if clim != (0., 0.)
+            plot!(clim = clim)
+        end
+
+        # symmetric?
+        if symmetric
+            if clim != (0., 0.)
+                cmax = maximum(abs.(clim));
+            else
+                cmax = maximum(abs.(G.f[:]));
+            end
+            if cmax < 10*eps()
+                cmax = 1;
+            end
+            plot!(cLims = (cmax, cmax))
+        end
+
 
         # title?
         if !isempty(G.name) && !notitle
