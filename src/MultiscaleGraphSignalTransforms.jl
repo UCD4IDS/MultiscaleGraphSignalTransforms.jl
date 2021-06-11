@@ -59,7 +59,7 @@ export unitary_folding_operator, keep_folding!
 export ngwp_analysis, ngwp_bestbasis, NGWP_jkl
 export natural_eigdist
 export nat_spec_filter, ngwf_all_vectors, rngwf_all_vectors, ngwf_vector, frame_approx, rngwf_lx
-export scatter_gplot, scatter_gplot!
+export scatter_gplot, scatter_gplot!, stem, stem!
 export standardize_eigenvectors!, spike, characteristic, χ, sort_wavelets, transform2D
 export getall_expansioncoeffs, approx_error_plot, getall_expansioncoeffs2, approx_error_plot2
 
