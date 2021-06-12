@@ -200,9 +200,11 @@ function scatter_gplot!(X; marker = nothing, ms = 4, shape = :none, mswidth = 0,
         end
         # if plotOrder is :propabs, set ms to be a vector prop to
         # abs.(marker) automatically
+        # The maximum marker size is set to be maximum(ms).
         if plotOrder == :propabs
+            maxmarkersize = maximum(ms)
             markerabsmax = maximum(abs.(marker))
-            ms = 10 .* log.(1 .+ abs.(marker)) ./ (log(1 + markerabsmax) + 10^3 * eps())
+            ms = maxmarkersize .* log.(1 .+ abs.(marker)) ./ (log(1 + markerabsmax) + 10^3 * eps())
         end
     end
     if dim == 2
