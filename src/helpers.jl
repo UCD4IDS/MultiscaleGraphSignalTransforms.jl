@@ -119,7 +119,9 @@ SCATTER\\_GPLOT!(X; ...) adds a plot to `current` one.
 - `mswidth::Number`: default is `0`. Width of the marker stroke border.
 - `msalpha::Number`: default is `nothing`. The opacity for the marker stroke.
 - `plotOrder::Symbol`: default is `:normal`. Optional choices `:s2l` or `:l2s`, i.e.,
-    plots from the smallest value of `marker` to the largest value or the other way around.
+    plots from the smallest value of `marker` to the largest value or the other way around,
+    or `:propabs`, ms is automatically set to be proportional to the absolute value
+    of the marker values.
 - `c::Symbol`: default is `:viridis`. Colors of the markers.
 - `subgplot::Int`: default is `1`. The subplot index.
 
@@ -139,13 +141,21 @@ function scatter_gplot(X; marker = nothing, ms = 4, shape = :none, mswidth = 0,
             idx = sortperm(marker)
         elseif plotOrder == :l2s
             idx = sortperm(marker, rev = true)
+        elseif plotOrder == :propabs
+            idx = sortperm(abs.(marker))
         else
-            error("plotOrder only supports for :normal, :s2l, or :l2s.")
+            error("plotOrder only supports for :normal, :s2l, :l2s, or :propabs.")
         end
         X = X[idx, :]
         marker = marker[idx]
         if length(ms) > 1
             ms = ms[idx]
+        end
+        # if plotOrder is :propabs, set ms to be a vector prop to
+        # abs.(marker) automatically
+        if plotOrder == :propabs
+            markerabsmax = maximum(abs.(marker))
+            ms = 10 .* log.(1 .+ abs.(marker)) ./ (log(1 + markerabsmax) + 10^3 * eps())
         end
     end
     if dim == 2
@@ -176,13 +186,21 @@ function scatter_gplot!(X; marker = nothing, ms = 4, shape = :none, mswidth = 0,
             idx = sortperm(marker)
         elseif plotOrder == :l2s
             idx = sortperm(marker, rev = true)
+        elseif plotOrder == :propabs
+            idx = sortperm(abs.(marker))
         else
-            error("plotOrder only supports for :normal, :s2l, or :l2s.")
+            error("plotOrder only supports for :normal, :s2l, :l2s, or :propabs.")
         end
         X = X[idx, :]
         marker = marker[idx]
         if length(ms) > 1
             ms = ms[idx]
+        end
+        # if plotOrder is :propabs, set ms to be a vector prop to
+        # abs.(marker) automatically
+        if plotOrder == :propabs
+            markerabsmax = maximum(abs.(marker))
+            ms = 10 .* log.(1 .+ abs.(marker)) ./ (log(1 + markerabsmax) + 10^3 * eps())
         end
     end
     if dim == 2
@@ -666,4 +684,44 @@ function approx_error_plot2(DVEC::Vector{Vector{Float64}}; frac::Float64 = 0.50)
         plot!(frac*(0:(p-1))/(p-1), er[1:p], yaxis=:log, xlims = (0.,frac),
                 label = T[i], line = L[i], linewidth = 2, grid = false)
     end
+end
+
+
+"""
+    stem(f; x = 1:length(f[:]), c = :black, ms = 5, shape = :circle, lw = 1)
+Display a length N discrete sequence data in a stem plot.
+
+# Input Arguments
+- `f`: function values could be a vector or an N x 1 matrix.
+- `x`: default is `1:N`. x values.
+- `c::Symbol`: default is `:black`. Color of the markers.
+- `ms::Number`: default is `5`. Size of markers.
+- `shape::Symbol`: default is `:circle`. Shape of the markers.
+- `lw::Number`: default is `1`. The line width of the stems.
+- `subgplot::Int`: default is `1`. The subplot index.
+"""
+function stem(f; x = 1:length(f[:]), c = :black, ms = 5, shape = :circle, lw = 1, subplot = 1)
+    if (ndims(f) == 2 && size(f, 2) > 1) || ndims(f) > 2
+        error("input only accepts a vector or a matrix of size (N, 1).")
+        return
+    end
+    f = f[:]
+    N = length(f)
+    plot(x, f, seriestype = :stem, color = c, lw = lw, subplot = subplot)
+    scatter!(x, f, marker = shape, color = c, ms = ms, mswidth = 0, subplot = subplot)
+    plot!(x, zeros(N), color = :black, lw = lw, subplot = subplot)
+    plot!(grid = false, legend = false, ratio = 1, frame = :none, subplot = subplot)
+end
+
+function stem!(f; x = 1:length(f[:]), c = :black, ms = 5, shape = :circle, lw = 1, subplot = 1)
+    if (ndims(f) == 2 && size(f, 2) > 1) || ndims(f) > 2
+        error("input only accepts a vector or a matrix of size (N, 1).")
+        return
+    end
+    f = f[:]
+    N = length(f)
+    plot!(x, f, seriestype = :stem, color = c, lw = lw, subplot = subplot)
+    scatter!(x, f, marker = shape, color = c, ms = ms, mswidth = 0, subplot = subplot)
+    plot!(x, zeros(N), color = :black, lw = lw, subplot = subplot)
+    plot!(grid = false, legend = false, ratio = 1, frame = :none, subplot = subplot)
 end

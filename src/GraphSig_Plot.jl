@@ -81,55 +81,43 @@ function GraphSig_Plot(G::GraphSig; symmetric::Bool = false,
     if G.dim == 1
         if G.length < 65 || stemplot
             # stem(G.xy, G.f, '-o','LineWidth',2,'Color',linecolor,'MarkerFaceColor',linecolor,'MarkerSize',markersize(1));
-            stem(G.xy, G.f, linetype = [:sticks :scatter], linewidth = 2, linecolor = linecolor, markercolor = linecolor, markersize = markersize)
-            # plot(1:G.length , G.f, line = :sticks)
-            # plot!(1:G.length , G.f, line = :scatter)
+            # stem(G.xy, G.f, linetype = [:sticks :scatter], linewidth = 2, linecolor = linecolor, markercolor = linecolor, markersize = markersize)
+            stem(G.f; x = G.xy, lw = linewidth, c = linecolor, ms = markersize, shape = markershape)
         else
             # plot(G.xy, G.f, '-','Color',linecolor,'LineWidth',linewidth);
             plot(G.xy, G.f, linetype = :line, linecolor = linecolor, linewidth = linewidth);
         end
 
-        xmin = minimum(G.xy);
-        xmax = maximum(G.xy);
-
-        #     dx = xmax-xmin;
-        #     if dx < 10*eps
-        #         dx = 1;
-        #     end
-        #     xmin = xmin - 0.1*dx;
-        #     xmax = xmax + 0.1*dx;
-
-        ymin = minimum(G.f);
-        ymax = maximum(G.f);
-        dy = ymax-ymin;
-        if dy < 10*eps
-            dy = 1;
+        xmin = minimum(G.xy)
+        xmax = maximum(G.xy)
+        dx = xmax - xmin
+        if dx < 10 * eps()
+            dx = 1
         end
-        ymin = ymin - 0.1*dy;
-        ymax = ymax + 0.1*dy;
+        xmin = xmin - 0.1 * dx
+        xmax = xmax + 0.1 * dx
+
+        ymin = minimum(G.f)
+        ymax = maximum(G.f)
+        dy = ymax - ymin
+        if dy < 10 * eps()
+            dy = 1
+        end
+        ymin = ymin - 0.1*dy
+        ymax = ymax + 0.1*dy
 
         # symmetric?
         if symmetric
-            ymax = 1.1*max(ymax, -ymin);
-            ymin = -ymax;
+            ymax = 1.1 * max(ymax, -ymin)
+            ymin = -ymax
         end
 
-        #axis([xmin, xmax, ymin, ymax]);
-        xaxis!(xlim = (xmin, xmax))
-        yaxis!(ylim = (ymin, ymax))
-
-        if clim != (0., 0.)
-            xaxis!(xlim = (xmin, xmax))
-            yaxis!(ylim = clim)
-        else
-            #axis([xmin, xmax, ymin, ymax]);
-            xaxis!(xlim = (xmin, xmax))
-            yaxis!(ylim = (ymin, ymax))
-        end
+        xlims!(xmin, xmax)
+        ylims!(ymin, ymax)
 
         # title?
         if ~isempty(G.name) && ~notitle
-            title!(G.name);
+            title!(G.name)
         end
 
         # legend?
