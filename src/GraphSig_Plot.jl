@@ -12,7 +12,7 @@ using Plots
       linestyle::Symbol = :solid,
       clim::Tuple{Float64,Float64} = (0., 0.),
       notitle::Bool = false, nocolorbar::Bool = false, nolegend::Bool = true,
-      stemplot::Bool = false, sortnodes::Bool = false)
+      stemplot::Bool = false, sortnodes::Symbol = :normal)
 
 Display a plot of the data in a GraphSig object
 
