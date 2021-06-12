@@ -119,7 +119,9 @@ SCATTER\\_GPLOT!(X; ...) adds a plot to `current` one.
 - `mswidth::Number`: default is `0`. Width of the marker stroke border.
 - `msalpha::Number`: default is `nothing`. The opacity for the marker stroke.
 - `plotOrder::Symbol`: default is `:normal`. Optional choices `:s2l` or `:l2s`, i.e.,
-    plots from the smallest value of `marker` to the largest value or the other way around.
+    plots from the smallest value of `marker` to the largest value or the other way around,
+    or `:propabs`, ms is automatically set to be proportional to the absolute value
+    of the marker values.
 - `c::Symbol`: default is `:viridis`. Colors of the markers.
 - `subgplot::Int`: default is `1`. The subplot index.
 
@@ -139,13 +141,21 @@ function scatter_gplot(X; marker = nothing, ms = 4, shape = :none, mswidth = 0,
             idx = sortperm(marker)
         elseif plotOrder == :l2s
             idx = sortperm(marker, rev = true)
+        elseif plotOrder == :propabs
+            idx = sortperm(abs.(marker))
         else
-            error("plotOrder only supports for :normal, :s2l, or :l2s.")
+            error("plotOrder only supports for :normal, :s2l, :l2s, or :propabs.")
         end
         X = X[idx, :]
         marker = marker[idx]
         if length(ms) > 1
             ms = ms[idx]
+        end
+        # if plotOrder is :propabs, set ms to be a vector prop to
+        # abs.(marker) automatically
+        if plotOrder == :propabs
+            markerabsmax = maximum(abs.(marker))
+            ms = 10 .* log.(1 .+ abs.(marker)) ./ (log(1 + markerabsmax) + 10^3 * eps())
         end
     end
     if dim == 2
@@ -176,13 +186,21 @@ function scatter_gplot!(X; marker = nothing, ms = 4, shape = :none, mswidth = 0,
             idx = sortperm(marker)
         elseif plotOrder == :l2s
             idx = sortperm(marker, rev = true)
+        elseif plotOrder == :propabs
+            idx = sortperm(abs.(marker))
         else
-            error("plotOrder only supports for :normal, :s2l, or :l2s.")
+            error("plotOrder only supports for :normal, :s2l, :l2s, or :propabs.")
         end
         X = X[idx, :]
         marker = marker[idx]
         if length(ms) > 1
             ms = ms[idx]
+        end
+        # if plotOrder is :propabs, set ms to be a vector prop to
+        # abs.(marker) automatically
+        if plotOrder == :propabs
+            markerabsmax = maximum(abs.(marker))
+            ms = 10 .* log.(1 .+ abs.(marker)) ./ (log(1 + markerabsmax) + 10^3 * eps())
         end
     end
     if dim == 2
