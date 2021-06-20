@@ -20,7 +20,7 @@ heatmap(matrix[row_zoom, col_zoom],ratio=1, yaxis =:flip, axis = false, color = 
 
 
 ### initialize the regular balanced binary partition and compute the expanding coefficients
-dmatrix, GProws, GPcols = ghwt_tf_init_2d_Linderberg(matrix)
+dmatrix, GProws, GPcols = ghwt_tf_init_2d_Lindberg(matrix)
 
 ### Compute the coefficients of different basis we will compare
 ############# Haar

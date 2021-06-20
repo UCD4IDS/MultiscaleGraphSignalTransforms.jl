@@ -8,7 +8,7 @@ include("common.jl")
 
 include("partition_fiedler.jl")
 
-export ghwt_tf_init_2d, ghwt_tf_bestbasis_2d, ghwt_tf_synthesis_2d, ghwt_tf_init_2d_Linderberg, eghwt_init_2d, eghwt_bestbasis_2d, eghwt_synthesis_2d, eghwt_init_2d_Linderberg, BS2loc
+export ghwt_tf_init_2d, ghwt_tf_bestbasis_2d, ghwt_tf_synthesis_2d, ghwt_tf_init_2d_Lindberg, eghwt_init_2d, eghwt_bestbasis_2d, eghwt_synthesis_2d, eghwt_init_2d_Lindberg, BS2loc
 
 
 
@@ -524,7 +524,7 @@ end
 
 
 
-function ghwt_tf_init_2d_Linderberg(matrix::Matrix{Float64})
+function ghwt_tf_init_2d_Lindberg(matrix::Matrix{Float64})
   #Partition matrix recuisively using Dhillon's method
   m,n = size(matrix)
   GProws = regularhaar(m)
@@ -681,6 +681,6 @@ end
 const eghwt_init_2d = ghwt_tf_init_2d
 const eghwt_bestbasis_2d = ghwt_tf_bestbasis_2d
 const eghwt_synthesis_2d = ghwt_tf_synthesis_2d
-const eghwt_init_2d_Linderberg = ghwt_tf_init_2d_Linderberg
+const eghwt_init_2d_Lindberg = ghwt_tf_init_2d_Lindberg
 
 end # of module GHWT_tf_2d
