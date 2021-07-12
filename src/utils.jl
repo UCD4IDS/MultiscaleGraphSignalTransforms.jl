@@ -222,7 +222,7 @@ function dmatrix_ldb_flatten(dmatrix::Array{Float64,3}...; dm::Symbol = :KLdiver
     end
     N, jmax, _ = Base.size(dmatrix[1])
     res = zeros(N, jmax)
-    for u = 1:(C - 1), v = (i + 1):C
+    for u = 1:(C - 1), v = (u + 1):C
         for j = 1:jmax
             for i = 1:N
                 h1 = ash(dmatrix[u][i, j, :])
