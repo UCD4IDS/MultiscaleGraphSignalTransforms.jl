@@ -1,4 +1,4 @@
-using LinearAlgebra
+using LinearAlgebra, AverageShiftedHistograms, Distances
 """
     T = ind_class(N::Int)
 
