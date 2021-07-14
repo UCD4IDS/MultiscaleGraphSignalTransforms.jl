@@ -16,3 +16,6 @@ cost_functional
 ```@docs
 dmatrix_flatten
 ```
+```@docs
+dmatrix_ldb_flatten
+```

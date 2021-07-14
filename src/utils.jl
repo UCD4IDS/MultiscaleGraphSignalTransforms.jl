@@ -1,4 +1,4 @@
-using LinearAlgebra
+using LinearAlgebra, AverageShiftedHistograms, Distances
 """
     T = ind_class(N::Int)
 
@@ -166,6 +166,77 @@ function dmatrix_flatten(dmatrix::Array{Float64,3}, flatten::Any)
     end
     return dmatrix
 end # of function dmatrix_flatten!
+
+"""
+function ldb_discriminant_measure(p::Vector{Float64}, q::Vector{Float64}; dm::Symbol = :KLdivergence)
+
+Discriminat measure in LDB.
+
+### Input Arguments
+* `p,q::Vector{Float64}`: probability mass functions.
+* `dm::Symbol`: discriminant measure. Options: `:KLdivergence`(default),
+    `:Jdivergence`, `:l1`, `:l2`, and `:Hellinger`.
+"""
+function ldb_discriminant_measure(p::Vector{Float64}, q::Vector{Float64}; dm::Symbol = :KLdivergence)
+    @assert all(p .>= 0) && all(q .>= 0)
+    @assert length(p) == length(q)
+    if dm == :KLdivergence
+        ind = findall((p .> 0) .& (q .> 0))
+        return Distances.kl_divergence(p[ind], q[ind])
+    elseif dm == :Jdivergence
+        ind = findall((p .> 0) .& (q .> 0))
+        return Distances.kl_divergence(p[ind], q[ind]) + Distances.kl_divergence(q[ind], p[ind])
+    elseif dm == :l1
+        return norm(p - q, 1)
+    elseif dm == :l2
+        return norm(p - q, 2)
+    elseif dm == :Hellinger
+        return hellinger(p, q)
+    else
+        error("This discriminat measure $(dm) is not supported! ")
+    end
+end
+
+"""
+    function dmatrix_ldb_flatten(dmatrix::Array{Float64,3}...; dm::Symbol = :KLdivergence)
+
+Flatten dmatrices using the LDB method; after this function is called, it returns
+a matrix of size (~, ~, 1).
+
+### Input Arguments
+* `dmatrix::Array{Float64,3}`: the matrix of LDB expansion coefficients in one class.
+* `dm::Symbol`: discriminant measure. Options: `:KLdivergence` (default),
+    `:Jdivergence`, `:l1`, `:l2`, and `:Hellinger`.
+
+### Example Usage:
+`dmatrix_ldb_flatten(dmatrix1, dmatrix2, dmatrix3)`,
+each argument is the expansion coefficient matrix of a class of signals. It uses
+the default discriminant measure KL divergence to flatten these matrices.
+In other words, it flattens these expansion coefficent matrices by computing and
+summing "statistical distances" among them.
+"""
+function dmatrix_ldb_flatten(dmatrix::Array{Float64,3}...; dm::Symbol = :KLdivergence)
+    C = length(dmatrix) # number of signal classes
+    if C < 2
+        error("Input should contain at least two classes of signals.")
+    end
+    N, jmax, _ = Base.size(dmatrix[1])
+    res = zeros(N, jmax)
+    for u = 1:(C - 1), v = (u + 1):C
+        for j = 1:jmax
+            for i = 1:N
+                h1 = ash(dmatrix[u][i, j, :])
+                p = h1.density / norm(h1.density, 1)
+                h2 = ash(dmatrix[v][i, j, :])
+                q = h2.density / norm(h2.density, 1)
+                res[i, j] += ldb_discriminant_measure(p, q; dm = dm)
+            end
+        end
+    end
+    res = reshape(res[:, :, 1], N, jmax, 1)
+    return res
+end
+
 
 """
     costfun = cost_functional(cfspec::Any)
