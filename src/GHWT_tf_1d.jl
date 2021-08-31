@@ -216,7 +216,7 @@ function ghwt_tf_bestbasis(dmatrix::Array{Float64,3}, GP::GraphPart; cfspec::Flo
     dmatrix0 = deepcopy(dmatrix)      # keep the original dmatrix as dmatrix0
     # "flatten" dmatrix
     if fcols > 1
-        if flatten != nothing
+        if !isnothing(flatten)
             dmatrix = dmatrix_flatten(dmatrix, flatten)[:,:,1]
         end
     end

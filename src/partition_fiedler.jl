@@ -91,7 +91,7 @@ function partition_fiedler(W::SparseMatrixCSC{Float64,Int};
         end
         if N <= cutoff || eigs_flag != 0 # if W is small or eigs had a problem,
                                          # then use full svd.
-            vtmp, val = svd(diagm(0 => vec(sum(W, dims = 1))) - W) # v <-> U, val <-> S
+            vtmp, val = svd(Diagonal(vec(sum(W, dims = 1))) - W) # v <-> U, val <-> S
             # diagm(vec(sum(W,1))) is Matrix{Float64} while W is SparseMatrix
             # But the results of the subtraction becomes Matrix{Float64}.
             # Also be careful here! val[end-2] == val[end-1] can happen.

@@ -433,7 +433,7 @@ function dvec_Threshold(dvec::Array{Float64,2}, SORH::String, keep::Float64,
       ind = sortperm(abs.(dvec[:]), rev = true)
       T = abs(dvec[ind[kept+1]])
 
-      if BS != nothing
+      if !isnothing(BS)
         #convert the tag matrix to a vector corresponding to BS
         tag = dmatrix2dvec(Array{Float64,3}(reshape(GP.tag,(size(GP.tag,1),size(GP.tag,2),1))),GP,BS)
 

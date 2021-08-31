@@ -232,7 +232,7 @@ function ghwt_analysis!(G::GraphSig; GP::GraphPart = nothing, c2f::Bool = true)
     #
     # 0. Preliminaries
     #
-    if GP == nothing
+    if isnothing(GP)
         GP = partition_tree_fiedler(G)
     end
 
@@ -680,7 +680,7 @@ function ghwt_c2f_bestbasis(dmatrix::Array{Float64,3}, GP::GraphPart;
     # "flatten" dmatrix
     if fcols > 1
         dmatrix0 = deepcopy(dmatrix)      # keep the original dmatrix as dmatrix0
-        if flatten != nothing
+        if !isnothing(flatten)
             dmatrix = dmatrix_flatten(dmatrix, flatten)
         end
     end
@@ -763,7 +763,7 @@ function ghwt_f2c_bestbasis(dmatrix::Array{Float64,3}, GP::GraphPart;
     # "flatten" dmatrix
     if fcols > 1
         dmatrix0 = deepcopy(dmatrix)      # keep the original dmatrix as dmatrix0
-        if flatten != nothing
+        if !isnothing(flatten)
             dmatrix = dmatrix_flatten(dmatrix, flatten)
         end
     end

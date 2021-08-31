@@ -1,6 +1,6 @@
 #Figure 3.2
 using Plots, SparseArrays, JLD2, LinearAlgebra, MultiscaleGraphSignalTransforms
-include("../../../src/utils")
+include("../../../../src/utils.jl")
 
 JLD2.@load "../data/Toronto.jld2"
 tmp1 = toronto["G"]
