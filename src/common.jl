@@ -447,17 +447,17 @@ function dvec_Threshold(dvec::Array{Float64,2}, SORH::String, keep::Float64,
         dvec_new = sign.(dvec).*(abs.(dvec).-T).*(abs.(dvec).-T.>0)
       end
 
-      kept = count(dvec_new.!=0)
+      kept = count(!iszero, dvec_new)
 
     elseif SORH == "h" || SORH == "hard"
       ind = sortperm(abs.(dvec[:]), rev = true)
       dvec_new[ind[kept+1:end]] .= 0
 
-      kept = count(dvec_new.!=0)
+      kept = count(!iszero, dvec_new)
 
     else
 
-      kept = count(dvec_new.!=0)
+      kept = count(!iszero, dvec_new)
 
     end
     return dvec_new, kept

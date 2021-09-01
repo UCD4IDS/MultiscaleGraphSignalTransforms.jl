@@ -37,7 +37,7 @@ function HGLET_Synthesis(dvec::Matrix{Float64}, GP::GraphPart, BS::BasisSpec,
 
     # Perform the signal synthesis from the given coefficients
     for j = jmax:-1:1
-        regioncount = count(GP.rs[:,j] .!= 0) - 1
+        regioncount = count(!iszero, GP.rs[:,j]) - 1
         for r = 1:regioncount
             # the index that marks the start of the region
             rs1 = GP.rs[r,j]
@@ -49,7 +49,7 @@ function HGLET_Synthesis(dvec::Matrix{Float64}, GP::GraphPart, BS::BasisSpec,
             n = rs3 - rs1
 
             # only proceed forward if coefficients do not exist
-            if (j == jmax || count(dmatrix[rs1:rs3-1,j+1,:] .!= 0) == 0) && count(dmatrix[rs1:rs3-1,j,:] .!= 0) > 0
+            if (j == jmax || count(!iszero, dmatrix[rs1:rs3-1,j+1,:]) == 0) && count(!iszero, dmatrix[rs1:rs3-1,j,:]) > 0
                 
                 if n == 1
                     f[rs1,:] = dmatrix[rs1,j,:]
@@ -116,9 +116,9 @@ function HGLET_jkl(GP::GraphPart, drow::Int, dcol::Int)
         the coefficient dmatrix(drow,dcol)
 
 ### Input Arguments
- * `GP`: a GraphPart object
- * `drow`: the row of the expansion coefficient
- * `dcol`: the column of the expansion coefficient
+ * `GP`:    a GraphPart object
+ * `drow`:  the row of the expansion coefficient
+ * `dcol`:  the column of the expansion coefficient
 
 ### Output Argument
  * `j`: the level index of the expansion coefficient
@@ -164,7 +164,7 @@ function HGLET_Analysis(G::GraphSig, GP::GraphPart, method::Symbol = :L)
 
     # Perform the HGLET analysis, i.e., generating the HGLET coefficients
     for j = jmax-1:-1:1
-        regioncount = count(rs[:,j] .!= 0) - 1
+        regioncount = count(!iszero, rs[:,j]) - 1
         for r = 1:regioncount
             # the index that marks the start of the region
             rs1 = rs[r,j]
@@ -228,7 +228,8 @@ end
 """
 function HGLET_Analysis_All(G::GraphSig, GP::GraphPart)
 
-    For a GraphSig object 'G', generate the 3 matrices of HGLET expansion coefficients corresponding to the eigenvectors of L, Lrw and Lsym
+    For a GraphSig object 'G', generate the 3 matrices of HGLET expansion 
+    coefficients corresponding to the eigenvectors of L, Lrw and Lsym
 
 ### Input Arguments
  * `G`:  a GraphSig object
@@ -255,7 +256,7 @@ function HGLET_Analysis_All(G::GraphSig, GP::GraphPart)
 
 # Perform the transform ==> eigenvectors of L
     for j = jmax-1:-1:1
-        regioncount = count(rs[:,j] .!= 0) - 1
+        regioncount = count(!iszero, rs[:,j]) - 1
         for r = 1:regioncount
             # the index that marks the start of the region
             rs1 = rs[r,j]
@@ -273,7 +274,7 @@ function HGLET_Analysis_All(G::GraphSig, GP::GraphPart)
                 indrs = ind[rs1:rs3-1]
 
                 # compute the eigenvectors of L ==> svd(L)
-                v,_,_ = svd(diagm(0 => dropdims(sum(W[indrs,indrs],dims = 1),dims = 1))-W[indrs,indrs])
+                v,_,_ = svd(Diagonal(vec(sum(W[indrs,indrs],dims = 1)))-W[indrs,indrs])
                 v = v[:,end:-1:1]
 
                 # standardize the eigenvector signs
@@ -286,7 +287,7 @@ function HGLET_Analysis_All(G::GraphSig, GP::GraphPart)
                         elseif v[row,col] < -10^3*eps()
                             v[:,col] = - v[:,col]
                         else
-                            row = row + 1
+                            row += 1
                         end
                     end
                 end
@@ -298,7 +299,7 @@ function HGLET_Analysis_All(G::GraphSig, GP::GraphPart)
     end
 
     for j = jmax-1:-1:1
-        regioncount = count(rs[:,j] .!= 0)-1
+        regioncount = count(!iszero, rs[:,j])-1
         for r = 1:regioncount
             # the index that marks the start of the region
             rs1 = rs[r,j]
@@ -323,9 +324,9 @@ function HGLET_Analysis_All(G::GraphSig, GP::GraphPart)
 
                     ### eigenvectors of L_rw ==> svd(L_sym)
                     W_temp = W[indrs,indrs]
-                    D_temp = sparse(Diagonal(dropdims(sum(W_temp,dims = 1), dims = 1)))
-                    D_temp_p = sparse(Diagonal(dropdims(sum(W_temp,dims = 1),dims = 1).^(-1/2)))
-                    v,_,_ = svd(Matrix(D_temp_p*(D_temp - W_temp)*D_temp_p))
+                    D = Diagonal(vec(sum(W_temp,dims = 1)))
+                    D2 = D.^(-0.5)
+                    v,_,_ = svd(D2 * (D - W_temp) * D2)
                     v = v[:,end:-1:1]
 
                 else
@@ -333,8 +334,8 @@ function HGLET_Analysis_All(G::GraphSig, GP::GraphPart)
 
                     ### eigenvectors of L ==> svd(L)
                     W_temp = W[indrs,indrs]
-                    D_temp = sparse(Diagonal(dropdims(sum(W_temp,dims = 1), dims = 1)))
-                    v,_,_ = svd(Matrix(D_temp-W_temp))
+                    D = Diagonal(vec(sum(W_temp,dims = 1)))
+                    v,_,_ = svd(D-W_temp)
                     v = v[:,end:-1:1]
                 end
 
@@ -348,7 +349,7 @@ function HGLET_Analysis_All(G::GraphSig, GP::GraphPart)
                         elseif v[row,col] < -10^3*eps()
                             v[:,col] = - v[:,col]
                         else
-                            row = row + 1
+                            row += 1
                         end
                     end
                 end
@@ -358,7 +359,7 @@ function HGLET_Analysis_All(G::GraphSig, GP::GraphPart)
 
                 # obtain the expansion coeffcients for L_rw
                 if useLrw
-                    dmatrixHrw[rs1:rs3-1,j,:] = v'*Diagonal(dropdims(sum(W_temp,dims = 1),dims = 1).^(1/2))*G.f[indrs,:]
+                    dmatrixHrw[rs1:rs3-1,j,:] = v'*(Diagonal(vec(sum(W_temp,dims = 1))).^0.5)*G.f[indrs,:]
                 else
                     dmatrixHrw[rs1:rs3-1,j,:] = v'*G.f[indrs,:]
                 end
@@ -373,31 +374,39 @@ end
 
 
 """
-     function HGLET_GHWT_BestBasis(GP::GraphPart; dmatrixH::Array{Float64,3} = Array{Float64,3}(undef,0,0,0),dmatrixHrw::Array{Float64,3} = Array{Float64,3}(undef,0,0,0)
-         ,dmatrixHsym::Array{Float64,3} = Array{Float64,3}(undef,0,0,0),dmatrixG::Array{Float64,3} = Array{Float64,3}(undef,0,0,0), costfun::Any = 0.1,flatten::Any = 1)
+function HGLET_GHWT_BestBasis(GP::GraphPart; 
+    dmatrixH::Array{Float64,3} = Array{Float64,3}(undef,0,0,0),
+    dmatrixHrw::Array{Float64,3} = Array{Float64,3}(undef,0,0,0), 
+    dmatrixHsym::Array{Float64,3} = Array{Float64,3}(undef,0,0,0),
+    dmatrixG::Array{Float64,3} = Array{Float64,3}(undef,0,0,0), 
+    costfun::Any = 0.1,flatten::Any = 1)
 
-         Select the best basis from several matrices of expansion coefficients
+    Select the best basis from several matrices of expansion coefficients
 
-         ### Input Arguments
-         * `dmatrixH`:    the matrix of HGLET expansion coefficients ==> eigenvectors of L
-         * `dmatrixHrw`:  the matrix of HGLET expansion coefficients ==> eigenvectors of Lrw
-         * `dmatrixHsym`: the matrix of HGLET expansion coefficients ==> eigenvectors of Lsym
-         * `dmatrixG`:    the matrix of GHWT expansion coefficients
-         * `GP`:          a GraphPart object
-         * `costfun`:     the cost functional to be used
-         * `flatten`:     the method for flattening vector-valued data to scalar-valued data
+### Input Arguments
+* `dmatrixH`:    the matrix of HGLET expansion coefficients ==> eigenvectors of L
+* `dmatrixHrw`:  the matrix of HGLET expansion coefficients ==> eigenvectors of Lrw
+* `dmatrixHsym`: the matrix of HGLET expansion coefficients ==> eigenvectors of Lsym
+* `dmatrixG`:    the matrix of GHWT expansion coefficients
+* `GP`:          a GraphPart object
+* `costfun`:     the cost functional to be used
+* `flatten`:     the method for flattening vector-valued data to scalar-valued data
 
-             ### Output Argument
-             * `dvec`:     the vector of expansion coefficients corresponding to the bestbasis
-             * `BS`:       a BasisSpec object which specifies the best-basis
-             * `trans`:    specifies which transform was used for that portion of the signal:
-                 00 = HGLET with L
-                 01 = HGLET with Lrw
-                 10 = HGLET with Lsym
-                 11 = GHWT
-                 """
-function HGLET_GHWT_BestBasis(GP::GraphPart; dmatrixH::Array{Float64,3} = Array{Float64,3}(undef,0,0,0),dmatrixHrw::Array{Float64,3} = Array{Float64,3}(undef,0,0,0)
-                              ,dmatrixHsym::Array{Float64,3} = Array{Float64,3}(undef,0,0,0),dmatrixG::Array{Float64,3} = Array{Float64,3}(undef,0,0,0), costfun::Any = 0.1,flatten::Any = 1)
+### Output Argument
+* `dvec`:     the vector of expansion coefficients corresponding to the bestbasis
+* `BS`:       a BasisSpec object which specifies the best-basis
+* `trans`:    specifies which transform was used for that portion of the signal:
+    00 = HGLET with L
+    01 = HGLET with Lrw
+    10 = HGLET with Lsym
+    11 = GHWT
+"""
+function HGLET_GHWT_BestBasis(GP::GraphPart; 
+    dmatrixH::Array{Float64,3} = Array{Float64,3}(undef,0,0,0),
+    dmatrixHrw::Array{Float64,3} = Array{Float64,3}(undef,0,0,0),
+    dmatrixHsym::Array{Float64,3} = Array{Float64,3}(undef,0,0,0),
+    dmatrixG::Array{Float64,3} = Array{Float64,3}(undef,0,0,0), 
+    costfun::Any = 0.1,flatten::Any = 1)
     # specify transform codes
     transHsym = [true false]
     transG = [true true]
@@ -471,7 +480,7 @@ function HGLET_GHWT_BestBasis(GP::GraphPart; dmatrixH::Array{Float64,3} = Array{
 
     # perform the basis search
     for j = jmax:-1:1
-        regioncount = count(GP.rs[:,j] .!= 0) - 1
+        regioncount = count(!iszero, GP.rs[:,j]) - 1
         for r = 1:regioncount
             indr = GP.rs[r,j]:(GP.rs[r+1,j]-1)
             ### compute the cost of the current best basis
@@ -578,21 +587,21 @@ function HGLET_GHWT_Synthesis(dvec::Matrix{Float64},GP::GraphPart,BS::BasisSpec,
     graph partitioning, and the choice of basis and corresponding transforms,
     reconstruct the signal.
 
-    ### Input Arguments
-    * `dvec`:         the expansion coefficients corresponding to the chosen basis
-    * `GP`:         A GraphPart object
-    * `BS`:         A BasisSpec object
-    * `trans`:      A specification of the transforms used for the HGLET-GHWT hybrid transform
-        00 = HGLET with L
-        01 = HGLET with Lrw
-        10 = HGLET with Lsym
-        11 = GHWT
-        * `G`:          A GraphSig object
+### Input Arguments
+* `dvec`:   the expansion coefficients corresponding to the chosen basis
+* `GP`:     a GraphPart object
+* `BS`:     a BasisSpec object
+* `trans`:  a specification of the transforms used for the HGLET-GHWT hybrid transform
+    00 = HGLET with L
+    01 = HGLET with Lrw
+    10 = HGLET with Lsym
+    11 = GHWT
+* `G`:      a GraphSig object
 
-        ### Output Argument
-        * `f`:    the reconstructed signal
-        * `GS`:   the reconstructed GraphSig object
-        """
+### Output Argument
+* `f`:      the reconstructed signal
+* `GS`:     the reconstructed GraphSig object
+"""
 function HGLET_GHWT_Synthesis(dvec::Matrix{Float64},GP::GraphPart,BS::BasisSpec,trans::Array{Bool,2},G::GraphSig)
     # fill out trans
     #_,_,transfull = BSfull(GP,BS,trans)
@@ -610,7 +619,7 @@ function HGLET_GHWT_Synthesis(dvec::Matrix{Float64},GP::GraphPart,BS::BasisSpec,
     fHsym,_ = HGLET_Synthesis(dvecHsym, GP, BS, G, method = :Lsym)
     fG = ghwt_synthesis(dvecG, GP, BS)
 
-    f = fH + fHrw +fHsym + fG
+    f = fH + fHrw + fHsym + fG
 
     GS = deepcopy(G)
     replace_data!(GS,f)
@@ -621,34 +630,44 @@ end
 
 
 """
-        function HGLET_GHWT_BestBasis_minrelerror(GP::GraphPart,G::GraphSig;dmatrixH::Array{Float64,3} = Array{Float64,3}(undef,0,0,0), dmatrixHrw::Array{Float64,3} = Array{Float64,3}(undef,0,0,0),
-            dmatrixHsym::Array{Float64,3} = Array{Float64,3}(undef,0,0,0),dmatrixG::Array{Float64,3} = Array{Float64,3}(undef,0,0,0), compare::Bool = true)
+function HGLET_GHWT_BestBasis_minrelerror(GP::GraphPart, G::GraphSig;
+    dmatrixH::Array{Float64,3} = Array{Float64,3}(undef,0,0,0), 
+    dmatrixHrw::Array{Float64,3} = Array{Float64,3}(undef,0,0,0),
+    dmatrixHsym::Array{Float64,3} = Array{Float64,3}(undef,0,0,0),
+    dmatrixG::Array{Float64,3} = Array{Float64,3}(undef,0,0,0), 
+    compare::Bool = true)
 
-            Find the best basis for approximating the signal 'G' by performing the best basis search with a range of tau-measures
-                as cost functionals (tau = 0.1,0.2,...,1.9) and minimizing the relative error.
+    Find the best basis for approximating the signal 'G' by performing the 
+        best basis search with a range of tau-measures as cost functionals
+        (tau = 0.1,0.2,...,1.9) and minimizing the relative error.
 
-                ### Input argument:
-                * `dmatrixH`: the matrix of HGLET expansion coefficients ==> eigenvectors of L
-                * `dmatrixHrw`: the matrix of HGLET expansion coefficients ==> eigenvectors of Lrw
-                * `dmatrixHsym`: the matrix of HGLET expansion coefficients ==> eigenvectors of Lsym
-                * `dmatrixG`: the matrix of GHWT expansion coefficients
-                * `GP`: a GraphPart object
-                * `G`: the GraphSig object
-                * `compare`: if it is false, don't compare the hybrid best basis to the GHWT fine-to-coarse best basis
+### Input argument:
+* `dmatrixH`: the matrix of HGLET expansion coefficients ==> eigenvectors of L
+* `dmatrixHrw`: the matrix of HGLET expansion coefficients ==> eigenvectors of Lrw
+* `dmatrixHsym`: the matrix of HGLET expansion coefficients ==> eigenvectors of Lsym
+* `dmatrixG`: the matrix of GHWT expansion coefficients
+* `GP`: a GraphPart object
+* `G`: the GraphSig object
+* `compare`: if it is false, don't compare the hybrid best basis to the GHWT fine-to-coarse best basis
 
-                    ### Output argument:
-                    * `dvec`: the vector of expansion coefficients corresponding to the bestbasis
-                    * `BS`: a BasisSpec object which specifies the best-basis
-                    * `trans`: specifies which transform was used for that portion of the signal
-                        00 = HGLET with L
-                        01 = HGLET with Lrw
-                        10 = HGLET with Lsym
-                        11 = GHWT
-                        * `tau`: the tau that yields the smallest relative error
+### Output argument:
+* `dvec`: the vector of expansion coefficients corresponding to the bestbasis
+* `BS`: a BasisSpec object which specifies the best-basis
+* `trans`: specifies which transform was used for that portion of the signal
+    00 = HGLET with L
+    01 = HGLET with Lrw
+    10 = HGLET with Lsym
+    11 = GHWT
+* `tau`: the tau that yields the smallest relative error
 
-                        """
-function HGLET_GHWT_BestBasis_minrelerror(GP::GraphPart,G::GraphSig;dmatrixH::Array{Float64,3} = Array{Float64,3}(undef,0,0,0), dmatrixHrw::Array{Float64,3} = Array{Float64,3}(undef,0,0,0),
-                                          dmatrixHsym::Array{Float64,3} = Array{Float64,3}(undef,0,0,0),dmatrixG::Array{Float64,3} = Array{Float64,3}(undef,0,0,0), compare::Bool = true)
+"""
+function HGLET_GHWT_BestBasis_minrelerror(GP::GraphPart, G::GraphSig;
+    dmatrixH::Array{Float64,3} = Array{Float64,3}(undef,0,0,0), 
+    dmatrixHrw::Array{Float64,3} = Array{Float64,3}(undef,0,0,0),
+    dmatrixHsym::Array{Float64,3} = Array{Float64,3}(undef,0,0,0),
+    dmatrixG::Array{Float64,3} = Array{Float64,3}(undef,0,0,0), 
+    compare::Bool = true)
+
     dvec, BS, trans, tau = 0, 0, 0, 0 # predefine
     sumrelerror = Inf
     for tau_temp = 0.1:0.1:1.9
@@ -658,8 +677,10 @@ function HGLET_GHWT_BestBasis_minrelerror(GP::GraphPart,G::GraphSig;dmatrixH::Ar
             trans_temp = trues(length(BS_temp.levlist),2)
             orthbasis = true
         else
-            dvec_temp, BS_temp, trans_temp = HGLET_GHWT_BestBasis(GP, dmatrixH = dmatrixH, dmatrixG = dmatrixG,
-                                                                  dmatrixHrw = dmatrixHrw, dmatrixHsym = dmatrixHsym, costfun = tau_temp)
+            dvec_temp, BS_temp, trans_temp = HGLET_GHWT_BestBasis(GP, 
+                dmatrixH = dmatrixH, dmatrixG = dmatrixG, 
+                dmatrixHrw = dmatrixHrw, dmatrixHsym = dmatrixHsym, 
+                costfun = tau_temp)
 
             # check whether any HGLET Lrw basis vectors are in the best basis
             orthbasis = true
@@ -676,7 +697,8 @@ function HGLET_GHWT_BestBasis_minrelerror(GP::GraphPart,G::GraphSig;dmatrixH::Ar
         if orthbasis
             relerror_temp = orth2relerror(dvec_temp[:])
         else
-            B,_ = HGLET_GHWT_Synthesis(Matrix{Float64}(I,length(dvec_temp),length(dvec_temp)),GP,BS_temp,trans_temp,G)
+            B,_ = HGLET_GHWT_Synthesis(Matrix{Float64}(I,length(dvec_temp),length(dvec_temp)),
+                GP, BS_temp, trans_temp, G)
             relerror_temp = nonorth2relerror(dvec_temp[:],B)
         end
         sumrelerror_temp = sum(relerror_temp)

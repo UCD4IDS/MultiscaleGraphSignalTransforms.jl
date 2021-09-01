@@ -34,12 +34,12 @@ function Lrw_eigenvec(W; nev = 6)
     # return round.(vtmp; digits = 14)
     deg = sum(W, dims = 1)[:]  # weighted degree vector
     if minimum(deg) <= 10^3 * eps()
-        L = diagm(deg) - W
+        L = Diagonal(deg) - W
         𝛌, 𝚽 = eigen(L)
         standardize_eigenvector_signs!(𝚽)
         return round.(𝚽[:, 2:nev]; digits = 14)
     end
-    Lsym = diagm(deg.^(-1/2)) * (diagm(deg) - W) * diagm(deg.^(-1/2))
+    Lsym = Diagonal(deg.^(-1/2)) * (Diagonal(deg) - W) * Diagonal(deg.^(-1/2))
     𝛌sym, 𝚽sym = eigen(Lsym)
     𝚽rw = Diagonal(deg.^(-1/2)) * 𝚽sym
     𝚽rw ./= sqrt.(sum(𝚽rw.^2; dims = 1))

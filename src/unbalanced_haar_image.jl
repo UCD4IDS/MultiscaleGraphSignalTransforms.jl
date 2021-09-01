@@ -172,7 +172,7 @@ function PartitionTreeMatrix_unbalanced_haar_binarytree(matrix::Matrix{Float64},
 
     for j = 1:jmax - 1
         rr = 1
-        regioncount = sum(rs[:,j].!=0) - 1
+        regioncount = sum(!iszero, rs[:,j]) - 1
 
         for r = 1:regioncount
             rs1 = rs[r,j]
