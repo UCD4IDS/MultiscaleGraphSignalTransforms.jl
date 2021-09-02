@@ -91,7 +91,7 @@ function partition_fiedler(W::SparseMatrixCSC{Float64,Int};
         end
         if N <= cutoff || eigs_flag != 0 # if W is small or eigs had a problem,
                                          # then use full svd.
-            vtmp, val = svd(Diagonal(vec(sum(W, dims = 1))) - W) # v <-> U, val <-> S
+            vtmp, val = svd(Matrix(Diagonal(vec(sum(W, dims = 1))) - W)) # v <-> U, val <-> S
             # Diagonal(vec(sum(W,1))) is Matrix{Float64} while W is SparseMatrix
             # But the results of the subtraction becomes Matrix{Float64}.
             # Also be careful here! val[end-2] == val[end-1] can happen.
@@ -133,8 +133,8 @@ function partition_fiedler(W::SparseMatrixCSC{Float64,Int};
                                          # then use full svd
             colsumW = vec(sum(W, dims = 1))
             D = Diagonal(colsumW)
-            D2 =Diagonal(colsumW.^(-0.5))
-            vtmp, val = svd(D2 * (D - W) * D2) # SVD of Lsym
+            D2 = Diagonal(colsumW.^(-0.5))
+            vtmp, val = svd(Matrix(D2 * (D - W) * D2)) # SVD of Lsym
             # MATLAB: [v,val,~] = svd(full(...
             # bsxfun(@times,bsxfun(@times,full(sum(W,2)).^(-0.5),diag(sum(W))-W),
             #  full(sum(W,1)).^(-0.5)) ) );

@@ -30,10 +30,10 @@ function HGLET_Synthesis(dvec::Matrix{Float64}, GP::GraphPart, BS::BasisSpec,
     # Preliminaries
     W = G.W
     jmax = size(GP.rs,2)
-    f = dmatrix[:,jmax,:]
 
     # Fill in the appropriate entries of dmatrix
     dmatrix = dvec2dmatrix(dvec,GP,BS)
+    f = dmatrix[:,jmax,:]
 
     # Perform the signal synthesis from the given coefficients
     for j = jmax:-1:1
@@ -57,16 +57,16 @@ function HGLET_Synthesis(dvec::Matrix{Float64}, GP::GraphPart, BS::BasisSpec,
                     indrs = GP.ind[rs1:rs3-1]
                     W_temp = W[indrs,indrs]
                     D = Diagonal(vec(sum(W_temp, dims = 1)))
-                    D2 = D.^(-0.5)
+                    D2 =Diagonal(vec(sum(W_temp, dims = 1)).^(-0.5))
                     normalizep = false # a flag for normalizing L for Lsym/Lrw
                     if minimum(diag(D)) > 10^3*eps() # avoiding 1/small entries
                         normalizep = true
                     end
                     # compute the GL eigenvectors via svd.
                     if ( method == :Lrw || method == :Lsym ) && normalizep
-                        v,_,_ = svd(D2 * (D - W_temp) * D2)
+                        v,_,_ = svd(D2 * (D - Matrix(W_temp)) * D2)
                     else
-                        v,_,_ = svd(D - W_temp)
+                        v,_,_ = svd(D - Matrix(W_temp))
                         if method != :L
                             @warn("Due to the small diagonal entries of W, we revert back to the option :L, not :" * String(method))
                         end
@@ -82,6 +82,7 @@ function HGLET_Synthesis(dvec::Matrix{Float64}, GP::GraphPart, BS::BasisSpec,
                                 standardized = true
                             elseif v[row,col] < -10^3*eps()
                                 v[:,col] = - v[:,col]
+                                standardized = true
                             else
                                 row += 1
                             end
@@ -181,7 +182,7 @@ function HGLET_Analysis(G::GraphSig, GP::GraphPart, method::Symbol = :L)
                 indrs = ind[rs1:rs3-1]
                 W_temp = W[indrs,indrs]
                 D = Diagonal(vec(sum(W_temp, dims = 1)))
-                D2 = D.^(-0.5)
+                D2 = Diagonal(vec(sum(W_temp, dims = 1)).^(-0.5))
                 normalizep = false # a flag for normalizing L for Lsym and Lrw
                 if minimum(diag(D)) > 10^3*eps() # avoiding 1/small entries
                     normalizep = true
@@ -189,9 +190,9 @@ function HGLET_Analysis(G::GraphSig, GP::GraphPart, method::Symbol = :L)
 
                 # compute the GL eigenvectors via svd
                 if ( method == :Lrw || method == :Lsym ) && normalizep
-                    v,_,_ = svd(D2 * (D - W_temp) * D2)
+                    v,_,_ = svd(D2 * (D - Matrix(W_temp)) * D2)
                 else
-                    v,_,_ = svd(D - W_temp)
+                    v,_,_ = svd(D - Matrix(W_temp))
                     if method != :L
                         @warn("Due to the small diagonal entries of W, we revert back to the option :L, not :" * String(method))
                     end
@@ -207,6 +208,7 @@ function HGLET_Analysis(G::GraphSig, GP::GraphPart, method::Symbol = :L)
                             standardized = true
                         elseif v[row,col] < -10^3*eps()
                             v[:,col] = - v[:,col]
+                            standardized = true
                         else
                             row += 1
                         end
@@ -274,7 +276,8 @@ function HGLET_Analysis_All(G::GraphSig, GP::GraphPart)
                 indrs = ind[rs1:rs3-1]
 
                 # compute the eigenvectors of L ==> svd(L)
-                v,_,_ = svd(Diagonal(vec(sum(W[indrs,indrs],dims = 1)))-W[indrs,indrs])
+                v,_,_ = svd(Diagonal(vec(sum(W[indrs,indrs],dims = 1)))
+                        - Matrix(W[indrs,indrs]))
                 v = v[:,end:-1:1]
 
                 # standardize the eigenvector signs
@@ -286,6 +289,7 @@ function HGLET_Analysis_All(G::GraphSig, GP::GraphPart)
                             standardized = true
                         elseif v[row,col] < -10^3*eps()
                             v[:,col] = - v[:,col]
+                            standardized = true
                         else
                             row += 1
                         end
@@ -325,17 +329,16 @@ function HGLET_Analysis_All(G::GraphSig, GP::GraphPart)
                     ### eigenvectors of L_rw ==> svd(L_sym)
                     W_temp = W[indrs,indrs]
                     D = Diagonal(vec(sum(W_temp,dims = 1)))
-                    D2 = D.^(-0.5)
-                    v,_,_ = svd(D2 * (D - W_temp) * D2)
+                    D2 =Diagonal(vec(sum(W_temp,dims = 1)).^(-0.5))
+                    v,_,_ = svd(D2 * (D - Matrix(W_temp)) * D2)
                     v = v[:,end:-1:1]
-
                 else
                     useLrw = false
 
                     ### eigenvectors of L ==> svd(L)
                     W_temp = W[indrs,indrs]
                     D = Diagonal(vec(sum(W_temp,dims = 1)))
-                    v,_,_ = svd(D-W_temp)
+                    v,_,_ = svd(D - Matrix(W_temp))
                     v = v[:,end:-1:1]
                 end
 
@@ -348,6 +351,7 @@ function HGLET_Analysis_All(G::GraphSig, GP::GraphPart)
                             standardized = true
                         elseif v[row,col] < -10^3*eps()
                             v[:,col] = - v[:,col]
+                            standardized = true
                         else
                             row += 1
                         end
@@ -359,7 +363,7 @@ function HGLET_Analysis_All(G::GraphSig, GP::GraphPart)
 
                 # obtain the expansion coeffcients for L_rw
                 if useLrw
-                    dmatrixHrw[rs1:rs3-1,j,:] = v'*(Diagonal(vec(sum(W_temp,dims = 1))).^0.5)*G.f[indrs,:]
+                    dmatrixHrw[rs1:rs3-1,j,:] = v'*(Diagonal(vec(sum(W_temp,dims = 1)).^0.5))*G.f[indrs,:]
                 else
                     dmatrixHrw[rs1:rs3-1,j,:] = v'*G.f[indrs,:]
                 end
