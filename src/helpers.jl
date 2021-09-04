@@ -306,7 +306,7 @@ function getall_expansioncoeffs(G_Sig::GraphSig, GP_star::GraphPart, VM_NGWP::Ar
     ############# plain Laplacian eigenvectors coefficients
     GP = partition_tree_fiedler(G_Sig)
     dmatrixH = HGLET_Analysis_All(G_Sig, GP)[1]
-    dvec_hglet, BS_hglet, _ = HGLET_GHWT_BestBasis(GP, dmatrixH = dmatrixH, costfun = 1)
+    dvec_hglet, BS_hglet, _ = HGLET_GHWT_BestBasis(GP, dmatrixH = dmatrixH, cfspec = 1)
     dmatrix = ghwt_analysis!(G_Sig, GP = GP)
     ############# Haar
     BS_haar = bs_haar(GP)
@@ -628,10 +628,10 @@ function getall_expansioncoeffs2(G_Sig::GraphSig, GP_star::GraphPart,
     ############# HGLET
     GP = partition_tree_fiedler(G_Sig)
     dmatrixH, _, dmatrixHsym = HGLET_Analysis_All(G_Sig, GP)
-    dvec_hglet, BS_hglet, trans_hglet = HGLET_GHWT_BestBasis(GP, dmatrixH = dmatrixH, dmatrixHsym = dmatrixHsym, costfun = 1)
+    dvec_hglet, BS_hglet, trans_hglet = HGLET_GHWT_BestBasis(GP, dmatrixH = dmatrixH, dmatrixHsym = dmatrixHsym, cfspec = 1)
     ############# LP-HGLET
     dmatrixsH, dmatrixsHsym = LPHGLET_Analysis_All(G_Sig, GP; ϵ = 0.3)
-    dvec_lphglet, BS_lphglet, trans_lphglet = HGLET_GHWT_BestBasis(GP, dmatrixH = dmatrixsH, dmatrixHsym = dmatrixsHsym, costfun = 1)
+    dvec_lphglet, BS_lphglet, trans_lphglet = HGLET_GHWT_BestBasis(GP, dmatrixH = dmatrixsH, dmatrixHsym = dmatrixsHsym, cfspec = 1)
     ############# GHWT dictionaries
     dmatrix = ghwt_analysis!(G_Sig, GP = GP)
     ############# Haar

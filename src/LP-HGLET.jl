@@ -182,26 +182,26 @@ function standardize_eigenvector_signs!(vec)
 end
 
 """
-    HGLET_dictionary(GP::GraphPart, G::GraphSig; method::Symbol = :L)
+    HGLET_dictionary(GP::GraphPart, G::GraphSig; gltype::Symbol = :L)
 
 assemble the whole HGLET dictionary
 
 ### Input Arguments
 * `GP`: a GraphPart object
 * `G`:  a GraphSig object
-* `method`: `:L` or `:Lsym`
+* `gltype`: `:L` or `:Lsym`
 
 ### Output Argument
 * `dictionary`: the HGLET dictionary
 
 """
-function HGLET_dictionary(GP::GraphPart, G::GraphSig; method::Symbol = :L)
+function HGLET_dictionary(GP::GraphPart, G::GraphSig; gltype::Symbol = :L)
     N = size(G.W, 1)
     jmax = size(GP.rs, 2)
     dictionary = zeros(N, jmax, N)
     for j = 1:jmax
         BS = BasisSpec(collect(enumerate(j * ones(Int, N))))
-        dictionary[:, j, :] = HGLET_Synthesis(Matrix{Float64}(I, N, N), GP, BS, G; method = method)[1]'
+        dictionary[:, j, :] = HGLET_Synthesis(Matrix{Float64}(I, N, N), GP, BS, G; gltype = method)[1]'
     end
     return dictionary
 end
