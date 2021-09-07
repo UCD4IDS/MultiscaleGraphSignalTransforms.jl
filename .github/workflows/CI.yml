@@ -25,6 +25,7 @@ jobs:
         os:
           - ubuntu-latest
           - macOS-latest
+          - windows-latest
         arch:
           - x64
     steps:
@@ -49,3 +50,28 @@ jobs:
       - uses: codecov/codecov-action@v1 
         with:
           file: lcov.info
+docs:
+    name: Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: julia-actions/setup-julia@v1
+        with:
+          version: '1'
+      - run: |
+          julia --project=docs -e '
+            import Pkg; Pkg.add("Documenter")
+            using Pkg
+            Pkg.develop(PackageSpec(path=pwd()))
+            Pkg.instantiate()'
+      - run: |
+          julia --project=docs -e '
+            import Pkg; Pkg.add("Documenter")
+            using Documenter: doctest
+            using MultiscaleGraphSignalTransforms
+            doctest(MultiscaleGraphSignalTransforms)'
+      - run: julia --project=docs --color=yes docs/make.jl
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}
+          GKSwstype: "100" # https://discourse.julialang.org/t/generation-of-documentation-fails-qt-qpa-xcb-could-not-connect-to-display/60988
