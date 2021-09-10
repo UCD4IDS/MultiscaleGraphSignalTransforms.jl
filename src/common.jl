@@ -368,7 +368,11 @@ function bs_level(GP::GraphPart, j::Int; c2f::Bool = true)
 
     # specify the level j basis
     #Nj = countnz(rspointer) - 1
-    N = size(GP.tag, 1)
+    if isempty(GP.tag)          # otherwise, it doesn't work for HGLET!
+        N = size(GP.rs)[1]-1
+    else
+        N = size(GP.tag, 1)
+    end
     levlist = collect(enumerate((j + 1) * ones(Int,N)))
     BS = BasisSpec(levlist, c2f = c2f, description = bspec)
 
