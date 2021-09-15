@@ -35,7 +35,7 @@ function Lrw_eigenvec(W; nev = 6)
     deg = sum(W, dims = 1)[:]  # weighted degree vector
     if minimum(deg) <= 10^3 * eps()
         L = Diagonal(deg) - W
-        𝛌, 𝚽 = eigen(L)
+        𝛌, 𝚽 = eigen(Matrix(L))
         standardize_eigenvector_signs!(𝚽)
         return round.(𝚽[:, 2:nev]; digits = 14)
     end
