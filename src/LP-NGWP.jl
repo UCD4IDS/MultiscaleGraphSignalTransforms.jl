@@ -40,7 +40,7 @@ function Lrw_eigenvec(W; nev = 6)
         return round.(𝚽[:, 2:nev]; digits = 14)
     end
     Lsym = Diagonal(deg.^(-1/2)) * (Diagonal(deg) - W) * Diagonal(deg.^(-1/2))
-    𝛌sym, 𝚽sym = eigen(Lsym)
+    𝛌sym, 𝚽sym = eigen(Matrix(Lsym))
     𝚽rw = Diagonal(deg.^(-1/2)) * 𝚽sym
     𝚽rw ./= sqrt.(sum(𝚽rw.^2; dims = 1))
     𝚽rw *= Diagonal(1 .- (𝚽rw[1, :] .< 0) .* 2)
