@@ -1,7 +1,7 @@
 name = "MultiscaleGraphSignalTransforms"
 uuid = "cc44fc10-d0fb-5545-af72-ba1cb661a341"
 authors = ["Naoki Saito <saito@math.ucdavis.edu>", "Yiqun Shao <shaoyiqun1992@gmail.com>", "Haotian Li <htsli@ucdavis.edu>"]
-version = "1.6.5"
+version = "1.6.6"
 
 [deps]
 Arpack = "7d9fca2a-8960-54d3-9f78-7d1dccf2cb97"
