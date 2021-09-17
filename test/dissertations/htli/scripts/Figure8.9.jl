@@ -2,8 +2,8 @@ cd(@__DIR__); include("setups/rgc100.jl")
 gr(dpi = 200)
 
 ## construct full HGLET and Lapped-HGLET dictionaries
-@time HGLET_dic = HGLET_dictionary(GP, G_Sig; method = :L)
-@time LPHGLET_dic = LPHGLET_dictionary(GP, G_Sig; method = :L, ϵ = 0.3)
+@time HGLET_dic = HGLET_dictionary(GP, G_Sig; gltype = :L)
+@time LPHGLET_dic = LPHGLET_dictionary(GP, G_Sig; gltype = :L, ϵ = 0.3)
 
 ## generate figures
 # pre-selected (j, k, l)s

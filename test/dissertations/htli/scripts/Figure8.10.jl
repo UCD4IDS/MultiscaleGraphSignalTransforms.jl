@@ -2,8 +2,8 @@ cd(@__DIR__); include("setups/path512.jl")
 pyplot(dpi = 200)
 
 ## construct full HGLET and Lapped-HGLET dictionaries
-@time HGLET_dic = HGLET_dictionary(GP, G_Sig; method = :L)
-@time LPHGLET_dic = LPHGLET_dictionary(GP, G_Sig; method = :L, ϵ = 0.3)
+@time HGLET_dic = HGLET_dictionary(GP, G_Sig; gltype = :L)
+@time LPHGLET_dic = LPHGLET_dictionary(GP, G_Sig; gltype = :L, ϵ = 0.3)
 
 j = 3; k = 2; l = 6;
 WH = HGLET_dic[GP.rs[k, j]:(GP.rs[k + 1, j] - 1), j, :]'
