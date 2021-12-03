@@ -187,7 +187,7 @@ function ggrid(Nx::Int, Ny::Int, connect::Symbol = :c4)
     # MATLAB:
     # xy = [(1:N)', repmat((1:Ny)',Nx,1)];
     # xy(:,1) = ceil(xy(:,1)/Ny);
-    xy =hcat( ceil((1:N) / Ny), repmat(1:Ny, Nx) )
+    xy =hcat( ceil.(collect(1:N) / Ny), repeat(1:Ny, Nx) )
 
     if connect == :c4         # this is the default, i.e., l; r; u; d.
         # make 1-D weight matrices
@@ -198,7 +198,8 @@ function ggrid(Nx::Int, Ny::Int, connect::Symbol = :c4)
         Wy  = spdiagm(-1 => ey, 1 => ey)
         #Wy = spdiagm((ey, ey), (-1, 1))
         # form the 2-D weight matrix
-        W = kron(speye(Nx), Wy) + kron(Wx, speye(Ny)) # this keeps a sparse form
+        W = kron(sparse(1.0I, Nx, Nx), Wy) + kron(Wx, sparse(1.0I, Ny, Ny)) 
+            # this keeps a sparse form
     else                # now for 8-connected or fully-connected cases
         W = sparse(pairwise(Euclidean(), xy')) # This is from Distances package.
         W[1:(N + 1):(N * N)] = 10 # set each diagonal entry to 10 to prevent blowup.
