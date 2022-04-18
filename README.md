@@ -52,4 +52,4 @@ graphs and networks](https://www.math.ucdavis.edu/~saito/publications/spie15.htm
 
 12. H. Li, Natural Graph Wavelet Dictionaries: Methods and Applications, Ph.D. dissertation, University of California, Davis, Jun. 2021.
 
-13. N. Saito and Y. Shao, [eGHWT: The extended Generalized Haar-Walsh Transform] (https://www.math.ucdavis.edu/~saito/publications/eghwt21.html), *J. Math. Imaging Vis.*, vol. 64, no. 3, pp. 261-283, 2022.
+13. N. Saito and Y. Shao, [eGHWT: The extended Generalized Haar-Walsh Transform](https://www.math.ucdavis.edu/~saito/publications/eghwt21.html), *J. Math. Imaging Vis.*, vol. 64, no. 3, pp. 261-283, 2022.
