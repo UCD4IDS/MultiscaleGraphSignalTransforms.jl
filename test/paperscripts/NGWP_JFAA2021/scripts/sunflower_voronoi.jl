@@ -1,6 +1,6 @@
 ## script for Fig.7, Fig.8(a), Fig.10(a)
 using VoronoiDelaunay, VoronoiCells, GeometricalPredicates
-using MultiscaleGraphSignalTransforms, Plots, LightGraphs, JLD; gr(dpi = 200)
+using MultiscaleGraphSignalTransforms, Plots, Graphs, JLD; gr(dpi = 200)
 
 barbara = JLD.load(joinpath(@__DIR__, "..", "datasets", "barbara_gray_matrix.jld"), "barbara")
 G, L, X = SunFlowerGraph(); N = nv(G)

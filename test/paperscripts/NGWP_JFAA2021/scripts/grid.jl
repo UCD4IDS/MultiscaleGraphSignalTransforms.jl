@@ -1,10 +1,10 @@
 # script for Fig.1, Fig.2, Fig.4, Fig.6
 
-using MultiscaleGraphSignalTransforms, LightGraphs, Plots, LaTeXStrings, MultivariateStats
+using MultiscaleGraphSignalTransforms, Graphs, Plots, LaTeXStrings, MultivariateStats
 pyplot(dpi = 200)
 
 Nx, Ny = 7, 3
-G = LightGraphs.grid([Nx, Ny]); N = nv(G);
+G = Graphs.grid([Nx, Ny]); N = nv(G);
 L = Matrix(laplacian_matrix(G))
 Q = incidence_matrix(G; oriented = true)
 𝛌, 𝚽 = eigen(L); 𝚽 = 𝚽 .* sign.(𝚽[1, :])';

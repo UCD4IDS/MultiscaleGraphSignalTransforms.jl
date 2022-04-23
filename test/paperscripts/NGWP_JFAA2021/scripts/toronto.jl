@@ -1,6 +1,6 @@
 # script for Fig.12, Fig.13, Fig.14, Fig.15, Fig.16
 
-using MultiscaleGraphSignalTransforms, JLD, Plots, LightGraphs, Distances
+using MultiscaleGraphSignalTransforms, JLD, Plots, Graphs, Distances
 gr(dpi = 200)
 
 ## Build weighted toronto street network graph

@@ -1,4 +1,4 @@
-using LightGraphs, SimpleWeightedGraphs, LinearAlgebra
+using Graphs, SimpleWeightedGraphs, LinearAlgebra
 """
     SunFlowerGraph(; N = 400)
 

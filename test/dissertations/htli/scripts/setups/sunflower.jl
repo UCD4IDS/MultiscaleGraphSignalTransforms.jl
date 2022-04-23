@@ -1,4 +1,4 @@
-using MultiscaleGraphSignalTransforms, Plots, LightGraphs, JLD, MAT
+using MultiscaleGraphSignalTransforms, Plots, Graphs, JLD, MAT
 
 barbara = JLD.load("../datasets/barbara_gray_matrix.jld", "barbara")
 

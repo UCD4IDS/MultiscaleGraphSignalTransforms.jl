@@ -1,6 +1,6 @@
 # script for Fig.5
 
-using MultiscaleGraphSignalTransforms, LightGraphs, Plots; gr(dpi = 200)
+using MultiscaleGraphSignalTransforms, Graphs, Plots; gr(dpi = 200)
 import WaveletsExt: wiggle
 
 ## Build Graph

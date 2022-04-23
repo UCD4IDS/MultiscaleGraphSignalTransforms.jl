@@ -22,7 +22,7 @@ export dvec2dmatrix, dmatrix2dvec, levlist2levlengths!, bsfull, bs_haar, bs_leve
 export cost_functional, dmatrix_flatten, dmatrix_ldb_flatten
 
 ## export functions of NGWP.jl
-using LinearAlgebra, SparseArrays, LightGraphs, SimpleWeightedGraphs, Clustering
+using LinearAlgebra, SparseArrays, Graphs, SimpleWeightedGraphs, Clustering
 using JuMP, Clp, Optim, Statistics, QuadGK, Arpack
 import Plots: plot, plot!, scatter, scatter!
 import StatsBase: crosscor

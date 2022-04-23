@@ -1,4 +1,4 @@
-using MultiscaleGraphSignalTransforms, LightGraphs, Plots, LaTeXStrings
+using MultiscaleGraphSignalTransforms, Graphs, Plots, LaTeXStrings
 
 ## Build Graph
 N = 16; G = path_graph(N)

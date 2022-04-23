@@ -1,4 +1,4 @@
-using MLDatasets, LightGraphs, Plots, LaTeXStrings, MultiscaleGraphSignalTransforms
+using MLDatasets, Graphs, Plots, LaTeXStrings, MultiscaleGraphSignalTransforms
 # Load local module
 push!(LOAD_PATH, @__DIR__)
 using pSGWT
@@ -8,7 +8,7 @@ digit_img = example[4:26, 26:-1:5]
 # heatmap(digit_img', ratio = 1, c=:viridis, frame = :none, xlim = [1, 22])
 
 Nx, Ny = size(digit_img)
-G = LightGraphs.grid([Nx, Ny]); N = nv(G);
+G = Graphs.grid([Nx, Ny]); N = nv(G);
 W = Matrix(adjacency_matrix(G))
 L = Matrix(laplacian_matrix(G))
 Q = incidence_matrix(G; oriented = true)

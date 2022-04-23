@@ -8,7 +8,7 @@
 
 ## COPYRIGHT
 
-Copyright 2015-2021 The Regents of the University of California
+Copyright 2015-2022 The Regents of the University of California
 
 Implemented by Jeff Irion, Haotian Li, Naoki Saito, and Yiqun Shao
 

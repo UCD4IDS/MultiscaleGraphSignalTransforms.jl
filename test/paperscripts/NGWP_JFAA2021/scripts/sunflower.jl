@@ -1,6 +1,6 @@
 # script for Fig.8(b)(c), Fig.9, Fig.10(b)(c), Fig.11
 
-using MultiscaleGraphSignalTransforms, LightGraphs, Plots; gr(dpi = 200)
+using MultiscaleGraphSignalTransforms, Graphs, Plots; gr(dpi = 200)
 
 ## Build weighted graph
 G, L, X = SunFlowerGraph(N = 400); N = nv(G)

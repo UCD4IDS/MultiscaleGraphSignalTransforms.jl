@@ -1,4 +1,4 @@
-using MultiscaleGraphSignalTransforms, Plots, LightGraphs, Random
+using MultiscaleGraphSignalTransforms, Plots, Graphs, Random
 using PrettyTables, StatsPlots
 
 nsim = 500

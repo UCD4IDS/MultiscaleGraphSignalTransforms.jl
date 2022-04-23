@@ -1,4 +1,4 @@
-using MultiscaleGraphSignalTransforms, LightGraphs, Plots, LaTeXStrings
+using MultiscaleGraphSignalTransforms, Graphs, Plots, LaTeXStrings
 import WaveletsExt: wiggle
 
 ## Build Graph
