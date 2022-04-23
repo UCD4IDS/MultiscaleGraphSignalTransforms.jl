@@ -1,7 +1,7 @@
 name = "MultiscaleGraphSignalTransforms"
 uuid = "cc44fc10-d0fb-5545-af72-ba1cb661a341"
 authors = ["Naoki Saito <saito@math.ucdavis.edu>", "Yiqun Shao <shaoyiqun1992@gmail.com>", "Haotian Li <htsli@ucdavis.edu>"]
-version = "1.6.8"
+version = "1.7.0"
 
 [deps]
 Arpack = "7d9fca2a-8960-54d3-9f78-7d1dccf2cb97"
@@ -41,7 +41,7 @@ QuadGK = "2.4.1"
 Reexport = "1.0.0"
 SimpleWeightedGraphs = "1.1.1"
 StatsBase = "0.33.6"
-julia = "1.5, 1.6, 1.7"
+julia = "1.6, 1.7"
 
 [extras]
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
