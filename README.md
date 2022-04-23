@@ -48,7 +48,7 @@ graphs and networks](https://www.math.ucdavis.edu/~saito/publications/spie15.htm
 
 10. Y. Shao, [The Extended Generalized Haar-Walsh Transform and Applications](https://www.math.ucdavis.edu/~tdenena/dissertations/202008_Shao_Yiqun_dissertation.pdf), Ph.D. dissertation, University of California, Davis, Sep. 2020.
 
-11. C. Alexander, H. Li and N. Saito, [Natural graph wavelet packet dictionaries](https://www.math.ucdavis.edu/~saito/publications/ngwp.html), *J. Fourier Anal. Appl.*, vol. 27, Article \#41, 2021.
+11. A. Cloninger, H. Li and N. Saito, [Natural graph wavelet packet dictionaries](https://www.math.ucdavis.edu/~saito/publications/ngwp.html), *J. Fourier Anal. Appl.*, vol. 27, Article \#41, 2021.
 
 12. H. Li, Natural Graph Wavelet Dictionaries: Methods and Applications, Ph.D. dissertation, University of California, Davis, Jun. 2021.
 
