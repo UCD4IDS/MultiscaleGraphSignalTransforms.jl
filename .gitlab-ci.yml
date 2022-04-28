@@ -29,15 +29,15 @@
         using Printf
         @printf "Test coverage %.2f%%\n" 100c / t'
 
-Julia 1.5:
-  image: julia:1.5
+Julia 1.6:
+  image: julia:1.6
   extends:
     - .check
     - .script
     - .coverage
 
-Julia 1.6:
-  image: julia:1.6
+Julia 1.7:
+  image: julia:1.7
   extends:
     - .check
     - .script
