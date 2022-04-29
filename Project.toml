@@ -27,7 +27,7 @@ StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 [compat]
 Arpack = "0.4.0, 0.5"
 AverageShiftedHistograms = "0.8.7"
-Clp = "0.8.3, 0.9, 1.0.1"
+Clp = "1"
 Clustering = "0.14.2"
 Distances = "0.10.2"
 Distributions = "0.24.18, 0.25"
