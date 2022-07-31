@@ -34,7 +34,7 @@ function varimax(A; gamma = 1.0, minit = 20, maxit = 1000, reltol = 1e-12)
 	L,_,M = svd(A' * (d*B.^3 - gamma*B * Diagonal(sum(B.^2, dims = 1)[:])))
 	T = L * M'
 	if norm(T-Matrix{Float64}(I, m, m)) < reltol
-		T,_ = qr(randn(m,m)).Q
+		T = qr(randn(m,m)).Q
 		B = A * T
 	end
 
