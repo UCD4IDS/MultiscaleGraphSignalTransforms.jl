@@ -69,7 +69,7 @@ function partition_fiedler(W::SparseMatrixCSC{Float64,Int};
             try
                 # MATLAB, [v,val,eigs_flag] = eigs(diag(sum(W))-W,2,sigma,opts);
                 val, vtmp = eigs(sparse(Diagonal(vec(sum(W, dims = 1)))) - W,
-                                 nev = 2, sigma = sigma, v0 = v0)
+                                 nev = 2, which = :SM, v0 = v0)
                 # val = real.(val)
                 # vtmp = real.(vtmp)
                 if isa(val[1], Complex{Float64})
@@ -111,7 +111,7 @@ function partition_fiedler(W::SparseMatrixCSC{Float64,Int};
                 # This is L*v = \lambda*D*v case.
                 temp = sparse(Diagonal(vec(sum(W, dims = 1))))
                 val, vtmp = eigs(temp - W, temp,
-                                 nev = 2, sigma = sigma, v0 = v0)
+                                 nev = 2, which = :SM, v0 = v0)
                 # val = real.(val)
                 # vtmp = real.(vtmp)
                 if isa(val[1], Complex{Float64})
