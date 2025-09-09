@@ -2,12 +2,12 @@
 
 ## Set up
 ```@example grid
-using MultiscaleGraphSignalTransforms, LightGraphs, MultivariateStats
+using MultiscaleGraphSignalTransforms, Graphs, MultivariateStats
 using Plots, LaTeXStrings, LinearAlgebra
 
 # compute the graph related quantities
 Nx, Ny = 7, 3
-G = LightGraphs.grid([Nx, Ny])
+G = Graphs.SimpleGraphs.grid([Nx, Ny])
 N = nv(G)
 L = Matrix(laplacian_matrix(G))
 Q = incidence_matrix(G; oriented = true)

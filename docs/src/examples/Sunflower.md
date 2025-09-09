@@ -4,7 +4,7 @@ SunFlowerGraph
 ```
 Let us see how to visualize the sunflower graph by `gplot()` and `scatter_gplot()`.
 ```@example sunflower
-using MultiscaleGraphSignalTransforms, LightGraphs, Plots
+using MultiscaleGraphSignalTransforms, Graphs, Plots
 
 # construct the sunflower graph
 G, L, X = SunFlowerGraph(); N = nv(G)
