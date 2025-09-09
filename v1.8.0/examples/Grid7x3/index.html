@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>2D Lattice · MultiscaleGraphSignalTransforms.jl</title><meta name="title" content="2D Lattice · MultiscaleGraphSignalTransforms.jl"/><meta property="og:title" content="2D Lattice · MultiscaleGraphSignalTransforms.jl"/><meta property="twitter:title" content="2D Lattice · MultiscaleGraphSignalTransforms.jl"/><meta name="description" content="Documentation for MultiscaleGraphSignalTransforms.jl."/><meta property="og:description" content="Documentation for MultiscaleGraphSignalTransforms.jl."/><meta property="twitter:description" content="Documentation for MultiscaleGraphSignalTransforms.jl."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../../"><img src="../../assets/logo.png" alt="MultiscaleGraphSignalTransforms.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../../">MultiscaleGraphSignalTransforms.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><input class="collapse-toggle" id="menuitem-2" type="checkbox" checked/><label class="tocitem" for="menuitem-2"><span class="docs-label">Examples</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../P64/">1D Path</a></li><li class="is-active"><a class="tocitem" href>2D Lattice</a><ul class="internal"><li><a class="tocitem" href="#Set-up"><span>Set up</span></a></li><li><a class="tocitem" href="#ROT-distance"><span>ROT distance</span></a></li><li><a class="tocitem" href="#DAG-distance"><span>DAG distance</span></a></li><li><a class="tocitem" href="#TSD-distance"><span>TSD distance</span></a></li></ul></li><li><a class="tocitem" href="../Sunflower/">Sunflower Graph</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-3" type="checkbox"/><label class="tocitem" for="menuitem-3"><span class="docs-label">Functions</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../functions/Partition/">Recursive Graph Partitioning</a></li><li><a class="tocitem" href="../../functions/HGLET/">Hierarchical Graph Laplacian Eigen Transform</a></li><li><a class="tocitem" href="../../functions/GHWT/">Generalized Haar-Walsh Transform</a></li><li><a class="tocitem" href="../../functions/eGHWT/">extended Generalized Haar-Walsh Transform</a></li><li><a class="tocitem" href="../../functions/NGWD/">Natural Graph Wavelet Dictionaries</a></li><li><a class="tocitem" href="../../functions/Utils/">Utils</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Examples</a></li><li class="is-active"><a href>2D Lattice</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>2D Lattice</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/UCD4IDS/MultiscaleGraphSignalTransforms.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/UCD4IDS/MultiscaleGraphSignalTransforms.jl/blob/master/docs/src/examples/Grid7x3.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Metrics-of-Graph-Laplacian-Eigenvectors-on-P_7-\\times-P_3"><a class="docs-heading-anchor" href="#Metrics-of-Graph-Laplacian-Eigenvectors-on-P_7-\\times-P_3">Metrics of Graph Laplacian Eigenvectors on <span>$P_7 \times P_3$</span></a><a id="Metrics-of-Graph-Laplacian-Eigenvectors-on-P_7-\\times-P_3-1"></a><a class="docs-heading-anchor-permalink" href="#Metrics-of-Graph-Laplacian-Eigenvectors-on-P_7-\\times-P_3" title="Permalink"></a></h1><h2 id="Set-up"><a class="docs-heading-anchor" href="#Set-up">Set up</a><a id="Set-up-1"></a><a class="docs-heading-anchor-permalink" href="#Set-up" title="Permalink"></a></h2><pre><code class="language-julia hljs">using MultiscaleGraphSignalTransforms, Graphs, MultivariateStats
+using Plots, LaTeXStrings, LinearAlgebra
+
+# compute the graph related quantities
+Nx, Ny = 7, 3
+G = Graphs.SimpleGraphs.grid([Nx, Ny])
+N = nv(G)
+L = Matrix(laplacian_matrix(G))
+Q = incidence_matrix(G; oriented = true)
+𝛌, 𝚽 = eigen(L)
+𝚽 = 𝚽 .* sign.(𝚽[1, :])&#39;  # sign of DCT
+∇𝚽 = Q&#39; * 𝚽
+W = 1.0 * adjacency_matrix(G)
+
+# manually set up the mapping between 1D ordering and 2D ordering
+grid2eig_ind = [1,2,3,6,8,12,15,4,5,7,9,13,16,18,10,11,14,17,19,20,21];
+eig2grid_ind = sortperm(grid2eig_ind);
+eig2dct = Array{Int64,3}(undef, Nx, Ny, 2);
+for i = 1:Nx; for j = 1:Ny; eig2dct[i,j,1] = i-1; eig2dct[i,j,2] = j-1; end; end
+eig2dct = reshape(eig2dct, (N, 2)); eig2dct = eig2dct[eig2grid_ind, :];</code></pre><p>Let us see the comparison between 1D ordering vs. 2D ordering of the eigenvectors.</p><pre><code class="language-julia hljs">## 1D ordering: non-decreasing eigenvalue ordering
+plot(layout = Plots.grid(3, 7))
+for i in 1:N
+    heatmap!(reshape(𝚽[:, i], (Nx, Ny))&#39;, c = :viridis, cbar = false,
+                clims = (-0.4,0.4), frame = :none, ratio = 1, ylim = [0, Ny + 1],
+                title = latexstring(&quot;\\phi_{&quot;, i-1, &quot;}&quot;), titlefont = 12,
+                subplot = i)
+end</code></pre><img src="ac1aa76a.svg" alt="Example block output"/><pre><code class="language-julia hljs">## 2D ordering: natural frequency ordering
+plot(layout = Plots.grid(3, 7))
+for i in 1:N
+    k = grid2eig_ind[i]
+    heatmap!(reshape(𝚽[:,k], (Nx, Ny))&#39;, c = :viridis, cbar = false,
+                clims = (-0.4,0.4), frame = :none, ratio = 1, ylim = [0, Ny + 1],
+                title = latexstring(&quot;\\varphi_{&quot;, string(eig2dct[k,1]),
+                &quot;,&quot;, string(eig2dct[k,2]), &quot;}&quot;), titlefont = 12, subplot = i)
+end</code></pre><img src="e6015222.svg" alt="Example block output"/><p>What we really want to do is to <em>organize</em> those eigenvectors based on their natural frequencies or their behaviors instead of their eigenvalues. To do that, we utilize the metrics discussed in the <a href="https://www.math.ucdavis.edu/~saito/publications/metgraphlap.html">paper</a> as follows. But first, we create a custom plotting function for later use.</p><pre><code class="language-julia hljs">function grid7x3_mds_heatmaps(E, 𝚽; Nx = 7, Ny = 3, annotate_ind = 1:N, plotOrder = 1:N)
+    # set up all heatmap plots&#39; positions
+    max_x = maximum(E[1, :]); min_x = minimum(E[1, :])
+    width_x = max_x - min_x
+    max_y = maximum(E[2, :]); min_y = minimum(E[2, :])
+    width_y = max_y - min_y
+    dx = 0.005 * width_x; dy = dx;
+    xej = zeros(Nx, N); yej=zeros(Ny, N);
+    a = 5.0; b = 7.0;
+    for k = 1:N
+        xej[:,k] = LinRange(E[1,k] - Ny * a * dx, E[1, k] + Ny * a * dx, Nx)
+        yej[:,k] = LinRange(E[2,k] - a * dy, E[2, k] + a * dy, Ny)
+    end
+
+    plot()
+    for k in plotOrder
+        if k in annotate_ind
+            heatmap!(xej[:, k], yej[:, k], reshape(𝚽[:, k], (Nx, Ny))&#39;, c = :viridis,
+                     colorbar = false, ratio = 1, annotations = (xej[4, k],
+                     yej[3, k] + b*dy, text(latexstring(&quot;\\varphi_{&quot;,
+                     string(eig2dct[k, 1]), &quot;,&quot;, string(eig2dct[k, 2]), &quot;}&quot;), 10)))
+        else
+            heatmap!(xej[:, k], yej[:, k], reshape(𝚽[:, k], (Nx, Ny))&#39;, c = :viridis,
+                     colorbar = false, ratio = 1)
+        end
+    end
+    plt = plot!(xlim = [min_x - 0.12 * width_x, max_x + 0.12 * width_x],
+                ylim = [min_y - 0.16 * width_y, max_y + 0.16 * width_y],
+                grid = false, clims = (-0.4, 0.4),
+                xlab = &quot;X₁&quot;, ylab = &quot;X₂&quot;)
+    return plt
+end</code></pre><h2 id="ROT-distance"><a class="docs-heading-anchor" href="#ROT-distance">ROT distance</a><a id="ROT-distance-1"></a><a class="docs-heading-anchor-permalink" href="#ROT-distance" title="Permalink"></a></h2><p>Before we measure the ROT distance between the eigenvectors, we convert them to probability mass functions by taking entrywise squares. After we got the ROT distance matrix of the eigenvectors, we visualize the arrangement of the eigenvectors in <span>$\mathbb{R}^{2}$</span> via <a href="https://en.wikipedia.org/wiki/Multidimensional_scaling#Classical_multidimensional_scaling">the classical MDS embedding</a>.</p><pre><code class="language-julia hljs">## ROT distance
+D = natural_eigdist(𝚽, 𝛌, Q; α = 0.5, input_format = :pmf1, distance = :ROT)
+E = transform(fit(MDS, D, maxoutdim=2, distances=true))
+grid7x3_mds_heatmaps(E, 𝚽)</code></pre><img src="85045abc.svg" alt="Example block output"/><h2 id="DAG-distance"><a class="docs-heading-anchor" href="#DAG-distance">DAG distance</a><a id="DAG-distance-1"></a><a class="docs-heading-anchor-permalink" href="#DAG-distance" title="Permalink"></a></h2><p>We organize the eigenvectors by the DAG distance.</p><pre><code class="language-julia hljs">D = natural_eigdist(𝚽, 𝛌, Q; distance = :DAG)
+E = transform(fit(MDS, D, maxoutdim=2, distances=true))
+grid7x3_mds_heatmaps(E, 𝚽)</code></pre><img src="96bdc6d8.svg" alt="Example block output"/><h2 id="TSD-distance"><a class="docs-heading-anchor" href="#TSD-distance">TSD distance</a><a id="TSD-distance-1"></a><a class="docs-heading-anchor-permalink" href="#TSD-distance" title="Permalink"></a></h2><p>We organize the eigenvectors by the TSD distance with the parameter <span>$T = 0.1$</span>.</p><pre><code class="language-julia hljs">D = natural_eigdist(𝚽, 𝛌, Q; T = 0.1, distance = :TSD)  # T = 0.1
+E = transform(fit(MDS, D, maxoutdim=2, distances=true))
+grid7x3_mds_heatmaps(E, 𝚽)</code></pre><img src="319ff6f9.svg" alt="Example block output"/></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../P64/">« 1D Path</a><a class="docs-footer-nextpage" href="../Sunflower/">Sunflower Graph »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Tuesday 9 September 2025 23:51">Tuesday 9 September 2025</span>. Using Julia version 1.8.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
