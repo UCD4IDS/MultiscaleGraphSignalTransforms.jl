@@ -27,7 +27,7 @@ function eigROT_Distance(P::Matrix{Float64}, Q::SparseMatrixCSC{Int64,Int64};
     m2 = size(Q2, 2)
     for i = 1:(n - 1), j = (i + 1):n
         f = P[:, i] - P[:, j]
-        md = Model(optimizer_with_attributes(Clp.Optimizer, "LogLevel" => 0))
+        md = Model(optimizer_with_attributes(HiGHS.Optimizer, "LogLevel" => 0))
         @variable(md, w[1:m2] >= 0.0)
         edge_length == 1 ? @objective(md, Min, sum(w)) : @objective(md, Min, sum(w .* le2))
         @constraint(md, Q2 * w .== f)
@@ -68,7 +68,7 @@ function ROT_Distance(A::Any, B::Any, Q::SparseMatrixCSC{Int64,Int64};
     m2 = size(Q2, 2)
     for i = 1:m, j = 1:n
         f = (ndims(A) > 1 && ndims(B) > 1) ? B[:,j] - A[:,i] : B - A
-        md = Model(optimizer_with_attributes(Clp.Optimizer, "LogLevel" => 0))
+        md = Model(optimizer_with_attributes(HiGHS.Optimizer, "LogLevel" => 0))
         @variable(md, w[1:m2] >= 0.0)
         edge_length == 1 ? @objective(md, Min, sum(w)) : @objective(md, Min, sum(w .* le2))
         @constraint(md, Q2 * w .== f)
