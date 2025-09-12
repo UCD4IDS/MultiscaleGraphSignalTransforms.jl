@@ -52,8 +52,13 @@ function partition_fiedler(W::SparseMatrixCSC{Float64,Int};
     N = size(W, 1)
     eigs_flag = 0
 
-    sigma = eps()
     cutoff = 128 # this value could be changed...
+    # Parameter settings for eigs of Arpack.jl
+    nev = 2
+    sigma = eps()
+    # maxiter = 20000
+    # tol = 1e-8
+    # ncv = 50
 
     # handle the case when there are 2 nodes
     if N == 2
@@ -69,7 +74,7 @@ function partition_fiedler(W::SparseMatrixCSC{Float64,Int};
             try
                 # MATLAB, [v,val,eigs_flag] = eigs(diag(sum(W))-W,2,sigma,opts);
                 val, vtmp = eigs(sparse(Diagonal(vec(sum(W, dims = 1)))) - W,
-                                 nev = 2, sigma = sigma, v0 = v0)
+                                 nev = nev, sigma = sigma, v0 = v0)
                 # val = real.(val)
                 # vtmp = real.(vtmp)
                 if isa(val[1], Complex{Float64})
@@ -105,13 +110,22 @@ function partition_fiedler(W::SparseMatrixCSC{Float64,Int};
     elseif method == :Lrw # Otherwise, use L_rw, which is normally preferred.
         if N > cutoff           # for a relatively large W
             v0 = ones(N) / sqrt(N)
+            #v0 = ones(N) + 1e-8*randn(N)
+            #v0 ./= norm(v0)
             try
                 # MATLAB: [v,val,eigs_flag] = ...
                 #           eigs(diag(sum(W))-W,diag(sum(W)),2,sigma,opts);
                 # This is L*v = \lambda*D*v case.
-                temp = sparse(Diagonal(vec(sum(W, dims = 1))))
-                val, vtmp = eigs(temp - W, temp,
-                                 nev = 2, sigma = sigma, v0 = v0)
+                colsumW = vec(sum(W, dims = 1))
+                D = Diagonal(colsumW)
+                D2 = Diagonal(colsumW .^(-0.5))
+                Ms = Hermitian(D2 * (D - W) * D2) # just in case, take Hermitian
+#                val, vtmp, nconv, niter, nmult, resid =
+#                    eigs(Ms; nev = nev, sigma, v0 = v0,
+#                         maxiter = maxiter, tol = tol, ncv = ncv)
+#                println("eigs took $niter iterations to converge $nconv/$nev eigenpairs")
+                val, vtmp = eigs(Ms; nev = nev, sigma, v0 = v0)
+
                 # val = real.(val)
                 # vtmp = real.(vtmp)
                 if isa(val[1], Complex{Float64})
@@ -125,6 +139,7 @@ function partition_fiedler(W::SparseMatrixCSC{Float64,Int};
             if eigs_flag == 0
                 val, ind = findmax(val) # val is set to be a scalar.
                 v = vtmp[:, ind]
+                v = vec((sum(W, dims = 2).^(-0.5)) .* v)
                 # MATLAB: v = (full(sum(W,2)).^(-0.5)) .* v
                 # v = vec((sum(W, dims = 2).^(-0.5)) .* v) # This is the Fiedler vector!
             end
