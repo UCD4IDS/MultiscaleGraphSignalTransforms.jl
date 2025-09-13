@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>1D Path · MultiscaleGraphSignalTransforms.jl</title><meta name="title" content="1D Path · MultiscaleGraphSignalTransforms.jl"/><meta property="og:title" content="1D Path · MultiscaleGraphSignalTransforms.jl"/><meta property="twitter:title" content="1D Path · MultiscaleGraphSignalTransforms.jl"/><meta name="description" content="Documentation for MultiscaleGraphSignalTransforms.jl."/><meta property="og:description" content="Documentation for MultiscaleGraphSignalTransforms.jl."/><meta property="twitter:description" content="Documentation for MultiscaleGraphSignalTransforms.jl."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../../"><img src="../../assets/logo.png" alt="MultiscaleGraphSignalTransforms.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../../">MultiscaleGraphSignalTransforms.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><input class="collapse-toggle" id="menuitem-2" type="checkbox" checked/><label class="tocitem" for="menuitem-2"><span class="docs-label">Examples</span><i class="docs-chevron"></i></label><ul class="collapsed"><li class="is-active"><a class="tocitem" href>1D Path</a><ul class="internal"><li><a class="tocitem" href="#Set-up"><span>Set up</span></a></li><li><a class="tocitem" href="#Graph-Signal-Processing-via-HGLET/LP-HGLET"><span>Graph Signal Processing via HGLET/LP-HGLET</span></a></li><li><a class="tocitem" href="#Graph-Signal-Processing-via-GHWT,-eGHWT,-etc."><span>Graph Signal Processing via GHWT, eGHWT, etc.</span></a></li><li><a class="tocitem" href="#Graph-Signal-Processing-via-the-NGWP-dictionaries"><span>Graph Signal Processing via the NGWP dictionaries</span></a></li></ul></li><li><a class="tocitem" href="../Grid7x3/">2D Lattice</a></li><li><a class="tocitem" href="../Sunflower/">Sunflower Graph</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-3" type="checkbox"/><label class="tocitem" for="menuitem-3"><span class="docs-label">Functions</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../functions/Partition/">Recursive Graph Partitioning</a></li><li><a class="tocitem" href="../../functions/HGLET/">Hierarchical Graph Laplacian Eigen Transform</a></li><li><a class="tocitem" href="../../functions/GHWT/">Generalized Haar-Walsh Transform</a></li><li><a class="tocitem" href="../../functions/eGHWT/">extended Generalized Haar-Walsh Transform</a></li><li><a class="tocitem" href="../../functions/NGWD/">Natural Graph Wavelet Dictionaries</a></li><li><a class="tocitem" href="../../functions/Utils/">Utils</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Examples</a></li><li class="is-active"><a href>1D Path</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>1D Path</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/UCD4IDS/MultiscaleGraphSignalTransforms.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/UCD4IDS/MultiscaleGraphSignalTransforms.jl/blob/master/docs/src/examples/P64.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="p64"><a class="docs-heading-anchor" href="#p64">Multiscale Graph Signal Transforms on 1D Path</a><a id="p64-1"></a><a class="docs-heading-anchor-permalink" href="#p64" title="Permalink"></a></h1><p>Let us use the <em>unweighted</em> 1D path with a synthetic signal as a simple example to demonstrate the usage of the MultiscaleGraphSignalTransforms.jl.</p><h2 id="Set-up"><a class="docs-heading-anchor" href="#Set-up">Set up</a><a id="Set-up-1"></a><a class="docs-heading-anchor-permalink" href="#Set-up" title="Permalink"></a></h2><p>We first construct the <code>GraphSig</code> and <code>GraphPart</code> objects of the <em>primal</em> graph <span>$G = P_{64}$</span>.</p><pre><code class="language-julia hljs">using MultiscaleGraphSignalTransforms, Plots, LinearAlgebra
+import WaveletsExt: wiggle
+
+# construct P64
+N = 64
+G = gpath(N)
+
+# compute graph Laplacian eigenvectors
+W = G.W
+L = diagm(sum(W; dims = 1)[:]) - W  # unnormalized graph Laplacian
+𝛌, 𝚽 = eigen(L)
+𝚽 = 𝚽 .* sign.(𝚽[1,:])&#39;
+
+# perform recursive bipartitioning of G by the Fiedler vectors of Lrw
+GP = partition_tree_fiedler(G; swapRegion = false)
+
+# use Chebyshev polynomial T₅(x) (x ∈ [0, 1]) as an example signal
+G.f = reshape([16 * x^5 - 20 * x^3 + 5 * x for x in LinRange(0, 1, N)], (N, 1))
+plot(G.f; c = :black, lw = 2, legend = false, grid = false, size = (815, 300))</code></pre><img src="0eab5c97.svg" alt="Example block output"/><h2 id="Graph-Signal-Processing-via-HGLET/LP-HGLET"><a class="docs-heading-anchor" href="#Graph-Signal-Processing-via-HGLET/LP-HGLET">Graph Signal Processing via HGLET/LP-HGLET</a><a id="Graph-Signal-Processing-via-HGLET/LP-HGLET-1"></a><a class="docs-heading-anchor-permalink" href="#Graph-Signal-Processing-via-HGLET/LP-HGLET" title="Permalink"></a></h2><pre><code class="language-julia hljs">## analyze the signal via HGLET
+dmatrixH, dmatrixHrw, dmatrixHsym = HGLET_Analysis_All(G, GP)
+dvec_hglet, BS_hglet, trans_hglet = HGLET_GHWT_BestBasis(GP, dmatrixH = dmatrixH,
+    dmatrixHrw = dmatrixHrw, dmatrixHsym = dmatrixHsym, cfspec = 1)
+
+## LP-HGLET
+dmatrixsH, dmatrixsHsym = LPHGLET_Analysis_All(G, GP; ϵ = 0.3)
+dvec_lphglet, BS_lphglet, trans_lphglet = HGLET_GHWT_BestBasis(GP, dmatrixH = dmatrixsH,
+    dmatrixHsym = dmatrixsHsym, cfspec = 1)
+
+# find the top 10 HGLET basis vectors
+important_idx = sortperm(dvec_hglet[:].^2; rev = true)
+hglet_top10 = zeros(N, 10)
+for i in 1:10
+    w, _ = HGLET_Synthesis(reshape(spike(important_idx[i], N), (N, 1)),
+        GP, BS_hglet, G, gltype = :L)
+    hglet_top10[:, i] = w[:]
+end
+wiggle(hglet_top10; sc = 0.45)
+p1 = title!(&quot;Top 10 HGLET basis vectors&quot;)
+
+# find the top 10 LP-HGLET basis vectors
+important_idx = sortperm(dvec_lphglet[:].^2; rev = true)
+lphglet_top10 = zeros(N, 10)
+for i in 1:10
+    w, _ = LPHGLET_Synthesis(reshape(spike(important_idx[i], N), (N, 1)),
+        GP, BS_lphglet, G; gltype = :L, ϵ = 0.3)
+    lphglet_top10[:, i] = w[:]
+end
+wiggle(lphglet_top10; sc = 0.45)
+p2 = title!(&quot;Top 10 LP-HGLET basis vectors&quot;)
+
+plot(p1, p2, layout = Plots.grid(2, 1), size = (815, 600))</code></pre><img src="f88a68b4.svg" alt="Example block output"/><h2 id="Graph-Signal-Processing-via-GHWT,-eGHWT,-etc."><a class="docs-heading-anchor" href="#Graph-Signal-Processing-via-GHWT,-eGHWT,-etc.">Graph Signal Processing via GHWT, eGHWT, etc.</a><a id="Graph-Signal-Processing-via-GHWT,-eGHWT,-etc.-1"></a><a class="docs-heading-anchor-permalink" href="#Graph-Signal-Processing-via-GHWT,-eGHWT,-etc." title="Permalink"></a></h2><pre><code class="language-julia hljs">## analyze the signal via GHWT
+dmatrix = ghwt_analysis!(G, GP = GP)
+
+## Haar
+BS_haar = bs_haar(GP)
+dvec_haar = dmatrix2dvec(dmatrix, GP, BS_haar)
+
+## Walsh
+BS_walsh = bs_walsh(GP)
+dvec_walsh = dmatrix2dvec(dmatrix, GP, BS_walsh)
+
+## GHWT_c2f
+dvec_c2f, BS_c2f = ghwt_c2f_bestbasis(dmatrix, GP)
+
+## GHWT_f2c
+dvec_f2c, BS_f2c = ghwt_f2c_bestbasis(dmatrix, GP)
+
+## eGHWT
+dvec_eghwt, BS_eghwt = ghwt_tf_bestbasis(dmatrix, GP)</code></pre><p>We then find the top 10 basis vectors in each case.</p><pre><code class="language-julia hljs">## Haar
+important_idx = sortperm(dvec_haar[:].^2; rev = true)
+haar_top10 = zeros(N, 10)
+for i in 1:10
+    w = ghwt_synthesis(reshape(spike(important_idx[i], N), (N, 1)), GP, BS_haar)
+    haar_top10[:, i] = w[:]
+end
+wiggle(haar_top10; sc = 0.45)
+p1 = title!(&quot;Top 10 Haar basis vectors&quot;)
+
+## Walsh
+important_idx = sortperm(dvec_walsh[:].^2; rev = true)
+walsh_top10 = zeros(N, 10)
+for i in 1:10
+    w = ghwt_synthesis(reshape(spike(important_idx[i], N), (N, 1)), GP, BS_walsh)
+    walsh_top10[:, i] = w[:]
+end
+wiggle(walsh_top10; sc = 0.45)
+p2 = title!(&quot;Top 10 Walsh basis vectors&quot;)
+
+## GHWT_c2f
+important_idx = sortperm(dvec_c2f[:].^2; rev = true)
+ghwt_c2f_top10 = zeros(N, 10)
+for i in 1:10
+    w = ghwt_synthesis(reshape(spike(important_idx[i], N), (N, 1)), GP, BS_c2f)
+    ghwt_c2f_top10[:, i] = w[:]
+end
+wiggle(ghwt_c2f_top10; sc = 0.45)
+p3 = title!(&quot;Top 10 GHWT c2f best basis vectors&quot;)
+
+## GHWT_f2c
+important_idx = sortperm(dvec_f2c[:].^2; rev = true)
+ghwt_f2c_top10 = zeros(N, 10)
+for i in 1:10
+    w = ghwt_synthesis(reshape(spike(important_idx[i], N), (N, 1)), GP, BS_f2c)
+    ghwt_f2c_top10[:, i] = w[:]
+end
+wiggle(ghwt_f2c_top10; sc = 0.45)
+p4 = title!(&quot;Top 10 GHWT f2c best basis vectors&quot;)
+
+## eGHWT
+important_idx = sortperm(dvec_eghwt[:].^2; rev = true)
+eghwt_top10 = zeros(N, 10)
+for i in 1:10
+    w = ghwt_synthesis(reshape(spike(important_idx[i], N), (N, 1)), GP, BS_eghwt)
+    eghwt_top10[:, i] = w[:]
+end
+wiggle(eghwt_top10; sc = 0.45)
+p5 = title!(&quot;Top 10 eGHWT best basis vectors&quot;)
+
+# display the top 10 basis vectors
+plot(p1, p2, p3, p4, p5, layout = Plots.grid(5, 1), size = (815, 1500))</code></pre><img src="758179fd.svg" alt="Example block output"/><h2 id="Graph-Signal-Processing-via-the-NGWP-dictionaries"><a class="docs-heading-anchor" href="#Graph-Signal-Processing-via-the-NGWP-dictionaries">Graph Signal Processing via the NGWP dictionaries</a><a id="Graph-Signal-Processing-via-the-NGWP-dictionaries-1"></a><a class="docs-heading-anchor-permalink" href="#Graph-Signal-Processing-via-the-NGWP-dictionaries" title="Permalink"></a></h2><p>To perform the NGWP transforms, we set up the <em>dual</em> graph <span>$G^{\star}$</span> (which is also <span>$P_{64}$</span>).</p><pre><code class="language-julia hljs"># build the dual graph object
+Gstar = GraphSig(W)
+
+# perform recursive bipartitioning of Gstar by the Fiedler vectors of Lrw
+GstarP = partition_tree_fiedler(Gstar; swapRegion = false)
+
+# perform the pair-clustering algorithm to recursively bipartition G
+GP_pc = pairclustering(𝚽, GstarP)  # for PC-NGWP</code></pre><p>Now, let us construct the three NGWP dictionaries (i.e., the VM-NGWP, the PC-NGWP, and the LP-NGWP) and use them to analyze the signal, respectively.</p><pre><code class="language-julia hljs">VM_NGWP = vm_ngwp(𝚽, GstarP)
+PC_NGWP = pc_ngwp(𝚽, GstarP, GP_pc)
+LP_NGWP = lp_ngwp(𝚽, W, GstarP; ϵ = 0.3)  # relative action region bandwidth ϵ
+
+# NGWP analysis, i.e., get the expansion coefficient matrix and apply the best
+# basis algorithm.
+dmatrix_VM = ngwp_analysis(G, VM_NGWP)
+dvec_vm_ngwp, BS_vm_ngwp = ngwp_bestbasis(dmatrix_VM, GstarP)
+dmatrix_PC = ngwp_analysis(G, PC_NGWP)
+dvec_pc_ngwp, BS_pc_ngwp = ngwp_bestbasis(dmatrix_PC, GstarP)
+dmatrix_LP = ngwp_analysis(G, LP_NGWP)
+dvec_lp_ngwp, BS_lp_ngwp = ngwp_bestbasis(dmatrix_LP, GstarP)</code></pre><p>Then, the top 10 NGWP basis vectors selected from each dictionary can be displayed as follows.</p><pre><code class="language-julia hljs">important_idx = sortperm(dvec_vm_ngwp[:].^2; rev = true)
+wav_vm_top10 = zeros(N, 10)
+for i in 1:10
+    dr, dc = BS_vm_ngwp.levlist[important_idx[i]]
+    wav_vm_top10[:, i] = VM_NGWP[dr, dc, :]
+end
+wiggle(wav_vm_top10; sc = 0.45)
+p1 = title!(&quot;Top 10 VM-NGWP basis vectors&quot;)
+
+important_idx = sortperm(dvec_pc_ngwp[:].^2; rev = true)
+wav_pc_top10 = zeros(N, 10)
+for i in 1:10
+    dr, dc = BS_pc_ngwp.levlist[important_idx[i]]
+    wav_pc_top10[:, i] = PC_NGWP[dr, dc, :]
+end
+wiggle(wav_pc_top10; sc = 0.45)
+p2 = title!(&quot;Top 10 PC-NGWP basis vectors&quot;)
+
+important_idx = sortperm(dvec_lp_ngwp[:].^2; rev = true)
+wav_lp_top10 = zeros(N, 10)
+for i in 1:10
+    dr, dc = BS_lp_ngwp.levlist[important_idx[i]]
+    wav_lp_top10[:, i] = LP_NGWP[dr, dc, :]
+end
+wiggle(wav_lp_top10; sc = 0.45)
+p3 = title!(&quot;Top 10 LP-NGWP basis vectors&quot;)
+
+plot(p1, p2, p3, layout = Plots.grid(3, 1), size = (815, 900))</code></pre><img src="4871f4cb.svg" alt="Example block output"/></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../">« Home</a><a class="docs-footer-nextpage" href="../Grid7x3/">2D Lattice »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Saturday 13 September 2025 03:54">Saturday 13 September 2025</span>. Using Julia version 1.8.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
